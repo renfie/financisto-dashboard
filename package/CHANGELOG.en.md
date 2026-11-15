@@ -1,3 +1,9 @@
+## 1.9.38 — Direct upgrade support and Caddy documentation (2026-11-15)
+- Fixed a release preflight bug: the updater now reads the actual version from `package/VERSION` instead of asserting version 1.9.36.
+- Supports updating directly from v1.9.35 to v1.9.38 without installing the intervening releases.
+- Added comprehensive English and German guides covering bundled Caddy HTTPS, internal CA certificates, optional Nginx Proxy Manager integration and persistent configuration.
+- No changes to financial data, accounting, import logic, users or existing Caddy certificates.
+
 # Changelog (English)
 
 ## 1.9.37 — Public release cleanup and bilingual documentation (2026-11-15)
