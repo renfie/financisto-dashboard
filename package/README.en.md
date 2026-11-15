@@ -1,5 +1,9 @@
 # Financisto Dashboard — Installation and Operations (English)
 
+## New in v1.9.41
+- Fixed Payee and Category layout in the desktop/tablet transaction form. They are now in one row, Payee on the left and Category on the right. Smartphone layout is unchanged.
+- No changes to transaction data, accounting logic or recurring rules.
+
 ## New in v1.9.40
 
 The payee field now precedes the category field. Recurring schedules can be limited by an inclusive end date and/or a maximum number of actual occurrences; existing rules remain unlimited. Future-dated transactions are highlighted yellow in lists without delaying their existing impact on account balances.

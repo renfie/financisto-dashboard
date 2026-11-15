@@ -1,3 +1,8 @@
+## 1.9.41 – Formularraster auf Desktop und Tablet korrigiert (15.11.2026)
+- Buchungserfassung: Empfänger und Kategorie stehen auf PC und Tablets wieder in derselben Zeile (Empfänger links, Kategorie rechts), passend zur bereits korrekten Reihenfolge der Felder.
+- Bei Umbuchungen bleiben Zielkonto und Empfänger auf großen Bildschirmen nebeneinander; die Smartphone-Darstellung bleibt unverändert untereinander.
+- Reine CSS-Korrektur. Keine Änderung an Buchungsdaten, Formularnamen, Wiederholungsregeln, Import, Authentifizierung oder Caddy.
+
 ## 1.9.40 – Wiederholungsgrenzen und Hervorhebung zukünftiger Buchungen (15.11.2026)
 - Eingabemaske: Empfänger steht auf Mobilgeräten und am Desktop vor der Kategorie; Tastaturreihenfolge entsprechend angepasst.
 - Wiederkehrende Buchungen: Optionales inklusives Enddatum und/oder maximale Anzahl tatsächlicher Ausführungen. Sobald die erste Grenze erreicht wird, endet die automatische/manuelle Regel. Vorhandene Regeln bleiben unbegrenzt; bereits ausgeführte Termine zählen zum Maximum, vorhandene Buchungen werden niemals gelöscht.

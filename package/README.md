@@ -1,5 +1,9 @@
 **Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
 
+## Neu in v1.9.41
+- Buchungsformular auf PC und Tablet: Empfänger und Kategorie stehen wieder nebeneinander (Empfänger links, Kategorie rechts). Smartphone-Layout unverändert.
+- Keine Änderungen an Finanzdaten, Buchungslogik und Wiederholungsregeln.
+
 ## Neu in v1.9.40
 
 Die Buchungsmaske zeigt den Empfänger vor der Kategorie. Wiederkehrende Regeln können durch ein Enddatum und/oder eine maximale Zahl von tatsächlichen Ausführungen begrenzt werden. Bereits angelegte Regeln bleiben unbegrenzt. Buchungen mit Datum in der Zukunft werden in der Buchungsliste gelb markiert, die bisherige sofortige Kontostandsänderung bleibt bestehen.

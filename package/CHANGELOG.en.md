@@ -1,3 +1,8 @@
+## 1.9.41 — Fix booking-form grid on desktop and tablets (2026-11-15)
+- Payee and Category now appear side by side in one row on desktops and tablets, with Payee on the left and Category on the right, matching the existing keyboard/mobile field order.
+- For transfers, the destination account and Payee share a row at desktop widths; smartphone layout remains stacked.
+- CSS-only change; no impact on stored bookings, recurrence, import, authentication or Caddy configuration.
+
 ## 1.9.40 — Recurrence limits and future-dated transaction highlighting (2026-11-15)
 - Transaction entry: Payee appears before Category on desktop and mobile, including keyboard navigation order.
 - Recurring entries: Optional inclusive end date and/or maximum number of actual occurrences. The rule ends when the first configured limit is reached; legacy rules remain unlimited, previous executions count, existing transactions are kept.

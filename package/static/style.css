@@ -669,8 +669,14 @@
 #booking-form .booking-compact-grid textarea{min-height:41px;max-height:170px;resize:vertical;font:inherit}
 #booking-form .book-field-amount{grid-column:1}
 #booking-form .book-field-day{grid-column:2}
-#booking-form .book-field-category,#booking-form .book-field-target{grid-column:1}
-#booking-form .book-field-payee{grid-column:2}
+/* v1.9.41: match desktop grid cells to the existing DOM/phone tab order. */
+#booking-form .book-field-payee{grid-column:1}
+#booking-form .book-field-category{grid-column:2}
+#booking-form .book-field-target{grid-column:1}
+/* For transfers, put the destination account and payee in the same row. */
+@media screen and (min-width:761px){
+ #booking-form .booking-compact-grid:has(#booking-target-field:not([hidden])) .book-field-payee{grid-column:2}
+}
 #booking-form .book-field-note{grid-column:1/-1}
 #booking-form .book-optional{font-weight:450;color:#6c797e}
 #booking-form .booking-extra{border:1px solid #dfe7e8;border-radius:9px;background:#fafbfb}

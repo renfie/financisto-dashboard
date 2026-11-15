@@ -1,7 +1,7 @@
 name: financisto-dashboard
 services:
   dashboard:
-    image: financisto-dashboard:1.9.40
+    image: financisto-dashboard:1.9.41
     build: .
     container_name: financisto-dashboard-app
     restart: unless-stopped
@@ -39,7 +39,7 @@ services:
       retries: 3
 
   background:
-    image: financisto-dashboard:1.9.40
+    image: financisto-dashboard:1.9.41
     container_name: financisto-dashboard-background
     restart: unless-stopped
     user: "${APP_UID:?APP_UID fehlt}:${APP_GID:?APP_GID fehlt}"
@@ -65,7 +65,7 @@ services:
       start_period: 10s
 
   notifications:
-    image: financisto-dashboard:1.9.40
+    image: financisto-dashboard:1.9.41
     container_name: financisto-dashboard-notifications
     restart: unless-stopped
     user: "${APP_UID:?APP_UID fehlt}:${APP_GID:?APP_GID fehlt}"

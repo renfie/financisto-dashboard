@@ -13,7 +13,7 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.40 · 15. November 2026 (Enddatum/Anzahl für Wiederholungen, Empfänger vor Kategorie, gelbe Hervorhebung vorausdatierter Buchungen).
+**Aktueller Quellstand:** v1.9.41 · 15. November 2026 (Korrektur des Buchungsformulars am PC und Tablet; Empfänger links und Kategorie rechts in einer Zeile).
 
 ## Funktionen
 
