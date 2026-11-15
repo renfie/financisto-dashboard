@@ -38,14 +38,20 @@ Do not install over an existing project directory or copy the release's `package
 Extract a newer release into **a different directory** from the production installation. Run the updater as the normal user who owns the existing project:
 
 ```bash
-/path/to/financisto-release-1.9.37/update.sh /path/to/existing/financisto-dashboard
+/path/to/financisto-release-1.9.38/update.sh /path/to/existing/financisto-dashboard
 ```
 
-The updater checks the directory structure, Docker access, file ownership and Python syntax before making changes. It backs up the prior source and uses SQLite's online backup API to create a consistent database snapshot. Configuration is preserved in the host's `.env` and secrets remain on the host.
+A direct upgrade from v1.9.35 to v1.9.38 is supported: no intermediate version is required. The updater checks the directory structure, Docker access, file ownership and Python syntax before making changes. It backs up the prior source and uses SQLite's online backup API to create a consistent database snapshot. Configuration is preserved in the host's `.env` and secrets remain on the host.
 
 The user-facing `.env` values such as `SITE_HOST`, `SITE_ADDRESSES`, `APP_TITLE`, `APP_SUBTITLE` and `APP_FOOTER` are retained when updating. Repository example hostnames (`finance.example.org`) are placeholders only and must be replaced for a **new installation**.
 
 **Never use `docker compose down -v` on an existing installation**: removing volumes may remove information needed to restore the service.
+
+## Caddy and HTTPS
+
+Caddy is bundled with the Docker Compose application and is responsible for internal HTTPS and reverse-proxy access to the dashboard. It uses `tls internal`, so its local CA must be explicitly trusted for direct browser access. When using an upstream Nginx Proxy Manager, terminate public TLS there with a publicly trusted certificate and correctly configure proxy trust. Persistent `caddy/data/` and `caddy/config/` survive updates.
+
+Read the full [Caddy and HTTPS guide](docs/CADDY.en.md) or the [German version](docs/CADDY.de.md).
 
 ## Data management
 
