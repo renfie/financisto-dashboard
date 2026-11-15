@@ -1,15 +1,18 @@
-FieLanzen v1.9.37 – Bereinigtes öffentliches Release (15.11.2026).
+FieLanzen v1.9.38 – Updatekorrektur und Caddy-Dokumentation (15.11.2026).
 
-Update (im Verzeichnis mit der ZIP-Datei):
-  unzip -o financisto-dashboard-v1.9.37.zip
-  ./financisto-release-1.9.37/update.sh /pfad/zur/bestehenden/financisto-dashboard-installation
+Ein direktes Update von v1.9.35 auf v1.9.38 ist vorgesehen.
+Die falsche harte Versionsprüfung der v1.9.37 wurde behoben.
 
-Die bestehende .env mit deinen Hostnamen und Einstellungen, die Datenbank,
-Benutzerkonten, Secrets und Finanzdaten werden beim Update beibehalten.
-Beispieladressen im öffentlich verfügbaren Quellcode sind Platzhalter.
+Update als Projektbenutzer (nicht root) im Verzeichnis mit der ZIP-Datei:
+  unzip -o financisto-dashboard-v1.9.38.zip
+  ./financisto-release-1.9.38/update.sh /pfad/zur/bestehenden/financisto-dashboard-installation
 
-Die Buchungslogik, die kompakte Mobilansicht sowie die Import-/Export- und
-Benachrichtigungsfunktionen bleiben gegenüber v1.9.36 unverändert.
+Bestehende .env, Finanzdaten, Benutzer, Secrets, Backups und
+Caddy-Zertifikatsdaten bleiben erhalten. Das Update legt vor der
+Programmänderung eine Sicherung der Datenbank und des Programmcodes an.
 
-Dokumentation: README.md (Englisch), README.de.md (Deutsch),
-package/README.en.md (Englisch), package/README.md (Deutsch).
+Englisch: README.md und package/README.en.md
+Deutsch: README.de.md und package/README.md
+Caddy/HTTPS: package/docs/CADDY.en.md und CADDY.de.md
+
+Keine Änderung an Buchungs- und Importlogik.
