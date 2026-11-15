@@ -1,0 +1,184 @@
+/* Financisto 1.9.20 — touch-friendly mobile UX. Desktop and print remain unchanged. */
+.skip-to-content{position:fixed;top:-100px;left:12px;z-index:120;display:block;background:#fff;color:#27313a;border:2px solid #b49a50;border-radius:9px;padding:12px 16px;}
+.skip-to-content:focus{top:12px;}
+.mobile-bottom-nav,.mobile-nav-scrim{display:none;}
+.mobile-sort-menu{display:none;}
+@media screen and (max-width:760px){
+  :root{--mobile-nav-h:70px;}
+  html{scroll-padding-top:76px;}
+  body.app-authenticated{overflow-x:clip;}
+  .app-authenticated .topbar{min-height:59px;padding:8px 13px!important;gap:8px;}
+  .app-authenticated .topbar .brand{font-size:.91rem;gap:7px;max-width:100%;min-width:0;}
+  .app-authenticated .topbar .brand-wolf{width:36px;height:36px;}
+  .app-authenticated .topbar .brand-secondary{display:inline;color:#66717b;font-size:.89em;}
+  .app-authenticated .topbar .mobile-menu-toggle{display:none!important;}
+  .app-authenticated .container{width:calc(100% - 20px);max-width:100%;margin:15px auto 20px;}
+  .app-authenticated .container .panel{padding:14px;border-radius:12px;margin-bottom:12px;}
+  .app-authenticated .container .filters:has(.dashboard-disclosure),
+  .app-authenticated .container .balances-panel:has(.dashboard-disclosure),
+  .app-authenticated .container .chart-panel:has(.dashboard-disclosure),
+  .app-authenticated .container .history-filter-panel:has(.dashboard-disclosure){padding:0!important;}
+  .app-authenticated .footer{padding-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 14px);font-size:.7rem;}
+  .app-authenticated .container :is(input,select,textarea){font-size:16px;max-width:100%;}
+  .app-authenticated .container :is(button,.button,details>summary){min-height:44px;}
+  .app-authenticated .container input[type="checkbox"],.app-authenticated .container input[type="radio"]{width:auto;min-width:18px;min-height:18px;}
+  .app-authenticated .container .heading{margin-bottom:15px;gap:10px;}
+  .app-authenticated .container h1{font-size:clamp(1.48rem,6.1vw,1.9rem);line-height:1.18;}
+  .app-authenticated .container h2{font-size:1.05rem;}
+  .app-authenticated .container .heading .muted{font-size:.82rem;line-height:1.4;}
+  .app-authenticated .heading-actions{width:100%;flex-direction:row;align-items:stretch;flex-wrap:wrap;gap:7px;}
+  .app-authenticated .heading-actions .button{flex:1 1 auto;font-size:.82rem;padding:10px 11px;}
+  .app-authenticated .heading-actions .importnote{flex:1 1 100%;overflow-wrap:anywhere;}
+  .app-authenticated .filter-actions{gap:8px;margin-top:12px;}
+  .app-authenticated .filter-actions :is(button,.button){flex:1 1 160px;white-space:normal;}
+  .app-authenticated .filter-grid,.app-authenticated .formgrid{grid-template-columns:1fr;gap:12px;}
+  .app-authenticated .formstack{gap:13px;margin-top:12px;}
+  .app-authenticated .formstack button[type="submit"]{max-width:100%;}
+  .app-authenticated .disclosure-summary{min-height:62px;padding:12px;gap:8px;}
+  .app-authenticated .disclosure-meta{font-size:.72rem;overflow-wrap:anywhere;}
+  .app-authenticated .disclosure-state{font-size:.71rem;}
+  .app-authenticated .disclosure-body{padding:12px;}
+  .app-authenticated .quick-filter-form{padding:12px;margin-bottom:11px;}
+  .app-authenticated .quick-filter-form .quick-filter-row{flex-direction:row;flex-wrap:wrap;gap:7px;}
+  .app-authenticated .quick-filter-form input{flex:1 1 100%;}
+  .app-authenticated .quick-filter-form :is(button,.button){flex:1 1 110px;}
+  .app-authenticated .pagination{flex-wrap:wrap;justify-content:center;gap:10px;text-align:center;}
+  .app-authenticated .pagination>span{flex:1 1 100%;}
+  .app-authenticated .pagination>div{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+  .app-authenticated .pagination a.button{min-width:100px;}
+  .mobile-bottom-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;z-index:65;bottom:0;left:0;right:0;min-height:var(--mobile-nav-h);padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));background:#fff;border-top:1px solid #dce0e2;box-shadow:0 -4px 24px #20282b12;gap:4px;}
+  .mobile-tab{appearance:none;text-decoration:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;min-height:54px;padding:5px 2px;border:0;border-radius:9px;background:transparent;color:#4f5b64;font:600 .72rem/1.18 Arial,Helvetica,sans-serif;}
+  .mobile-tab-icon{font-size:1.42rem;line-height:1.1;font-weight:700;}
+  .mobile-tab.active,.mobile-tab.is-open{background:#f5f3ea;color:#343c42;box-shadow:inset 0 3px #b49a50;}
+  .mobile-tab:focus-visible{outline:2px solid #b49a50;outline-offset:1px;}
+  .mobile-nav-scrim:not([hidden]){display:block;position:fixed;z-index:38;inset:58px 0 calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));background:#1b252a77;}
+  .app-authenticated .topbar .mobile-nav:not([hidden]){display:flex;position:fixed;z-index:90;top:66px;left:10px;right:10px;bottom:calc(var(--mobile-nav-h) + 10px + env(safe-area-inset-bottom));height:auto;max-height:none;overflow-y:auto;overscroll-behavior:contain;width:auto;margin:0;padding:11px 12px 16px;border-radius:12px!important;align-items:stretch;flex-direction:column;flex-wrap:nowrap;gap:3px;box-shadow:0 12px 35px #1c27314a;}
+  .app-authenticated .topbar .mobile-nav .nav-entry{min-height:46px;font-size:.91rem;}
+  .app-authenticated .topbar .mobile-nav .nav-logout{width:100%;}
+  .app-authenticated .month-comparison{gap:10px;}
+  .app-authenticated .month-card{padding:14px!important;}
+  .app-authenticated .month-card .metric{flex-direction:row;align-items:baseline;flex-wrap:wrap;gap:4px 9px;}
+  .app-authenticated .month-card .metric-value{font-size:clamp(1.05rem,4.7vw,1.4rem);max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+  .app-authenticated .month-card .month-full-name{font-size:1.08rem;}
+  .app-authenticated .history-kpis,.app-authenticated .history-highlight-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+  .app-authenticated .history-kpi,.app-authenticated .history-highlight{padding:12px;min-width:0;}
+  .app-authenticated .history-kpi strong{font-size:clamp(1rem,4.8vw,1.35rem);overflow-wrap:anywhere;}
+  .app-authenticated .history-pie-layout{grid-template-columns:1fr;}
+  .app-authenticated .history-pie{max-width:190px;margin:0 auto;}
+  .app-authenticated .history-bar-line{grid-template-columns:58px minmax(0,1fr) 76px;gap:5px;}
+  .app-authenticated .history-bar-line>strong{font-size:.7rem;}
+  .app-authenticated .recurring-actions{align-items:stretch;}
+  .app-authenticated .recurring-mode-form{flex:1 1 100%;}
+  .app-authenticated .recurring-mode-form select{width:100%;}
+  .app-authenticated .recurring-delete>summary{min-height:44px;}
+  .app-authenticated .recurring-form-dialog{width:calc(100vw - 14px);max-height:calc(100dvh - 20px);border-radius:12px;}
+  .app-authenticated .recurring-form-dialog #regel-formular{padding:13px;}
+  .app-authenticated .user-manage-menu{width:100%;}
+  .app-authenticated .user-manage-content{width:100%;min-width:0;}
+  .app-authenticated .user-manage-option input{max-width:100%;}
+  .app-authenticated .report-print-actions,.app-authenticated .compact-toolbar-buttons{flex-wrap:wrap;}
+  .app-authenticated .report-print-actions :is(button,.button),.app-authenticated .compact-toolbar-buttons :is(button,.button){flex:1 1 160px;}
+  .mobile-sort-menu{display:block;margin:4px 0 13px;border:1px solid #e0e3e5;border-radius:9px;background:#fff;}
+  .mobile-sort-menu>summary{list-style-position:inside;cursor:pointer;padding:11px 13px;font-weight:700;color:#344049;}
+  .mobile-sort-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:0 10px 10px;}
+  .mobile-sort-links a{font-size:.82rem;color:#33404a;background:#f4f5f5;border:1px solid #e2e5e7;border-radius:8px;padding:11px 8px;text-align:center;}
+  .mobile-sort-links a[aria-current]{background:#f8f2e3;border-color:#b49a50;font-weight:800;}
+  .app-authenticated #buchungen .section-head p{font-size:.79rem;}
+  .app-authenticated #buchungen .section-head>a.button{align-self:stretch;}
+  .mobile-booking-list,.mobile-web-booking-list,.mobile-users-list{overflow:visible!important;background:transparent;}
+  .mobile-booking-list table,.mobile-web-booking-list table,.mobile-users-list table{display:block;width:100%;min-width:0!important;border-collapse:separate;}
+  .mobile-booking-list thead,.mobile-web-booking-list thead,.mobile-users-list thead{display:none;}
+  .mobile-booking-list tbody,.mobile-web-booking-list tbody,.mobile-users-list tbody{display:grid;gap:10px;}
+  .mobile-booking-list tr.mobile-booking-card,.mobile-web-booking-list tr.mobile-booking-card,.mobile-users-list tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;align-items:start;width:100%;min-width:0;margin:0;padding:13px 12px;border:1px solid #e0e3e5;border-radius:11px;background:#fff;box-shadow:0 4px 15px #2b3a450a;}
+  .mobile-booking-list tr.mobile-booking-card>td,.mobile-web-booking-list tr.mobile-booking-card>td,.mobile-users-list tbody tr>td{display:block;min-width:0!important;max-width:100%;width:auto;padding:0!important;border:0!important;background:transparent!important;overflow-wrap:anywhere;white-space:normal;}
+  .mobile-booking-list tr.mobile-booking-card>td::before,.mobile-web-booking-list tr.mobile-booking-card>td::before,.mobile-users-list tbody tr>td::before{content:attr(data-label);display:block;font-size:.69rem;font-weight:600;color:#738087;margin-bottom:2px;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(1),.mobile-web-booking-list tr.mobile-booking-card>td:nth-child(1){grid-column:1;grid-row:1;font-weight:700;font-size:.84rem;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(7),.mobile-web-booking-list tr.mobile-booking-card>td:nth-child(5){grid-column:2;grid-row:1;text-align:right;min-width:100px!important;font-size:.98rem;font-weight:800;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(7)::before,.mobile-web-booking-list tr.mobile-booking-card>td:nth-child(5)::before{text-align:right;}
+  .mobile-booking-list .balance-after{display:block;font-size:.72rem;font-weight:500;color:#77828a;white-space:normal;max-width:170px;line-height:1.45;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(5),.mobile-web-booking-list tr.mobile-booking-card>td:nth-child(4){grid-column:1;grid-row:2;font-weight:800;font-size:.94rem;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(2),.mobile-web-booking-list tr.mobile-booking-card>td:nth-child(2){grid-column:2;grid-row:2;text-align:right;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(3),.mobile-web-booking-list tr.mobile-booking-card>td:nth-child(3){grid-column:1/-1;grid-row:3;font-size:.86rem;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(4){grid-column:1/-1;grid-row:4;font-size:.86rem;}
+  .mobile-booking-list tr.mobile-booking-card>td:nth-child(6){grid-column:1/-1;grid-row:5;font-size:.84rem;}
+  .mobile-booking-list tr.mobile-booking-card>td[data-empty="true"]{display:none;}
+  .mobile-web-booking-list tr.mobile-booking-card>td:nth-child(6){grid-column:1/-1;grid-row:4;border-top:1px solid #edf0f1!important;padding-top:8px!important;}
+  .mobile-web-booking-list td.finance-row-actions{display:flex!important;flex-wrap:wrap;gap:8px;align-items:center;}
+  .mobile-web-booking-list td.finance-row-actions::before{flex:1 1 100%;}
+  .mobile-web-booking-list td.finance-row-actions .button,.mobile-web-booking-list td.finance-row-actions form{flex:1 1 115px;}
+  .mobile-web-booking-list td.finance-row-actions form button{width:100%;}
+  .mobile-booking-list tr.mobile-booking-empty,.mobile-web-booking-list tr.mobile-booking-empty{display:block;padding:15px;text-align:center;border:1px solid #e1e4e6;border-radius:10px;background:#fff;}
+  .mobile-booking-list tr.mobile-booking-empty td,.mobile-web-booking-list tr.mobile-booking-empty td{display:block;border:0;}
+  .mobile-users-list tbody tr{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mobile-users-list tbody tr>td:first-child{grid-column:1/-1;font-size:1rem;}
+  .mobile-users-list tbody tr>td:last-child{grid-column:1/-1;border-top:1px solid #e8ebec!important;padding-top:9px!important;}
+  .mobile-users-list .user-actions-row{gap:8px;}
+  .mobile-users-list .user-manage-menu{min-width:0;}
+  .mobile-users-list .user-manage-content{max-width:100%;}
+  .app-authenticated .container :is(.operation-panel,.recurring-table,.history-kpi){max-width:100%;}
+  .app-authenticated .container .table-wrap:not(.mobile-booking-list):not(.mobile-web-booking-list):not(.mobile-users-list){-webkit-overflow-scrolling:touch;}
+}
+@media screen and (max-width:380px){
+ .app-authenticated .month-comparison{grid-template-columns:1fr;}
+ .app-authenticated .history-kpis,.app-authenticated .history-highlight-grid{grid-template-columns:1fr;}
+ .app-authenticated .topbar .brand-secondary{display:none;}
+ .mobile-tab{font-size:.67rem;}
+}
+@media print{
+ .mobile-bottom-nav,.mobile-nav-scrim,.mobile-sort-menu{display:none!important;}
+}
+
+/* 1.9.22: keep all three booking actions accessible on phone cards. */
+@media screen and (max-width:760px){
+ .mobile-booking-list tr.mobile-booking-card>td.dashboard-row-actions{
+  grid-column:1/-1;grid-row:6;display:flex!important;flex-wrap:wrap;gap:8px;
+  border-top:1px solid #e8ebed!important;padding-top:10px!important;
+ }
+ .mobile-booking-list tr.mobile-booking-card>td.dashboard-row-actions::before{flex:1 1 100%;text-align:left}
+ .mobile-booking-list td.dashboard-row-actions>.button,
+ .mobile-booking-list td.dashboard-row-actions>form{flex:1 1 90px;min-width:0}
+ .mobile-booking-list td.dashboard-row-actions>form button{width:100%}
+}
+
+
+/* 1.9.36 – Kompakte, per Fingertipp aufklappbare Dashboard-Buchungen.
+ * Tablet-Querformat und schmale Desktop-Fenster verwenden dieselbe Liste,
+ * statt die zu breite Tabelle horizontal scrollen zu lassen.
+ */
+.dashboard-compact-ledger{display:none}
+@media screen and (max-width:1350px), screen and (hover:none) and (pointer:coarse){
+ #buchungen .dashboard-desktop-ledger{display:none!important}
+ #buchungen .dashboard-compact-ledger{display:grid;gap:7px;min-width:0;max-width:100%}
+ #buchungen .mobile-sort-menu{display:block}
+ #buchungen .compact-booking{min-width:0;margin:0;border:1px solid #e0e8e8;border-radius:10px;background:#fff;box-shadow:0 2px 9px #1d404508;overflow:hidden}
+ #buchungen .compact-booking[open]{border-color:#b8d1d0}
+ #buchungen .compact-booking-summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,max-content) 12px;align-items:center;gap:10px;padding:10px 12px;min-width:0;min-height:61px}
+ #buchungen .compact-booking-summary::-webkit-details-marker{display:none}
+ #buchungen .compact-booking-summary::marker{content:""}
+ #buchungen .compact-booking-summary:focus-visible{outline:2px solid #0c6e72;outline-offset:-3px;border-radius:10px}
+ #buchungen .compact-booking-heading{min-width:0;display:grid;gap:2px}
+ #buchungen .compact-booking-title{font-size:.94rem;line-height:1.3;font-weight:750;color:#293e45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #buchungen .compact-booking-subtitle{font-size:.74rem;line-height:1.35;color:#6a7d83;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #buchungen .compact-booking-amount{font-size:1rem;font-weight:800;font-variant-numeric:tabular-nums;text-align:right;min-width:0;overflow-wrap:anywhere;line-height:1.3}
+ #buchungen .compact-booking-amount.booking-neutral{color:#3d5d62}
+ #buchungen .compact-booking-chevron{width:9px;height:9px;flex:none;border-right:2px solid #829397;border-bottom:2px solid #829397;transform:rotate(45deg);transition:transform .15s ease}
+ #buchungen details[open] .compact-booking-chevron{transform:rotate(225deg)}
+ #buchungen .compact-booking-details{padding:12px;border-top:1px solid #e7eeee;background:#fcfdfd}
+ #buchungen .compact-booking-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 15px;margin:0}
+ #buchungen .compact-booking-fields>div{min-width:0}
+ #buchungen .compact-booking-fields dt{font-size:.72rem;color:#6c7d81;margin-bottom:3px}
+ #buchungen .compact-booking-fields dd{font-size:.86rem;line-height:1.45;font-weight:630;margin:0;overflow-wrap:anywhere}
+ #buchungen .compact-booking-note,#buchungen .compact-booking-balance{grid-column:1/-1}
+ #buchungen .compact-booking-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid #e7eeee;align-items:stretch}
+ #buchungen .compact-booking-actions .button,#buchungen .compact-booking-actions form{flex:1 1 100px;min-width:0}
+ #buchungen .compact-booking-actions .button,#buchungen .compact-booking-actions button{min-height:44px;width:100%;font-size:.83rem;padding:9px}
+ #buchungen .compact-booking-actions .danger-action{color:#9a342d;border:1px solid #e8c7c2}
+ #buchungen .compact-booking-empty{margin:0;padding:15px;text-align:center}
+}
+@media screen and (max-width:380px){
+ #buchungen .compact-booking-summary{gap:7px;padding:10px 9px;grid-template-columns:minmax(0,1fr) minmax(0,max-content) 10px}
+ #buchungen .compact-booking-amount{font-size:.89rem}
+ #buchungen .compact-booking-fields{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){#buchungen .compact-booking-chevron{transition:none}}
+@media print{#buchungen .dashboard-compact-ledger{display:none!important}#buchungen .dashboard-desktop-ledger{display:block!important}}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Zwei-Faktor-Einrichtung · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<section class="panel auth auth-wide">
+ <div class="eyebrow">Sicherheit · Pflicht bei der ersten Anmeldung</div>
+ <h1>Zwei-Faktor-Authentifizierung einrichten</h1>
+ <p class="muted">Für <strong>{{ username }}</strong> ist ein Authenticator (TOTP) erforderlich. Die Einrichtung muss abgeschlossen sein, bevor das Dashboard geöffnet werden kann.</p>
+ <ol class="setup-instructions">
+  <li>In einer Authenticator-App ein neues Konto hinzufügen und den QR-Code scannen.</li>
+  <li>Falls der QR-Code nicht gelesen wird, den Schlüssel manuell hinterlegen.</li>
+  <li>Den angezeigten sechsstelligen Code eingeben und bestätigen.</li>
+ </ol>
+ <div class="totp-qr"><img src="{{ qr }}" width="220" height="220" alt="QR-Code für die Authenticator-App"></div>
+ <div class="totp-seed"><span>Manueller TOTP-Schlüssel</span><code>{{ seed }}</code></div>
+ <form method="post" class="formstack">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>6-stelliger Bestätigungscode<input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required autofocus></label>
+  <button class="primary" type="submit">2FA aktivieren</button>
+ </form>
+ <p class="muted">Den QR-Code und Schlüssel niemandem weitergeben. Bei einem neuen Gerät benötigst du den Schlüssel oder einen Wiederherstellungscode.</p>
+ <form action="{{ url_for('logout_pending') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="secondary" type="submit">Anmeldung abbrechen</button></form>
+</section>
+{% endblock %}

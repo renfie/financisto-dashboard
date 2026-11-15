@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Wiederherstellungscodes · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<section class="panel auth auth-wide">
+ <div class="eyebrow">2FA erfolgreich eingerichtet</div>
+ <h1>Wiederherstellungscodes aufbewahren</h1>
+ <p>Diese zehn Codes werden <strong>nur einmal</strong> angezeigt. Jeder Code funktioniert genau einmal, falls du keinen Zugriff auf die Authenticator-App hast.</p>
+ <div class="recovery-grid">{% for code in codes %}<code>{{ code }}</code>{% endfor %}</div>
+ <p class="muted">Sicher außerhalb des Dashboards verwahren, zum Beispiel in deinem Passwortmanager. Sie sind nicht Teil der druckbaren Haushaltsauswertung.</p>
+ <form action="{{ url_for('recovery_ack') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="primary" type="submit">Codes gesichert – zum Dashboard</button></form>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Wiederkehrende Vorlagen prüfen · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="heading"><div><div class="eyebrow">Schreibgeschützte Vorschau</div><h1>Financisto-Vorlagen prüfen</h1><p class="muted">Die Datei enthält {{ count }} Transaktionsdatensätze. Davon werden ausschließlich {{ entries|length }} als wiederkehrende Vorlagen markierte Regeln zur Übernahme angeboten.</p></div></div>
+<section class="panel">
+{% if entries %}
+<p class="notice"><strong>Noch keine Änderung an deinen Finanzdaten.</strong> Die Vorlagen werden deaktiviert übernommen. Bereits angelegte Regeln werden beim erneuten Import nicht überschrieben.</p>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Betrag (kleinste Einheit)</th><th>Regel</th><th>Prüfhinweis</th></tr></thead><tbody>{% for item in entries %}<tr><td><strong>{{item.title}}</strong></td><td>{{item.amount_minor}}</td><td>{{item.frequency}} · {{item.day_of_month}}. Tag</td><td>{{item.needs_review or 'Format erkannt; vor Aktivierung prüfen' }}</td></tr>{% endfor %}</tbody></table></div>
+<form method="post" action="{{ url_for('recurring_import_confirm') }}" class="formstack"><input type="hidden" name="csrf" value="{{csrf_token()}}"><input type="hidden" name="token" value="{{token}}"><button class="primary" type="submit">{{entries|length}} Vorlagen deaktiviert übernehmen</button></form>
+{% else %}<p>Keine importierbaren wiederkehrenden Vorlagen erkannt.</p>{% endif %}
+<a class="button secondary" href="{{url_for('recurring_list')}}">Abbrechen / zurück</a>
+</section>
+{% endblock %}

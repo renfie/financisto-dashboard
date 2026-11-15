@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}PC-Freigaben · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="heading"><div><div class="eyebrow">Zugriffsverwaltung</div><h1>Freigegebene PCs</h1><p class="muted">Nur PCs mit einer hier hinterlegten IP erreichen die Anmeldung. Änderungen gelten sofort, ohne Caddy-Neustart.</p></div></div>
+<section class="panel narrow">
+ <h2>Weiteren PC freigeben</h2>
+ <p class="muted">Die IP muss aus Sicht des Caddy-Servers erreichbar sein. DHCP-Reservierung für jeden PC empfohlen.</p>
+ <form action="{{ url_for('add_pc') }}" method="post" class="formstack">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Beschreibung (frei wählbar)<input name="label" placeholder="Büro-PC" maxlength="100" required></label>
+  <label>IP-Adresse (einzelne IPv4 oder IPv6)<input name="ip" placeholder="192.168.1.42" maxlength="45" required></label>
+  <button type="submit" class="primary">PC freigeben</button>
+ </form>
+</section>
+<section class="panel">
+ <h2>Aktuelle Freigaben</h2>
+ <p class="muted">Deine aktuelle, durch Caddy erkannte IP: <strong>{{ current_ip or 'unbekannt' }}</strong></p>
+ <div class="table-wrap"><table><thead><tr><th>Name</th><th>IP-Adresse</th><th>Erfasst am</th><th>Aktion</th></tr></thead><tbody>
+ {% for pc in clients %}
+ <tr><td>{{ pc.label }}{% if pc.ip==current_ip %}<span class="current-tag">Dieser PC</span>{% endif %}</td><td><code>{{ pc.ip }}</code></td><td>{{ pc.created_at }}</td>
+ <td>{% if pc.ip==current_ip %}<span class="muted">Aktuell verwendet</span>{% else %}<form action="{{ url_for('remove_pc',client_id=pc.id) }}" method="post" data-confirm="Diesen PC wirklich sperren?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="danger" type="submit">Entfernen</button></form>{% endif %}</td></tr>
+ {% endfor %}
+ </tbody></table></div>
+</section>
+<p class="muted disclaimer">Wichtig: Bei einem Wechsel der PC-IP kann der Zugriff verloren gehen. Das Notfallverfahren über den Docker-Host ist in der README beschrieben.</p>
+{% endblock %}

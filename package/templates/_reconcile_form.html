@@ -1,0 +1,12 @@
+{# Shared adjustment form for admin/settings, editor/settings and dashboard.
+   Expected: reconcile_accounts, reconcile_source. No administrative functions. #}
+<p class="hint">Den tatsächlichen aktuellen Stand eingeben, auch für Bargeld, Taschengeld oder Depots. Nur die Differenz wird als nachvollziehbare Korrekturbuchung gespeichert – ohne Einfluss auf die Haushaltsstatistik.</p>
+<form class="finance-inline-form account-reconcile-form" action="{{ url_for('settings_reconcile_account') }}" method="post" data-confirm="Kontostand als Differenzbuchung abgleichen?" data-reconcile-form>
+ <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+ <input type="hidden" name="return_to" value="{{ reconcile_source }}">
+ <label>Konto<select name="account_id" data-reconcile-account required><option value="">Konto wählen</option>{% for acc in reconcile_accounts %}<option value="{{ acc.id }}" data-balance="{{ acc.balance_minor }}" data-decimals="{{ acc.decimals }}" data-code="{{ acc.code }}">{{ acc.title }} ({{ acc.code }})</option>{% endfor %}</select></label>
+ <label>Ist-Kontostand<input name="actual_balance" data-reconcile-actual inputmode="decimal" placeholder="z. B. 1234,56" required></label>
+ <label>Notiz (optional)<input name="note" maxlength="500" placeholder="z. B. Kontoauszug, Zählung, Kursstand"></label>
+ <button type="submit" class="primary">Differenz buchen</button>
+</form>
+<p class="hint reconcile-preview" data-reconcile-preview aria-live="polite">Wähle ein Konto und gib den aktuellen Stand ein.</p>

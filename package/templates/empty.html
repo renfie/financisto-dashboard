@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel center empty">
+  <div class="empty-icon">▤</div>
+  <h1>Dein Dashboard ist startklar</h1>
+  <p>Importiere als Erstes eine Financisto-Sicherungsdatei, um deine Auswertungen zu sehen.</p>
+  <a href="{{ url_for('upload') }}" class="button primary">Sicherung importieren</a>
+</section>
+{% endblock %}

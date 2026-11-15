@@ -1,0 +1,13 @@
+.git
+.env
+secrets/
+data/
+caddy/
+__pycache__/
+*.pyc
+*.backup
+*.sqlite3*
+*.zip
+README.md
+install.sh
+setup_secrets.py

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Historische Auswertung · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="heading"><div><div class="eyebrow">Langzeitvergleich</div><h1>Historische Auswertung</h1>
+ <p class="muted">{{ start_label }} bis {{ end_label }} · {{ months }} Monate einschließlich der Grenzen</p></div>
+ <div class="heading-actions"><a class="button secondary" href="{{ url_for('dashboard',a=a,b=b,currency=currency,account=account,category=category,q=q) }}#monatsvergleich">Zum Dashboard mit diesen Filtern</a></div></div>
+<section class="panel history-filter-panel" id="historischer-filterbereich" aria-label="Filter der historischen Auswertung">
+ <details class="dashboard-disclosure filter-disclosure history-filter-disclosure" id="history-filters">
+  <summary class="disclosure-summary">
+   <span class="disclosure-title">
+    <span class="disclosure-label">Filter und Zeitraum</span>
+    <span class="disclosure-meta">{{ start_label }} – {{ end_label }} · {% for c in currencies %}{% if currency == c.id|string %}{{ c.code }}{% endif %}{% endfor %} · {{ 'Alle Konten' if not account else 'Konto ausgewählt' }}{% if category %} · Kategorie gefiltert{% endif %}{% if q %} · Suche aktiv{% endif %}</span>
+   </span>
+   <span class="disclosure-state" aria-hidden="true">Einblenden</span>
+   <span class="disclosure-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="disclosure-body">
+   <form method="get" id="filter-form" action="{{ url_for('historical_analysis') }}#historische-werte">
+    <div class="filter-grid">
+     <label>Monat 1<input type="month" name="a" value="{{ a }}" required></label>
+     <label>Monat 2<input type="month" name="b" value="{{ b }}" required></label>
+     <label>Währung<select name="currency">{% for c in currencies %}<option value="{{ c.id }}" {{ 'selected' if currency == c.id|string else '' }}>{{ c.code }}</option>{% endfor %}</select></label>
+     <label>Konto<select name="account"><option value="">Alle Konten</option>{% for item in accounts %}<option value="{{ item.id }}" {{ 'selected' if account == item.id|string else '' }}>{{ item.title }}</option>{% endfor %}</select></label>
+     <label>Kategorie<select name="category"><option value="">Alle Kategorien</option>{% for item in categories %}<option value="{{ item.id }}" {{ 'selected' if category == item.id|string else '' }}>{{ cat_names[item.id] }}</option>{% endfor %}</select></label>
+     <label>Suche<input type="search" name="q" value="{{ q }}" placeholder="Empfänger, Notiz, Kategorie"></label>
+    </div>
+    <div class="filter-actions"><button class="primary" type="submit">Zeitraum auswerten</button><a class="button secondary" href="{{ url_for('historical_analysis',reset=1) }}">Aktueller Monat / Vormonat</a></div>
+   </form>
+   <p class="hint">Beide Monate bilden die Grenzen des Zeitraums, unabhängig von ihrer Reihenfolge. Die Einstellung wird automatisch mit dem Dashboard geteilt. Umbuchungen zählen nicht als Einnahmen oder Ausgaben.</p>
+  </div>
+ </details>
+</section>
+<section id="historische-werte" class="history-wrap">
+<div class="history-kpis">
+ <div class="history-kpi"><span>Einnahmen gesamt</span><strong class="income">{{ (total_income/divisor)|money(decimals) }} {{ symbol }}</strong><small>Ø pro Monat: {{ (avg_income_month/divisor)|money(decimals) }} {{ symbol }}</small></div>
+ <div class="history-kpi"><span>Ausgaben gesamt</span><strong class="expense">{{ (total_expenses/divisor)|money(decimals) }} {{ symbol }}</strong><small>Ø pro Monat: {{ (avg_expense_month/divisor)|money(decimals) }} {{ symbol }}</small></div>
+ <div class="history-kpi"><span>Saldo im Zeitraum</span><strong class="{{ 'expense' if period_balance<0 else 'income' }}">{{ (period_balance/divisor)|money(decimals) }} {{ symbol }}</strong><small>Einnahmen − Ausgaben</small></div>
+ <div class="history-kpi"><span>Buchungen im Zeitraum</span><strong>{{ filtered_count }}</strong><small>Ø Ausgabe: {{ (avg_expense/divisor)|money(decimals) }} {{ symbol }} · Ø Einnahme: {{ (avg_income/divisor)|money(decimals) }} {{ symbol }}</small></div>
+</div>
+<div class="history-highlight-grid">
+ <article class="panel history-highlight"><h2>Höchste Einzelausgabe</h2>{% if biggest_expense %}<strong class="expense">{{ (-biggest_expense.amount/divisor)|money(decimals) }} {{ symbol }}</strong><p>{{ biggest_expense.payee_title or biggest_expense.category_title or 'Ohne Empfänger' }} · {{ biggest_expense.day[8:10] }}.{{ biggest_expense.day[5:7] }}.{{ biggest_expense.day[:4] }}</p>{% else %}<p>Keine Ausgaben</p>{% endif %}</article>
+ <article class="panel history-highlight"><h2>Höchste Einzeleinnahme</h2>{% if biggest_income %}<strong class="income">{{ (biggest_income.amount/divisor)|money(decimals) }} {{ symbol }}</strong><p>{{ biggest_income.payee_title or biggest_income.category_title or 'Ohne Empfänger' }} · {{ biggest_income.day[8:10] }}.{{ biggest_income.day[5:7] }}.{{ biggest_income.day[:4] }}</p>{% else %}<p>Keine Einnahmen</p>{% endif %}</article>
+ <article class="panel history-highlight"><h2>Höchster Ø-Ausgabebetrag nach Kategorie</h2>{% if top_expense_average %}<strong>{{ (top_expense_average[1]/divisor)|money(decimals) }} {{ symbol }}</strong><p>{{ top_expense_average[0] }} · je Buchung</p>{% else %}<p>Keine Ausgaben</p>{% endif %}</article>
+ <article class="panel history-highlight"><h2>Höchster Ø-Einnahmebetrag nach Kategorie</h2>{% if top_income_average %}<strong>{{ (top_income_average[1]/divisor)|money(decimals) }} {{ symbol }}</strong><p>{{ top_income_average[0] }} · je Buchung</p>{% else %}<p>Keine Einnahmen</p>{% endif %}</article>
+</div>
+<section class="panel" id="historischer-verlauf"><div class="section-head"><div><h2>Monatsverlauf: Einnahmen und Ausgaben</h2><p class="muted">Alle {{ months }} Monate von {{ start_label }} bis {{ end_label }} einschließlich · Beträge in {{ symbol }}</p></div></div>
+ <div class="history-timeline">{% for row in timeline %}
+  <div class="history-month-row"><div class="history-month-name">{{ row.label }}</div><div class="history-month-bars">
+   <div class="history-bar-line"><span>Einnahmen</span><div class="history-bar-track"><div class="history-bar history-income-bar" style="width:{{ row.income_pct }}%"></div></div><strong>{{ (row.income/divisor)|money(decimals) }}</strong></div>
+   <div class="history-bar-line"><span>Ausgaben</span><div class="history-bar-track"><div class="history-bar history-expense-bar" style="width:{{ row.expense_pct }}%"></div></div><strong>{{ (row.expenses/divisor)|money(decimals) }}</strong></div>
+  </div></div>
+ {% endfor %}</div>
+</section>
+<div class="history-pies">
+ {% for pie,title in [(expense_pie,'Ausgaben nach Kategorie'),(income_pie,'Einnahmen nach Kategorie')] %}
+ <section class="panel history-pie-card"><h2>{{ title }}</h2>{% if pie.rows %}
+ <div class="history-pie-layout"><div class="history-pie" role="img" aria-label="{{ title }}" style="background: {{ pie.gradient }}"><div class="history-pie-hole"></div></div>
+ <div class="history-pie-legend">{% for item in pie.rows %}<div class="history-pie-legend-row"><span class="history-pie-color" style="background:{{ item.color }}"></span><span>{{ item.name }}</span><strong>{{ (item.value/divisor)|money(decimals) }} {{ symbol }} <small>({{ item.percent }} %)</small></strong></div>{% endfor %}</div></div>
+ {% else %}<p class="muted">Keine Buchungen in diesem Zeitraum.</p>{% endif %}
+ </section>
+ {% endfor %}
+</div>
+</section>
+<p class="muted disclaimer">Auswertungen berücksichtigen die ausgewählten Filter und nur Buchungen in der gewählten Währung. Konto-Transfers und Vorlagen sind ausgeschlossen. Durchschnittswerte beziehen sich auf alle gewählten Kalendermonate, auch ohne Buchungen.</p>
+{% endblock %}

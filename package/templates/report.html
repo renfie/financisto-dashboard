@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Monatsauswertung {{ month }} · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="report-controls panel no-print">
+  <div class="report-editor-head">
+    <div>
+      <div class="eyebrow">Financisto · Monatsblatt</div>
+      <h1>Haushaltsauswertung zum Ausdrucken</h1>
+      <p class="muted">Einnahmen und Einkäufe getrennt, mit kompaktem A5-Monatszettel oder ausführlicher A4-Ansicht und frei wählbaren Kategorien.</p>
+    </div>
+    {% if not no_data %}<div class="report-print-actions"><a class="button primary" id="compact-print-link" href="{{ url_for('monthly_report_compact') }}{% if request.query_string %}?{{ request.query_string.decode('utf-8') }}{% endif %}">A5-Monatszettel ansehen</a><button class="secondary" type="button" id="print-report">A4-Auswertung drucken</button></div>{% endif %}
+  </div>
+  {% if not no_data %}
+  <form method="get" class="report-form" id="report-form">
+    <div class="report-filters">
+      <label>Monat<input type="month" name="month" value="{{ month }}" required></label>
+      <label>Währung<select name="currency">{% for c in currencies %}<option value="{{ c.id }}" {% if currency==c.id|string %}selected{% endif %}>{{ c.code }}</option>{% endfor %}</select></label>
+      <label>Konto<select name="account"><option value="">Alle Konten</option>{% for a in accounts %}<option value="{{ a.id }}" {% if account==a.id|string %}selected{% endif %}>{{ a.title }}</option>{% endfor %}</select></label>
+      <label>Ausgaben gruppieren<select name="group">
+        <option value="category" {% if group_by=='category' %}selected{% endif %}>Nach (Unter-)Kategorie</option>
+        <option value="payee" {% if group_by=='payee' %}selected{% endif %}>Nach Geschäft / Empfänger</option>
+      </select></label>
+    </div>
+    <details class="report-category-picker" id="report-category-picker">
+      <summary>Kategorien ein- oder ausblenden <span class="picker-count">{{ hidden|length }} ausgeblendet</span></summary>
+      <p class="hint">Markierte Kategorien werden <strong>nicht</strong> angezeigt oder gedruckt. Die Summen werden entsprechend neu berechnet.</p>
+      <div class="picker-columns">
+        <div class="picker-group">
+          <strong>Ausgaben</strong>
+          {% for c in expense_choices %}
+          <label class="hide-choice"><input type="checkbox" name="hide" value="{{ c.key }}" {% if c.key in hidden %}checked{% endif %}><span>{{ c.label }}</span></label>
+          {% else %}<p class="muted">Keine Ausgaben</p>{% endfor %}
+        </div>
+        <div class="picker-group">
+          <strong>Einnahmen</strong>
+          {% for c in income_choices %}
+          <label class="hide-choice"><input type="checkbox" name="hide" value="{{ c.key }}" {% if c.key in hidden %}checked{% endif %}><span>{{ c.label }}</span></label>
+          {% else %}<p class="muted">Keine Einnahmen</p>{% endfor %}
+        </div>
+      </div>
+    </details>
+    <div class="report-actions">
+      <button class="primary" type="submit">Auswahl übernehmen</button>
+      <a class="button secondary" href="{{ url_for('monthly_report', month=month, currency=currency, account=account, group=group_by) }}">Alle Kategorien anzeigen</a>
+      <span class="hint">Die Auswahl bleibt bis zum nächsten Aufruf über die URL erhalten. Financisto wird nicht verändert.</span>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% if no_data %}
+<section class="panel">Noch keine Financisto-Buchungen importiert.</section>
+{% else %}
+<article class="report-page">
+  <header class="print-head">
+    <div>
+      <p class="report-kicker">PRIVATE HAUSHALTSÜBERSICHT</p>
+      <h1>Haushaltsauswertung <span>{{ month[5:7] }}/{{ month[:4] }}</span></h1>
+      <p class="report-meta">{{ (accounts|selectattr('id','equalto',account|int)|list|first).title if account else 'Alle Konten' }} · {{ transaction_count }} angezeigte Buchungen · {{ symbol }}</p>
+    </div>
+    <div class="print-stamp">Erstellt: {{ generated_at }}</div>
+  </header>
+  <div class="report-kpis">
+    <div class="report-kpi income-kpi"><span>Einnahmen</span><strong>{{ income_total|money(decimals) }} {{ symbol }}</strong></div>
+    <div class="report-kpi expense-kpi"><span>Ausgaben</span><strong>{{ expense_total|money(decimals) }} {{ symbol }}</strong></div>
+    <div class="report-kpi balance-kpi"><span>{% if hidden %}Saldo der Auswahl{% else %}Monatssaldo{% endif %}</span><strong>{{ balance|money(decimals) }} {{ symbol }}</strong></div>
+  </div>
+  {% if hidden %}
+  <p class="report-selection-note">Gefilterte Auswertung: {{ hidden|length }} Kategorie(n) ausgeblendet · {{ income_skipped + expense_skipped }} Buchung(en) nicht enthalten. Einnahmen, Ausgaben und Saldo gelten nur für die angezeigte Auswahl.</p>
+  {% endif %}
+  <section class="report-section">
+    <div class="report-section-head">
+      <div><span class="report-section-nr">01</span><h2>Einnahmen</h2></div>
+      <strong>{{ income_total|money(decimals) }} {{ symbol }}</strong>
+    </div>
+    {% if incomes %}
+    <table class="report-lines">
+      <thead><tr><th class="date-col">Datum</th><th>Herkunft / Notiz</th><th>Kategorie</th><th class="right amount-col">Betrag</th></tr></thead>
+      <tbody>
+      {% for item in incomes %}
+      <tr><td>{{ item.day[8:10] }}.{{ item.day[5:7] }}.</td><td class="entry-main">{{ item.payee }}{% if item.note %}<small>{{ item.note }}</small>{% endif %}</td><td class="entry-category">{{ item.category_path }}</td><td class="right">{{ item.amount|money(decimals) }}</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="3">Summe Einnahmen</th><th class="right">{{ income_total|money(decimals) }} {{ symbol }}</th></tr></tfoot>
+    </table>
+    {% else %}<p class="report-empty">Keine Einnahmen in der gewählten Auswahl.</p>{% endif %}
+  </section>
+  <section class="report-section expense-section">
+    <div class="report-section-head">
+      <div><span class="report-section-nr">02</span><h2>Ausgaben <small>nach {{ 'Kategorien' if group_by=='category' else 'Geschäften / Empfängern' }}</small></h2></div>
+      <strong>{{ expense_total|money(decimals) }} {{ symbol }}</strong>
+    </div>
+    {% if groups %}
+      {% for g in groups %}
+      <div class="report-group-block">
+        <div class="report-group-head"><h3>{{ g.name }}</h3><strong>{{ g.amount|money(decimals) }} {{ symbol }}</strong></div>
+        <table class="report-lines">
+          <thead><tr><th class="date-col">Datum</th><th>Empfänger / Notiz{% if group_by=='payee' %} / Kategorie{% endif %}</th><th class="right amount-col">Betrag</th></tr></thead>
+          <tbody>{% for item in g['items'] %}
+          <tr><td>{{ item.day[8:10] }}.{{ item.day[5:7] }}.</td><td class="entry-main">{{ item.payee }}{% if item.note %}<small>{{ item.note }}</small>{% endif %}{% if group_by=='payee' %}<small>{{ item.category_path }}</small>{% endif %}</td><td class="right">{{ item.amount|money(decimals) }}</td></tr>
+          {% endfor %}</tbody>
+        </table>
+        <div class="report-subtotal"><span>Zwischensumme {{ g.name }}</span><strong>{{ g.amount|money(decimals) }} {{ symbol }}</strong></div>
+      </div>
+      {% endfor %}
+      <div class="report-total"><span>Gesamtausgaben</span><strong>{{ expense_total|money(decimals) }} {{ symbol }}</strong></div>
+    {% else %}<p class="report-empty">Keine Ausgaben in der gewählten Auswahl.</p>{% endif %}
+  </section>
+  <footer class="report-disclaimer">Datengrundlage: ausschließlich Financisto · Umbuchungen zwischen eigenen Konten und Buchungsvorlagen ausgeschlossen · Währungen werden nicht vermischt · Saldo = Einnahmen − Ausgaben, kein Kontostand.</footer>
+</article>
+{% endif %}
+{% endblock %}

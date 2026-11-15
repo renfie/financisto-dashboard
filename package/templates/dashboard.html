@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block title %}Auswertung · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="heading"><div><div class="eyebrow">Deine Finanzen im Überblick</div><h1>Einnahmen, Ausgaben und Saldo</h1><p class="muted">Aktueller Monat und Vormonat · zwei Monate frei vergleichbar</p></div><div class="heading-actions"><a class="button secondary" href="{{ url_for('historical_analysis',a=a,b=b,currency=currency,account=account,category=category,q=q) }}">Historische Auswertung</a><a class="button secondary" href="#buchungen">Zu den Buchungen ↓</a><a class="button secondary" href="{{ url_for('monthly_report', month=a, currency=currency, account=account) }}">Monat {{ a }} drucken</a><div class="importnote">{{ 'Letzter Financisto-Import' if finance_mode == 'web' else 'Letzter Import' }}: {{ last_import }} · {{ last_import_source }}</div></div></div>
+{% if latest_date and latest_date[:7] < current_month  %}
+<div class="notice">{{ 'Die letzte Buchung im System' if finance_mode == 'web' else 'Die letzte importierte Financisto-Buchung' }} ist vom {{ latest_date[8:10] }}.{{ latest_date[5:7] }}.{{ latest_date[:4] }}. Neuere Monate können deshalb unvollständig sein. Die Monatswerte sind keine Kontostände.</div>
+{% endif %}
+<section class="panel filters" id="filter-panel" aria-label="Filter und Zeitraum">
+ <details class="dashboard-disclosure filter-disclosure" id="dashboard-filters">
+  <summary class="disclosure-summary">
+   <span class="disclosure-title"><span class="disclosure-label">Filter und Zeitraum</span><span class="disclosure-meta">{{ month_a_short }} / {{ month_b_short }} · {{ selected_currency.code if selected_currency is defined else symbol }} · {{ 'Alle Konten' if not account else 'Konto ausgewählt' }}{% if category %} · Kategorie gefiltert{% endif %}{% if q %} · Suche aktiv{% endif %}</span></span>
+   <span class="disclosure-state" aria-hidden="true">Einblenden</span><span class="disclosure-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="disclosure-body">
+<form method="get" id="filter-form" action="{{ url_for('dashboard') }}#monatsvergleich">
+ <div class="filter-grid">
+  <label>Monat 1<input type="month" name="a" value="{{ a }}" required></label>
+  <label>Monat 2<input type="month" name="b" value="{{ b }}" required></label>
+  <label>Währung<select name="currency">{% for c in currencies %}<option value="{{ c.id }}" {% if currency==c.id|string %}selected{% endif %}>{{ c.code }}</option>{% endfor %}</select></label>
+  <label>Konto<select name="account"><option value="">Alle Konten</option>{% for x in accounts %}<option value="{{ x.id }}" {% if account==x.id|string %}selected{% endif %}>{{ x.title }}</option>{% endfor %}</select></label>
+  <label>Kategorie<select name="category"><option value="">Alle Kategorien</option>{% for x in categories %}<option value="{{ x.id }}" {% if category==x.id|string %}selected{% endif %}>{{ cat_names[x.id] }}</option>{% endfor %}</select></label>
+  <label>Suche<input type="search" name="q" value="{{ q }}" placeholder="Empfänger, Notiz, Kategorie"></label>
+ </div>
+ <div class="filter-actions"><button type="submit" class="primary">Auswerten</button><a class="button secondary" href="{{ url_for('dashboard',reset=1) }}">Aktueller Monat / Vormonat</a></div>
+</form>
+<p class="hint">{{ 'Die Finanzübersicht berücksichtigt importierte und selbst erfasste Buchungen.' if finance_mode == 'web' else 'Alle Tabellen, Kennzahlen und Diagramme stammen ausschließlich aus Financisto.' }} Umbuchungen werden bei den Einnahmen/Ausgaben ausgeschlossen.</p>
+  </div>
+ </details>
+</section>
+<div class="cards month-comparison" id="monatsvergleich" aria-label="Vergleich der beiden ausgewählten Monate">
+ {% for month in [a,b] %}
+ {% set is_first = loop.first %}
+ {% set human_month = month_a_label if is_first else month_b_label %}
+ <section class="kpi panel month-card {{ 'month-first' if is_first else 'month-second' }}">
+   <div class="month-card-heading">
+     <div class="month-title-group">
+       <div class="month-role">{{ 'Monat 1 · Aktueller Monat' if is_first and month==current_month else ('Monat 1' if is_first else ('Monat 2 · Vormonat' if month==previous_month else 'Monat 2 · Vergleichsmonat')) }}</div>
+       <h2 class="month-full-name">{{ human_month }}</h2>
+     </div>
+     <span class="month-index" aria-hidden="true">{{ '01' if is_first else '02' }}</span>
+   </div>
+   <div class="monthly-metrics">
+    <div class="metric"><span class="kpi-label">Einnahmen</span><strong class="metric-value income">{{ (totals[month]['income']/divisor)|money(decimals) }} {{ symbol }}</strong></div>
+    <div class="metric"><span class="kpi-label">Ausgaben</span><strong class="metric-value expense">{{ (totals[month]['expenses']/divisor)|money(decimals) }} {{ symbol }}</strong></div>
+    <div class="metric balance-metric"><span class="kpi-label">Saldo (Einnahmen − Ausgaben)</span><strong class="metric-value {% if totals[month]['balance'] < 0 %}expense{% else %}income{% endif %}">{{ (totals[month]['balance']/divisor)|money(decimals) }} {{ symbol }}</strong></div>
+   </div>
+ </section>
+ {% endfor %}
+</div>
+<section class="panel balances-panel" id="kontostaende" aria-label="Aktuelle Kontostände aus Financisto">
+ <details class="dashboard-disclosure balances-disclosure" id="dashboard-balances">
+  <summary class="disclosure-summary balance-disclosure-summary">
+   <span class="disclosure-title"><span class="disclosure-label">Kontostände</span><span class="disclosure-meta">{{ 'Letzter Android-Import' if finance_mode=='web' else 'Letzte Sicherung' }}: {{ last_import }} · {{ selected_currency.code if selected_currency is defined else symbol }}</span></span>
+   <span class="balance-summary-total"><span>Gesamtkontostand</span>
+    {% if balance_total_minor is not none %}<strong class="{{ 'expense' if balance_total_minor < 0 else 'income' }}">{{ (balance_total_minor/divisor)|money(decimals) }} {{ symbol }}</strong>
+    {% else %}<strong class="muted">Noch nicht verfügbar</strong>{% endif %}
+   </span>
+   <span class="disclosure-state" aria-hidden="true">Einblenden</span><span class="disclosure-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="disclosure-body balances-body">
+   {% if not balance_snapshot_known %}<p class="hint balance-notice">Für ältere Importe sind die Kontostände eventuell noch nicht gespeichert. Sie erscheinen nach dem nächsten gültigen Financisto-Import oder nach dem Abgleich mit einer passenden Archiv-Sicherung. Unbekannte Beträge werden nicht als 0 € ausgegeben.</p>{% endif %}
+   <p class="hint balance-sort-hint">Sortierung: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €.</p>
+   <div class="account-balances" style="--balance-rows: {{ ((balance_accounts|length + 1) // 2) if balance_accounts else 1 }}">
+    {% for x in balance_accounts %}
+    <div class="account-balance {{ 'balance-excluded' if x.include_in_totals == 0 else '' }}">
+     <div class="account-balance-name">{{ x.title }}
+      {% if x.include_in_totals == 0 %}<span class="account-tag">Nicht in Gesamtsumme</span>{% elif x.include_in_totals is none %}<span class="account-tag">Zuordnung unbekannt</span>{% endif %}
+      {% if x.is_active == 0 %}<span class="account-tag">Inaktiv</span>{% endif %}
+     </div>
+     {% if x.balance_minor is not none %}<strong class="account-balance-value {{ 'expense' if x.balance_minor < 0 else '' }}">{{ (x.balance_minor/divisor)|money(decimals) }} {{ symbol }}</strong>
+     {% else %}<strong class="account-balance-value muted">–</strong>{% endif %}
+    </div>
+    {% endfor %}
+   </div>
+   <p class="hint balance-hint">Die Kontostände sind unabhängig von den gewählten Monaten und Buchungsfiltern. Ein Monats-Saldo ist keine Änderung des Gesamtkontostands. Fremdwährungen werden nicht umgerechnet. <a class="inline-link" href="#dashboard-filters">Währung im Filter ändern ↑</a></p>
+   {% if can_reconcile and reconcile_accounts %}
+   <details class="balance-reconcile-details" id="balance-reconcile-details">
+    <summary>Kontostand abgleichen</summary>
+    <div class="balance-reconcile-content">
+     {% set reconcile_source = 'dashboard' %}
+     {% include '_reconcile_form.html' %}
+    </div>
+   </details>
+   {% endif %}
+  </div>
+ </details>
+</section>
+<section class="panel chart-panel" id="ausgabenkategorien" aria-label="Ausgaben nach Kategorien">
+ <details class="dashboard-disclosure chart-disclosure" id="dashboard-charts">
+  <summary class="disclosure-summary">
+   <span class="disclosure-title"><span class="disclosure-label">Ausgaben nach Kategorien</span><span class="disclosure-meta">{{ month_a_short }} / {{ month_b_short }} · {{ rows|length }} Kategorien · Monatsvergleich</span></span>
+   <span class="disclosure-state" aria-hidden="true">Einblenden</span><span class="disclosure-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="disclosure-body chart-disclosure-body">
+ <div class="section-head"><div><p class="muted">Die Farben entsprechen den Monatskarten oben.</p></div><div class="legend" aria-label="Legende zum Monatsvergleich"><span class="legend-entry first"><i class="dot first"></i>Monat 1 · {{ month_a_label }}</span><span class="legend-entry second"><i class="dot second"></i>Monat 2 · {{ month_b_label }}</span></div></div>
+ {% if rows %}
+ <div class="bar-chart" role="img" aria-label="Balkendiagramm zum Ausgabenvergleich der Monate {{ a }} und {{ b }}">
+ {% for r in rows %}
+  <div class="bar-group"><div class="bar-title" title="{{ r.category }}">{{ r.category }}</div><div class="bar-pair">
+   <div class="bar-line first"><span class="bar-month-label">{{ month_a_short }}</span><div class="bar-bg"><div class="bar first" style="width: {{ r.first_width }}%"></div></div><span class="bar-value">{{ r.first|money(decimals) }} {{ symbol }}</span></div>
+   <div class="bar-line second"><span class="bar-month-label">{{ month_b_short }}</span><div class="bar-bg"><div class="bar second" style="width: {{ r.second_width }}%"></div></div><span class="bar-value">{{ r.second|money(decimals) }} {{ symbol }}</span></div>
+  </div></div>
+ {% endfor %}
+ </div>
+ {% else %}<p class="muted no-results">Für die gewählten Monate und Filter sind keine Ausgaben vorhanden.</p>{% endif %}
+  </div>
+ </details>
+</section>
+<section class="panel" id="buchungen">
+ <div class="section-head"><div><h2>Buchungen</h2><p class="muted">{{ count }}{% if quick %} von {{ count_unfiltered }}{% endif %} Buchungen von {{ range_start }} bis {{ range_end }} · {{ page_size }} pro Seite · Sortierung nach Datum, Betrag, Empfänger, Kategorie oder Konto</p></div><a class="button secondary" href="#filter-form">Filter bearbeiten ↑</a></div>
+ <form method="get" id="quick-filter-form" action="{{ url_for('dashboard') }}#buchungen" role="search" class="quick-filter-form">
+  {% for name, value in [('a',a),('b',b),('currency',currency),('account',account),('category',category),('q',q),('sort',sort),('dir',direction)] %}
+  <input type="hidden" name="{{ name }}" value="{{ value }}">
+  {% endfor %}
+  <label for="quick-filter">Schnellfilter (alle Buchungen zwischen den gewählten Monaten)</label>
+  <div class="quick-filter-row">
+   <input id="quick-filter" name="quick" type="search" value="{{ quick }}" placeholder="Empfänger, Kategorie, Konto, Notiz, Datum oder Betrag" autocomplete="off">
+   <button type="submit" class="primary">Suchen</button>
+   {% if quick %}<a class="button secondary" href="{{ link(quick='',page=1) }}">Zurücksetzen</a>{% endif %}
+  </div>
+  <p class="hint">Filtert nach kurzer Eingabepause automatisch über sämtliche Treffer, nicht nur die aktuelle Tabellenseite. Monats-Summen und Diagramme bleiben unverändert.</p>
+ </form>
+ <details class="mobile-sort-menu"><summary>Sortierung ändern</summary><div class="mobile-sort-links">
+  {% for key,label in [('date','Datum'),('amount','Betrag'),('payee','Empfänger'),('category','Kategorie'),('account','Konto')] %}
+   <a href="{{ link(sort=key,dir='desc',page=1) }}" {% if sort==key and direction=='desc' %}aria-current="true"{% endif %}>{{ label }} ↓</a>
+   <a href="{{ link(sort=key,dir='asc',page=1) }}" {% if sort==key and direction=='asc' %}aria-current="true"{% endif %}>{{ label }} ↑</a>
+  {% endfor %}
+ </div></details>
+ <div class="dashboard-compact-ledger" aria-label="Buchungen – kompakte Liste">
+ {% for t in tx %}
+ <details class="compact-booking" name="dashboard-booking-details">
+  <summary class="compact-booking-summary">
+   <span class="compact-booking-heading">
+    <span class="compact-booking-title">
+     {% if t.to_account_id %}Umbuchung{% elif t.payee_title %}{{ t.payee_title }}{% elif t.note %}{{ t.note }}{% elif t.adjustment %}Saldoabgleich{% elif t.category_title %}{{ t.category_title }}{% else %}{{ 'Ausgabe' if t.amount < 0 else 'Einnahme' if t.amount > 0 else 'Buchung' }}{% endif %}
+    </span>
+    <span class="compact-booking-subtitle">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }} · {{ t.account_title }}{% if t.to_account_id %} → {{ t.target_account_title or 'Zielkonto' }}{% endif %}</span>
+   </span>
+   <span class="compact-booking-amount {% if t.to_account_id %}booking-neutral{% elif t.amount < 0 %}expense{% else %}income{% endif %}">{{ (t.amount/divisor)|money(decimals) }} {{ symbol }}</span>
+   <span class="compact-booking-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="compact-booking-details">
+   <dl class="compact-booking-fields">
+    <div><dt>Art</dt><dd>{% if t.to_account_id %}Umbuchung{% elif t.adjustment %}Saldoabgleich{% elif t.pass_through %}Durchlaufender Posten{% elif t.amount < 0 %}Ausgabe{% elif t.amount > 0 %}Einnahme{% else %}Ohne Betrag{% endif %}</dd></div>
+    <div><dt>Datum</dt><dd>{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }}</dd></div>
+    <div><dt>{{ 'Quellkonto' if t.to_account_id else 'Konto' }}</dt><dd>{{ t.account_title }}</dd></div>
+    {% if t.to_account_id %}<div><dt>Zielkonto</dt><dd>{{ t.target_account_title or 'Zielkonto unbekannt' }}</dd></div>{% endif %}
+    <div><dt>Kategorie</dt><dd>{{ '–' if t.to_account_id else (t.category_title or 'Ohne Kategorie') }}</dd></div>
+    <div><dt>Empfänger</dt><dd>{{ t.payee_title or '–' }}</dd></div>
+    {% if t.note %}<div class="compact-booking-note"><dt>Notiz</dt><dd>{{ t.note }}</dd></div>{% endif %}
+    <div class="compact-booking-balance"><dt>{{ 'Quellkonto danach' if t.to_account_id else 'Kontostand danach' }}</dt><dd>{% if t.balance_after is not none %}{{ (t.balance_after/divisor)|money(decimals) }} {{ symbol }}{% else %}Nicht verfügbar{% endif %}</dd></div>
+   </dl>
+   {% if can_modify %}
+   <div class="compact-booking-actions" aria-label="Aktionen für diese Buchung">
+    <a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a>
+    <a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a>
+    <form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung dauerhaft löschen und den Kontostand entsprechend korrigieren?">
+     <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN">
+     <button class="secondary danger-action" type="submit">Löschen</button>
+    </form>
+   </div>
+   {% endif %}
+  </div>
+ </details>
+ {% else %}<p class="no-results compact-booking-empty">Keine Buchungen vorhanden.</p>{% endfor %}
+ </div>
+ <div class="table-wrap mobile-booking-list dashboard-desktop-ledger"><table><thead><tr>
+ {% for key,label in [('date','Datum'),('type','Typ'),('account','Konto'),('category','Kategorie'),('payee','Empfänger'),('note','Notiz'),('amount','Betrag')] %}
+ <th {% if key=='amount' %}class="right"{% endif %}><a href="{{ link(sort=key,dir='asc' if sort==key and direction=='desc' else 'desc',page=1) }}">{{ label }}{% if sort==key %}<span class="sorticon">{{ '▲' if direction=='asc' else '▼' }}</span>{% endif %}</a></th>
+ {% endfor %}
+ {% if can_modify %}<th>Aktionen</th>{% endif %}
+ </tr></thead><tbody>
+ {% for t in tx %}
+  <tr class="mobile-booking-card"><td data-label="Datum">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }}</td><td class="booking-kind" data-label="Typ">{% if t.to_account_id %}<span class="booking-type booking-neutral">Umbuchung</span>{% elif t.adjustment %}<span class="booking-type booking-neutral">Saldoabgleich</span>{% elif t.pass_through %}<span class="booking-type booking-neutral">Durchlaufend</span>{% elif t.amount < 0 %}<span class="booking-type booking-expense"><span aria-hidden="true">↓</span> Ausgabe</span>{% elif t.amount > 0 %}<span class="booking-type booking-income"><span aria-hidden="true">↑</span> Einnahme</span>{% else %}<span class="booking-type booking-neutral">Ohne Betrag</span>{% endif %}</td><td data-label="Konto">{{ t.account_title }}{% if t.to_account_id %} → {{ t.target_account_title or 'Zielkonto unbekannt' }}{% endif %}</td><td data-label="Kategorie">{{ '–' if t.to_account_id else (t.category_title or 'Ohne Kategorie') }}</td><td data-label="Empfänger">{{ t.payee_title or '–' }}</td><td class="note" data-label="Notiz" {% if not t.note %}data-empty="true"{% endif %}>{{ t.note or '–' }}</td><td data-label="Betrag" class="right amount {% if t.to_account_id %}booking-neutral{% elif t.amount<0 %}expense{% else %}income{% endif %}">{{ (t.amount/divisor)|money(decimals) }} {{ symbol }}
+   {% if t.balance_after is not none %}<span class="balance-after">{{ 'Quellkonto danach' if t.to_account_id else 'Kontostand danach' }}: {{ (t.balance_after/divisor)|money(decimals) }} {{ symbol }}</span>{% else %}<span class="balance-after balance-unknown">Kontostand nicht verfügbar</span>{% endif %}</td>{% if can_modify %}<td data-label="Aktionen" class="finance-row-actions dashboard-row-actions"><a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a><a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a><form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung dauerhaft löschen und den Kontostand entsprechend korrigieren?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN"><button class="secondary danger-action" type="submit">Löschen</button></form></td>{% endif %}</tr>
+ {% else %}<tr class="mobile-booking-empty"><td colspan="{{ 8 if can_modify else 7 }}" class="no-results">Keine Buchungen vorhanden.</td></tr>{% endfor %}
+ </tbody></table></div>
+ {% if page_count>1 %}
+ <div class="pagination"><span>Seite {{ page }} von {{ page_count }} · {{ page_size }} je Seite</span><div>{% if page>1 %}<a class="button secondary" href="{{ link(page=page-1) }}">Zurück</a>{% endif %}{% if page<page_count %}<a class="button secondary" href="{{ link(page=page+1) }}">Weiter</a>{% endif %}</div></div>
+ {% endif %}
+</section>
+<p class="muted disclaimer">Durchlaufende Posten („Durchlaufender Posten (Eingang/Ausgabe)“ einschließlich Unterkategorien) stehen weiterhin in der Buchungsliste und verändern den Kontostand, werden aber aus Einnahmen, Ausgaben und den Diagrammen des Dashboards herausgerechnet. In Financisto selbst gelten weiterhin dessen eigene Statistikregeln.</p>
+<p class="muted disclaimer">Der Buchungs-Kontostand wird aus dem aktuell gespeicherten Kontostand rückwärts berechnet und berücksichtigt Umbuchungen innerhalb derselben Währung. Bei Fremdwährungsumbuchungen ist der Verlauf nicht vollständig rekonstruierbar. Monatssaldo = Einnahmen − Ausgaben im gewählten Zeitraum; kein Kontostand. Umbuchungen erscheinen in der Buchungsliste, werden aber in den Einnahmen-/Ausgabensummen und Diagrammen nicht mitgezählt. Andere Währungen werden nicht mit EUR verrechnet.</p>
+{% endblock %}

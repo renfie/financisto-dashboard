@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}2FA-Bestätigung · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<section class="panel auth">
+ <div class="eyebrow">Zweiter Anmeldeschritt</div>
+ <h1>2FA bestätigen</h1>
+ <p class="muted">Anmeldung als <strong>{{ username }}</strong>. Gib den aktuellen sechsstelligen Code deiner Authenticator-App oder einen einmaligen Wiederherstellungscode ein.</p>
+ <form method="post" class="formstack">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Authenticator- oder Wiederherstellungscode<input name="code" inputmode="text" autocomplete="one-time-code" maxlength="18" required autofocus></label>
+  <button class="primary" type="submit">Sicher anmelden</button>
+ </form>
+ <form action="{{ url_for('logout_pending') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="secondary" type="submit">Abbrechen</button></form>
+</section>
+{% endblock %}

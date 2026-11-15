@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Sicherung importieren · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+  <div class="heading"><div><div class="eyebrow">Datenverwaltung</div><h1>Financisto-Sicherung importieren</h1></div></div>
+  <section class="panel narrow">
+    <p>Lade deine komprimierte <strong>.backup</strong>-Datei aus Financisto hoch. {% if finance_mode == 'web' %}<strong>Web-Finanzverwaltung ist führend.</strong> Du kannst weiterhin eine .backup-Datei hochladen und prüfen. Zur Sicherheit werden vorhandene Web-Buchungen dabei <strong>nicht überschrieben</strong>. Ein späterer Import-Abgleich ist eine gesonderte Funktion.{% else %}Ein manueller Import ersetzt den bisherigen Financisto-Snapshot vollständig. Eine gesonderte Sicherung wird empfohlen.{% endif %}</p>
+    <form method="post" enctype="multipart/form-data" class="formstack">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label>Sicherungsdatei (max. 30 MiB)<input type="file" name="file" accept=".backup,application/gzip" required></label>
+      {% if destructive_pending and finance_mode == 'import' %}
+      <p class="notice">Diese Sicherung kann vorhandene Web-Änderungen überschreiben. Beim ersten Hochladen wird nur die Datei geprüft. Erst eine erneute Auswahl mit ausdrücklicher Bestätigung darf importieren.</p>
+      {% if manual_preview %}<p class="hint"><strong>Vorschau geprüft:</strong> {{ manual_preview[0] }} Buchungen, {{ manual_preview[1] }} Konten. Keine Daten verändert. Bitte dieselbe Datei erneut auswählen und die Übernahme bestätigen.</p>{% endif %}
+      <label class="checkline"><input type="checkbox" name="risk_ack" value="1">Ich möchte die Web-Buchungen beim Import überschreiben.</label>
+      <label>Zur Bestätigung UEBERSCHREIBEN eingeben<input name="confirm" pattern="UEBERSCHREIBEN"></label>
+      <div class="formgrid"><label>Administratorpasswort<input type="password" name="admin_password"></label><label>Frischer 2FA-Code<input name="admin_totp" maxlength="6" pattern="[0-9]{6}"></label></div>
+      {% endif %}
+      <button type="submit" class="primary">{{ "Sicherung prüfen (ohne Übernahme)" if finance_mode == "web" else "Sicherung importieren" }}</button>
+    </form>
+    <form method="post" action="{{ url_for('settings_auto_import') }}" class="formstack compact-form">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="enabled" value="{{ '0' if auto_enabled else '1' }}">
+      <button class="secondary" type="submit" {% if finance_mode=='web' and not auto_enabled %}disabled{% endif %}>Automatischen Import {{ 'deaktivieren' if auto_enabled else 'aktivieren' }}</button>
+    </form>
+    <p class="muted small">Automatischer Import: <strong>{{ "Aktiv" if auto_enabled else "Deaktiviert" }}</strong> (unter Einstellungen umschaltbar). Übertragene <code>.backup</code>-Dateien im Verzeichnis <code>data/inbox/</code> werden nach vollständiger Übertragung geprüft und automatisch übernommen. Alte Sicherungen ersetzen keinen neueren Stand. Die manuelle Haushaltsbuch-Tabelle bleibt unangetastet.</p>
+    <p class="muted small">Die Originaldatei wird nicht dauerhaft gespeichert, sondern für den Import in eine lokale SQLite-Datenbank eingelesen. Vor dem Import empfiehlt sich eine separate Sicherung des Docker-Datenvolumens.</p>
+  </section>
+{% endblock %}

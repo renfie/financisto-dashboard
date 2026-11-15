@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Buchungen erfassen · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="heading booking-heading"><div><div class="eyebrow">Finanzverwaltung</div><h1>Buchungen erfassen</h1><p class="muted">Einnahmen, Ausgaben und Umbuchungen – mit Empfängersuche und direkter Neuanlage.</p></div></div>
+{% if finance_mode != 'web' %}
+<section class="panel narrow"><h2>Noch ist Financisto führend</h2><p>Damit der automatische Import keine Web-Buchungen überschreibt, ist die Buchungserfassung noch gesperrt. Der Administrator kann unter <a href="{{ url_for('settings') }}#datenfuehrung">Einstellungen → Datenführung</a> bewusst auf die Web-Finanzverwaltung umstellen. Dabei wird vorher eine vollständige SQLite-Sicherung erstellt.</p></section>
+{% else %}
+<section class="panel booking-entry-panel" id="buchungseingabe"><h2>{{ 'Web-Buchung bearbeiten' if edit_row else ('Buchung klonen' if clone_row else 'Neue Buchung') }}</h2>
+<form class="formstack booking-compact-form" method="post" action="{{ url_for('booking_add') }}" id="booking-form" data-new-booking="{{ 'false' if form_row else 'true' }}">
+ <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="edit_id" value="{{ edit_row.id if edit_row else '' }}">
+ {% set kind = ('transfer' if form_row.to_account_id else ('income' if form_row.amount>0 else 'expense')) if form_row else 'expense' %}
+ {% if clone_row %}<p class="hint clone-hint">Vorlage aus Buchung vom {{ clone_row.day[8:10] }}.{{ clone_row.day[5:7] }}.{{ clone_row.day[:4] }} · Neues Datum ist heute, Betrag bleibt absichtlich leer. Es wird erst beim Speichern eine neue Buchung angelegt.</p>{% endif %}
+ <div class="booking-compact-grid">
+   <label class="book-field-kind">Buchungsart<select name="kind" required><option value="expense" {{ 'selected' if kind=='expense' else '' }}>Ausgabe</option><option value="income" {{ 'selected' if kind=='income' else '' }}>Einnahme</option><option value="transfer" {{ 'selected' if kind=='transfer' else '' }}>Umbuchung</option></select></label>
+   <label class="book-field-account">Konto<select name="account_id" required><option value="">Bitte wählen</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if (form_row and form_row.account_id==a.id) or (not form_row and default_account_id==(a.id|string)) else '' }}>{{ a.title }} ({{ a.code }}){% if a.balance_minor is none %} – Kontostand unbekannt{% endif %}</option>{% endfor %}</select></label>
+   <label class="book-field-amount">Betrag (Kontowährung)<input name="amount" inputmode="decimal" required placeholder="0,00" value="{{ edit_amount }}"></label>
+   <label class="book-field-day">Datum<input type="date" name="day" value="{{ today if clone_row else (edit_row.day if edit_row else today) }}" required></label>
+   <label class="book-field-category" id="booking-category-field" {% if kind=='transfer' %}hidden{% endif %}>Kategorie<select id="booking-category-select" name="category_id" data-default-expense="{{ default_expense_category_id }}" {% if kind=='transfer' %}disabled{% endif %}><option value="">Ohne Kategorie</option>{% for id,title in categories %}<option value="{{ id }}" {{ 'selected' if (form_row and form_row.category_id==id) or (not form_row and kind=='expense' and default_expense_category_id==id) else '' }}>{{ title }}</option>{% endfor %}</select></label>
+   <label class="book-field-target" id="booking-target-field" {% if kind!='transfer' %}hidden{% endif %}>Zielkonto bei Umbuchung<select name="to_account_id" {% if kind!='transfer' %}disabled{% endif %}><option value="">Bitte Zielkonto wählen</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if form_row and form_row.to_account_id==a.id else '' }}>{{ a.title }} ({{ a.code }})</option>{% endfor %}</select></label>
+   <label class="book-field-payee">Empfänger<input name="payee_title" list="known-payees" maxlength="120" autocomplete="off" value="{{ form_row.payee_title or '' if form_row else '' }}" placeholder="z. B. Rewe"><datalist id="known-payees">{% for p in payees %}<option value="{{ p.title }}">{% endfor %}</datalist></label>
+   <label class="book-field-note">Notiz (optional)<textarea name="note" rows="1" maxlength="1000" placeholder="Ergänzende Informationen">{{ form_row.note or '' if form_row else '' }}</textarea></label>
+ </div>
+ <details class="booking-extra" id="booking-extra" {% if form_row and form_row.category_id in neutral_ids %}open{% endif %}><summary>Weitere Optionen <span>Durchlaufender Posten · neue Kategorie</span></summary>
+   <div class="booking-extra-body">
+     <div class="booking-category-quick" id="booking-category-quick"><button type="button" class="secondary" id="booking-category-add" aria-haspopup="dialog">+ Neue Kategorie anlegen</button><span class="hint">Auch als Unterkategorie möglich.</span></div>
+     <div id="booking-pass-through-field" {% if kind=='transfer' %}hidden{% endif %}>
+       <label class="pass-through-check"><input type="checkbox" name="pass_through" value="1" {{ 'checked' if form_row and form_row.category_id in neutral_ids else '' }}>
+       <span><strong>Durchlaufender Posten (Geld für andere)</strong><small>Wird im Kontostand berücksichtigt, aber nicht als eigene Einnahme oder Ausgabe ausgewertet.</small></span></label>
+     </div>
+   </div>
+ </details>
+ <div class="filter-actions"><button class="primary" type="submit">{{ 'Änderungen speichern' if edit_row else 'Buchung speichern' }}</button>{% if edit_row or clone_row %}<a class="button secondary" href="{{ url_for('booking_list') }}">Abbrechen</a>{% endif %}</div>
+</form>
+<dialog id="booking-category-dialog" class="booking-category-dialog" aria-labelledby="booking-category-title">
+  <form id="booking-category-create" method="post" action="{{ url_for('booking_new_category') }}">
+   <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="expense">
+   <h3 id="booking-category-title">Neue Kategorie</h3>
+   <p class="muted">Die Kategorie wird sofort angelegt und in deiner aktuellen Buchung ausgewählt.</p>
+   <label>Bezeichnung<input name="title" maxlength="100" required autocomplete="off" placeholder="z. B. Haushaltsartikel"></label>
+   <label>Übergeordnete Kategorie<select name="parent_id"><option value="">Neue Hauptkategorie</option>{% for c in category_records %}<option value="{{ c.id }}" data-kind="{{ c.kind }}">{{ category_names[c.id] }}</option>{% endfor %}</select></label>
+   <p class="hint" id="booking-category-message" role="status" aria-live="polite"></p>
+   <div class="filter-actions"><button type="submit" class="primary">Kategorie anlegen</button><button type="button" class="secondary" data-close-category>Abbrechen</button></div>
+  </form>
+</dialog>
+<details class="booking-help"><summary>Hinweise zur Buchung</summary><p class="hint">Klonen übernimmt Konto, Empfänger, Kategorie, Notiz und Buchungsart – nicht den Betrag. Durchlaufende Posten haben keine Auswirkung auf die Haushaltsstatistik dieses Dashboards; in den Auswertungen der Android-App können sie weiterhin als Einnahmen/Ausgaben erscheinen.</p><p class="hint">Umbuchungen sind nur zwischen Konten derselben Währung möglich. Beträge werden exakt in der jeweiligen Währung gespeichert und Kontostände atomar aktualisiert. Auch importierte Buchungen lassen sich bei führendem Web-Dashboard bearbeiten; die Original-Sicherung bleibt als Exportgrundlage erhalten.</p></details></section>
+<section class="panel"><h2>Über die Webseite erfasste Buchungen</h2><p class="muted">Die letzten 100 neu erfassten oder geänderten Web-Buchungen. Auf dem Dashboard kannst du alle Buchungen bearbeiten, löschen oder klonen, sofern die Web-Verwaltung führend ist.</p>
+<div class="table-wrap mobile-web-booking-list"><table><thead><tr><th>Datum</th><th>Typ</th><th>Konto</th><th>Empfänger</th><th>Betrag</th><th>Aktionen</th></tr></thead><tbody>
+{% for t in rows %}
+<tr class="mobile-booking-card"><td data-label="Datum">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }}</td><td data-label="Typ">{{ 'Umbuchung' if t.to_account_id else ('Einnahme' if t.amount>0 else 'Ausgabe') }}</td><td data-label="Konto">{{ t.account_title }}</td><td data-label="Empfänger">{{ t.payee_title or '–' }}</td><td data-label="Betrag">{{ (t.amount / (10 ** t.decimals))|money(t.decimals) }} {{ t.symbol or t.currency_code }}</td>
+<td class="finance-row-actions" data-label="Aktionen"><a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a><a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a><form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung löschen und Kontostand zurückrechnen?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN"><button class="secondary" type="submit">Löschen</button></form></td></tr>
+{% else %}<tr class="mobile-booking-empty"><td colspan="6">Noch keine Web-Buchungen erfasst.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+{% block title %}Einstellungen · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<div class="heading"><div><div class="eyebrow">Verwaltung</div><h1>Einstellungen</h1><p class="muted">{% if viewer.role == 'admin' %}Finanz-Stammdaten sowie System und Sicherheit.{% else %}Empfänger, Kategorien und Kontostände verwalten.{% endif %}</p></div></div>
+<details class="panel settings-accordion" id="app-push">
+  <summary class="section-head settings-accordion-summary"><div><h2>App-Benachrichtigungen (Web Push)</h2></div><span class="pill-status status-off" id="push-summary-state">Gerät prüfen</span></summary>
+  <div class="push-panel-content" data-csrf="{{ csrf_token() }}">
+    <p class="hint">Persönliche Benachrichtigungen für neue Ausgaben und Einnahmen. Unabhängig von der globalen Gotify-/Telegram-Grenze. Einstellungen gelten für alle deine Push-Geräte.</p>
+    <p id="push-status" class="muted" role="status">Unterstützung wird geprüft …</p>
+    <div class="settings-shortcuts">
+      <button type="button" id="push-enable" class="primary">Auf diesem Gerät aktivieren</button>
+      <button type="button" id="push-disable" class="secondary" hidden>Auf diesem Gerät deaktivieren</button>
+      <button type="button" id="push-test" class="secondary" hidden>Test-Push senden</button>
+    </div>
+    <p class="muted small">Jedes Gerät muss separat freigegeben werden. Browser-Berechtigungen können auch in Android oder Chrome widerrufen werden. Beim Benutzerwechsel auf einem gemeinsam genutzten Gerät den Push-Empfang hier zuvor deaktivieren.</p>
+    <form id="push-preferences-form" class="formstack push-preferences-form" autocomplete="off">
+      <h3>Meine Benachrichtigungen</h3>
+      <label class="checkline"><input type="checkbox" id="push-expense-enabled"> Neue Ausgaben melden</label>
+      <label>Meine Ausgabengrenze (EUR, einschließlich)
+        <input id="push-min-amount" type="text" inputmode="decimal" maxlength="14" placeholder="100,00" required>
+      </label>
+      <label class="checkline"><input type="checkbox" id="push-income-enabled"> Neue Einnahmen melden</label>
+      <label>Welche Informationen dürfen angezeigt werden?
+        <select id="push-detail-level">
+          <option value="private">Privat – nur ein allgemeiner Hinweis</option>
+          <option value="amount">Buchungsart und Betrag</option>
+          <option value="full">Ausführlich – Betrag, Empfänger, Konto und Notiz</option>
+        </select>
+      </label>
+      <div class="push-preview" aria-live="polite">
+        <strong>Beispiel-Benachrichtigung</strong>
+        <p id="push-example-title">FieLanzen</p>
+        <p id="push-example-body">Neue Ausgabe erfasst.</p>
+      </div>
+      <p class="muted small">Ausführliche Texte können auch auf Sperrbildschirmen sichtbar werden. Die Vorschau kannst du zusätzlich in den Benachrichtigungseinstellungen deines Geräts einschränken.</p>
+      <button type="submit" class="secondary" id="push-save-preferences">Meine Einstellungen speichern</button>
+      <p class="muted small" role="status" id="push-preferences-status"></p>
+    </form>
+  </div>
+</details>
+<script defer src="{{ url_for('static',filename='push-settings.js',v=app_version) }}"></script>
+{% if viewer.role == 'admin' %}
+<div class="section-head"><h2>System und Sicherheit</h2><p class="muted">Nur für Administratoren: Benutzer, Konten, Import, Sicherungen und Zugriff.</p></div>
+{# Betriebs- und Systeminformationen niemals an Bearbeiter oder Leser ausgeben. #}
+{% if viewer.role == 'admin' %}
+<section class="panel operation-panel" id="systemstatus" aria-label="Systemstatus und Hintergrunddienste">
+  <div class="section-head operation-header">
+    <div>
+      <h2>Systemstatus &amp; Hintergrunddienste</h2>
+      <p class="muted">Nur für Administratoren · tatsächliche Prüfungen des gemeinsamen Hintergrunddienstes</p>
+    </div>
+    <span class="pill-status {{ 'status-on' if background_status.heartbeat_ok else 'status-off' }}">{{ 'Prüfungen aktuell' if background_status.heartbeat_ok else 'Status prüfen' }}</span>
+  </div>
+  <div class="operation-overview">
+    <div class="operation-fact"><span>Führendes System</span><strong>{{ 'Financisto (Android)' if finance_mode!='web' else 'Web-Dashboard' }}</strong></div>
+    <div class="operation-fact"><span>Letzter erfolgreicher Import</span><strong>{{ background_status.last_import }}</strong><small>{{ background_status.last_import_source }}</small></div>
+    <div class="operation-fact"><span>Letzte Datenbanksicherung</span><strong>{{ background_status.last_backup }}</strong><small>{{ background_status.last_backup_type or 'Im Sicherungsverzeichnis nicht vorhanden' }}</small></div>
+  </div>
+  <details class="operation-details">
+    <summary>Prüfintervalle und nächste Termine anzeigen</summary>
+    <div class="operation-job-grid">
+      {% for job in background_status.jobs %}
+      <div class="operation-job operation-{{ job.tone }}">
+        <div class="operation-job-head"><strong>{{ job.label }}</strong><span class="operation-indicator" aria-hidden="true"></span></div>
+        <p class="operation-job-status">{{ job.status }}</p>
+        <dl><dt>Letzte Prüfung</dt><dd>{{ job.last_check }}</dd><dt>Nächste Prüfung</dt><dd>{{ job.next_check }}</dd></dl>
+        {% if job.error %}<p class="operation-error">{{ job.error }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <p class="hint">Letzte Rückmeldung des Hintergrunddienstes: {{ background_status.heartbeat_seen }}. Bei ausbleibenden Prüfungen wird der Status als veraltet angezeigt. Die Zeiten aktualisieren sich beim Neuladen der Seite.</p>
+    {% if finance_mode!='web' %}<p class="hint">Wiederkehrende Buchungen werden derzeit von Financisto verwaltet; unser Hintergrunddienst führt keine Web-Dauerbuchungen aus. <a href="{{ url_for('recurring_list') }}">Vorlagen ansehen</a></p>{% endif %}
+    <p class="hint">Letzte tägliche SQLite-Sicherung: {{ background_status.last_daily }}.</p>
+  </details>
+</section>
+{% endif %}
+<section class="panel" id="benutzer">
+ <div class="section-head"><h2>Benutzer und Zugriff</h2><p class="muted">Jeder neue Benutzer muss beim ersten Login eine eigene 2FA einrichten.</p></div>
+ <div class="table-wrap mobile-users-list"><table><thead><tr><th>Benutzer</th><th>Rolle</th><th>Status</th><th>2FA</th><th>Aktionen</th></tr></thead><tbody>
+ {% for user in users %}
+ <tr><td data-label="Benutzer"><strong>{{ user.display_name }}</strong><br><span class="muted">{{ user.username }}</span></td>
+ <td data-label="Rolle">{{ {'admin':'Administrator','editor':'Bearbeitung','viewer':'Nur Lesen'}.get(user.role,user.role) }}</td>
+ <td data-label="Status">{{ 'Aktiv' if user.is_active else 'Gesperrt' }}</td>
+ <td data-label="2FA"><span class="pill-status {{ 'status-on' if user.totp_enabled else 'status-off' }}">{{ 'Aktiv' if user.totp_enabled else 'Einrichtung erforderlich' }}</span></td>
+ <td class="user-actions" data-label="Aktionen">
+ {% if user.id != viewer.id %}
+ <div class="user-actions-row">
+  <form method="post" action="{{ url_for('settings_toggle_user',user_id=user.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="secondary" type="submit">{{ 'Sperren' if user.is_active else 'Aktivieren' }}</button></form>
+  <details class="user-manage-menu">
+   <summary>Verwalten</summary>
+   <div class="user-manage-content">
+    <details class="user-manage-option"><summary>Passwort zurücksetzen</summary>
+     <form method="post" action="{{ url_for('settings_set_password',user_id=user.id) }}" class="formstack user-reset">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label>Neues Benutzerpasswort<input type="password" name="password" minlength="12" maxlength="256" autocomplete="new-password" placeholder="Mindestens 12 Zeichen" required></label>
+      <label>Eigenes Administratorpasswort<input type="password" name="admin_password" autocomplete="current-password" required></label>
+      <label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label>
+      <button type="submit" class="secondary">Passwort setzen</button>
+     </form>
+    </details>
+    <details class="user-manage-option"><summary>2FA zurücksetzen</summary>
+     <form method="post" action="{{ url_for('settings_reset_totp',user_id=user.id) }}" class="formstack user-reset">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <p class="muted small">Der Benutzer muss beim nächsten Login seine 2FA erneut einrichten.</p>
+      <label>Eigenes Administratorpasswort<input type="password" name="admin_password" autocomplete="current-password" required></label>
+      <label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label>
+      <button type="submit" class="secondary">2FA zurücksetzen</button>
+     </form>
+    </details>
+    <details class="user-manage-option"><summary class="danger-text">Benutzer dauerhaft löschen</summary>
+     <form method="post" action="{{ url_for('settings_delete_user',user_id=user.id) }}" class="formstack user-reset" data-confirm="Benutzer endgültig löschen? Bereits erfasste Buchungen bleiben bestehen.">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <p class="notice"><strong>Unwiderruflich:</strong> Benutzerkonto, Passwort, 2FA und Wiederherstellungscodes werden entfernt. Finanzbuchungen und Audit-Einträge bleiben erhalten.</p>
+      <label>Benutzernamen zur Bestätigung exakt eingeben<input name="confirm_username" autocomplete="off" placeholder="{{ user.username }}" required></label>
+      <label>Eigenes Administratorpasswort<input type="password" name="admin_password" autocomplete="current-password" required></label>
+      <label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label>
+      <button class="danger" type="submit">Benutzer endgültig löschen</button>
+     </form>
+    </details>
+   </div>
+  </details>
+ </div>
+ {% else %}<span class="muted">Eigenes Konto</span>{% endif %}
+ </td></tr>
+ {% endfor %}
+ </tbody></table></div>
+ <details class="settings-create"><summary>Neuen Benutzer hinzufügen</summary>
+ <form method="post" action="{{ url_for('settings_add_user') }}" class="formstack">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <div class="formgrid"><label>Benutzername<input name="username" minlength="3" maxlength="40" pattern="[A-Za-z0-9._-]{3,40}" autocomplete="off" required></label><label>Anzeigename<input name="display_name" maxlength="100" required></label></div>
+  <div class="formgrid"><label>Rolle<select name="role"><option value="viewer">Nur Lesen</option><option value="editor">Bearbeitung (Buchungen)</option><option value="admin">Administrator</option></select></label><label>Startpasswort<input type="password" name="password" minlength="12" maxlength="256" autocomplete="new-password" required></label></div>
+  <button class="primary" type="submit">Benutzer anlegen</button>
+ </form></details>
+ <div class="settings-shortcuts"><a class="button secondary" href="#pc-freigaben">PC-Freigaben verwalten</a><a class="button secondary" href="#zugriff">Öffentlichen Zugang konfigurieren</a></div>
+</section>
+<section class="panel" id="pc-freigaben">
+ <div class="section-head"><div><h2>PC-Freigaben</h2><p class="muted">Zugelassene Geräte für den privaten Zugriffsmodus. Hier verwaltest du sie direkt in den Einstellungen.</p></div></div>
+ <p class="hint">Von Caddy erkannte Client-IP: <strong>{{ current_ip or 'unbekannt' }}</strong>. Nur die tatsächliche Endgeräte-IP eintragen, nicht pauschal die IP des Nginx Proxy Managers.</p>
+ <form class="finance-inline-form" action="{{ url_for('add_pc') }}" method="post">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Gerätebezeichnung<input name="label" maxlength="100" placeholder="Arbeits-PC" required></label>
+  <label>IPv4- oder IPv6-Adresse<input name="ip" maxlength="45" placeholder="192.168.2.42" required></label>
+  <button class="primary" type="submit">PC freigeben</button>
+ </form>
+ <div class="table-wrap"><table><thead><tr><th>Gerät</th><th>Client-IP</th><th>Aktion</th></tr></thead><tbody>
+ {% for pc in clients %}<tr><td>{{ pc.label }}{% if pc.ip==current_ip %} <span class="current-tag">Dieser PC</span>{% endif %}</td><td><code>{{ pc.ip }}</code></td>
+ <td>{% if pc.ip == current_ip %}<span class="muted">Aktuell verwendet</span>{% else %}<form method="post" action="{{ url_for('remove_pc',client_id=pc.id) }}" data-confirm="Diesen PC wirklich entfernen?"><input name="csrf" type="hidden" value="{{ csrf_token() }}"><button type="submit" class="danger">Entfernen</button></form>{% endif %}</td></tr>{% endfor %}
+ </tbody></table></div>
+</section>
+<section class="panel" id="zugriff">
+ <div class="section-head"><div><h2>Öffentlicher Zugriff</h2><p class="muted">Administratorgesteuerte Freigabe der Anmeldeseite. Passwort und individuelle 2FA bleiben für alle Benutzer Pflicht.</p></div>
+ <span class="pill-status {{ 'status-on' if public_access else 'status-off' }}">{{ 'Aktiv' if public_access else 'Nur freigegebene PCs' }}</span></div>
+ <p class="notice">Wichtig: Bei öffentlichem Zugriff erreicht jeder die Anmeldeseite. Richte Nginx Proxy Manager mit gültigem öffentlichem TLS-Zertifikat ein, entferne gegebenenfalls die bisherige NPM-Access-List für interne IPs und teste von einem externen Netzwerk. Split-DNS macht eine Webseite nicht öffentlich und schützt sie nicht vor Zugriff.</p>
+ <details class="settings-create"><summary>{{ 'Öffentlichen Zugang wieder sperren' if public_access else 'Öffentlichen Login aktivieren' }}</summary>
+  <form class="formstack" action="{{ url_for('settings_public_access') }}" method="post">
+   <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="enabled" value="{{ '0' if public_access else '1' }}">
+   <label>Zur Bestätigung {{ 'PRIVAT' if public_access else 'OEFFENTLICH' }} eingeben<input name="confirm" required pattern="{{ 'PRIVAT' if public_access else 'OEFFENTLICH' }}" autocomplete="off"></label>
+   <div class="formgrid"><label>Administratorpasswort<input name="admin_password" type="password" required autocomplete="current-password"></label>
+   <label>Frischer 2FA-Code<input name="admin_totp" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
+   <button type="submit" class="{{ 'secondary' if public_access else 'primary' }}">{{ 'Öffentlichen Login deaktivieren' if public_access else 'Öffentlichen Login bewusst freigeben' }}</button>
+  </form>
+ </details>
+</section>
+<details class="panel settings-accordion" id="telegram-buchungen">
+  <summary class="section-head settings-accordion-summary">
+    <div><h2>Buchungen per Telegram</h2></div>
+    <span class="pill-status {{ 'status-on' if telegram_book_config.enabled and telegram_book_config.receive_mode == 'direct' else 'status-off' }}">{{ 'Aktiv' if telegram_book_config.enabled and telegram_book_config.receive_mode == 'direct' else 'Deaktiviert' }}</span>
+  </summary>
+  <div class="settings-accordion-content">
+    <p class="muted">Direkt über einen eigenen FieLanzen-Bot in deiner privaten Finanzgruppe. Kein Node-RED, kein weiterer Container. Nur ausdrücklich freigegebene Telegram-Benutzer dürfen buchen.</p>
+    <p class="hint"><strong>Einrichtung:</strong> Bot mit <code>@BotFather</code> anlegen und in die Telegram-Finanzgruppe aufnehmen. Bot-Token hier eintragen und einmal ohne Aktivierung speichern. Anschließend <code>/finanzid</code> in der Gruppe senden und Gruppen-Chat-ID sowie die jeweiligen Benutzer-IDs hier übernehmen. Bei mehreren Bots in der Gruppe gegebenenfalls <code>/finanzid@DEIN_BOTNAME</code> verwenden. Erst danach aktivieren.</p>
+    <form method="post" action="{{ url_for('settings_telegram_bookings_save') }}" class="formstack">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label>Telegram-Bot-Token {% if telegram_book_config.bot_token_enc %}<span class="muted small">(bereits verschlüsselt gespeichert – leer lassen zum Beibehalten)</span>{% endif %}
+        <input name="bot_token" type="password" maxlength="250" autocomplete="new-password" placeholder="{{ 'Gespeichert – unverändert' if telegram_book_config.bot_token_enc else 'Token von BotFather' }}">
+      </label>
+      {% if telegram_book_config.bot_token_enc %}<label class="checkline"><input type="checkbox" name="remove_bot_token" value="1"> Gespeichertes Bot-Token löschen</label>{% endif %}
+      <div class="formgrid">
+        <label>Gruppen-Chat-ID (negative Zahl)
+          <input name="allowed_chat_id" inputmode="numeric" value="{{ telegram_book_config.allowed_chat_id }}" maxlength="22" placeholder="-1001234567890" autocomplete="off">
+        </label>
+        <label>Freigegebene Telegram-Benutzer-IDs (durch Komma getrennt)
+          <input name="permitted_user_ids" value="{{ telegram_book_config.permitted_user_ids }}" maxlength="250" placeholder="123456789,987654321" autocomplete="off">
+        </label>
+        <label>Standardkonto
+          <select name="default_account_id"><option value="0">Bitte wählen</option>
+            {% for ac in default_account_choices %}<option value="{{ ac.id }}" {% if telegram_book_config.default_account_id == ac.id %}selected{% endif %}>{{ ac.title }} ({{ ac.code }})</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+      <label class="checkline"><input type="checkbox" name="enabled" value="1" {% if telegram_book_config.enabled and telegram_book_config.receive_mode == 'direct' %}checked{% endif %}> Buchungen aus der freigegebenen Telegram-Gruppe erlauben</label>
+      <label class="checkline"><input type="checkbox" name="auto_confirm" value="1" {% if telegram_book_config.auto_confirm %}checked{% endif %}> <strong>Ohne Rückfrage direkt buchen</strong> (nur für gültige <code>/finanz</code>-Befehle von freigegebenen Nutzern)</label>
+      <p class="hint">Ohne den Haken „Ohne Rückfrage“ erscheint zuerst ein Vorschlag mit Konto, Kategorie und Bestätigung. Mit Haken wird die Buchung direkt gespeichert und der Bot antwortet mit der Buchungsnummer. Wiederholte Telegram-Nachrichten-IDs werden niemals doppelt gebucht. Voraussetzung ist die aktivierte Web-Datenführung.</p>
+      <button class="primary" type="submit">Telegram-Buchungen speichern</button>
+    </form>
+    <p class="hint"><strong>Telegram-Syntax:</strong> <code>/finanz 24,90 Edeka</code> (Ausgabe mit gemeinsamer Standardkategorie und Telegram-Standardkonto), <code>/finanz 24,90 Edeka | Lebensmittel | Bargeld</code> (Kategorie, dann Konto), <code>/finanz +150 Taschengeld | Ebay Direkteinzahlung</code> (Einnahme auf Taschengeld mit Notiz). Ein <code>+</code> vor dem Betrag kennzeichnet eine Einnahme. Die Standardkategorie wird zentral im Bereich „Standardkonto für neue Buchungen“ eingestellt. Mit <code>/finanz</code> ohne Angaben wird die Hilfe angezeigt. <code>/finanzid</code> zeigt IDs an. Bitte keine PINs oder vollständigen Kontodaten an den Bot senden.</p>
+  </div>
+</details>
+
+<details class="panel settings-accordion" id="benachrichtigungen">
+  <summary class="section-head settings-accordion-summary">
+    <div><h2>Benachrichtigungen bei größeren Ausgaben</h2></div>
+    <span class="pill-status {{ 'status-on' if notify_config.enabled else 'status-off' }}">{{ 'Aktiv' if notify_config.enabled else 'Deaktiviert' }}</span>
+  </summary>
+  <div class="settings-accordion-content">
+  <p class="muted">Nur für Administratoren · Versand über Gotify und/oder einen Telegram-Bot.</p>
+  <p class="hint">Benachrichtigt werden <strong>neue, echte Ausgaben</strong> über die Web-Erfassung, Telegram oder neue wiederkehrende Buchungen ab dem gewählten Betrag. Keine Warnung bei Umbuchungen, Importen, Depot-/Saldoabgleichen oder bloßen Änderungen. Der Grenzbetrag ist in EUR; andere Währungen werden nicht ohne Umrechnung verglichen.</p>
+  <p class="muted small">Die drei Bereiche werden <strong>getrennt gespeichert</strong>. Du kannst Telegram ohne Gotify einrichten. Erst danach bei Bedarf die Ausgabenwarnungen insgesamt aktivieren.</p>
+  <details class="settings-create" {% if notify_config.telegram_enabled %}open{% endif %}>
+    <summary>Telegram konfigurieren (unabhängig von Gotify)</summary>
+    <form method="post" action="{{ url_for('settings_notifications_save') }}" class="formstack notification-settings">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="scope" value="telegram">
+      <label class="checkline"><input name="telegram_enabled" type="checkbox" value="1" {% if notify_config.telegram_enabled %}checked{% endif %}> Über Telegram senden</label>
+      <label>Telegram-Bot-Token {% if notify_config.telegram_token_enc %}<span class="muted small">(gespeichert; leer lassen zum Beibehalten)</span>{% endif %}
+        <input type="password" name="telegram_token" maxlength="250" autocomplete="new-password" placeholder="{{ 'Gespeichert – unverändert' if notify_config.telegram_token_enc else 'BotFather-Token' }}">
+      </label>
+      <label>Telegram-Chat-ID
+        <input name="telegram_chat_id" inputmode="numeric" maxlength="22" value="{{ notify_config.telegram_chat_id }}" placeholder="-1001234567890" autocomplete="off">
+      </label>
+      {% if notify_config.telegram_token_enc %}<label class="checkline"><input type="checkbox" name="remove_telegram_token" value="1"> Gespeichertes Telegram-Token entfernen</label>{% endif %}
+      <p class="hint">Diese Einstellungen betreffen nur <strong>Ausgabenwarnungen</strong>. Du kannst dafür denselben FieLanzen-Bot und dieselbe Finanzgruppe wie bei den Buchungen verwenden. Alternativ bleibt dein bisheriger Bot für Benachrichtigungen nutzbar. Mitglieder der Gruppe können Finanzmeldungen lesen.</p>
+      <button class="secondary" type="submit">Telegram separat speichern</button>
+    </form>
+  </details>
+  <details class="settings-create" {% if notify_config.gotify_enabled %}open{% endif %}>
+    <summary>Gotify konfigurieren (unabhängig von Telegram)</summary>
+    <form method="post" action="{{ url_for('settings_notifications_save') }}" class="formstack notification-settings">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="scope" value="gotify">
+      <label class="checkline"><input name="gotify_enabled" type="checkbox" value="1" {% if notify_config.gotify_enabled %}checked{% endif %}> Über Gotify senden</label>
+      <label>Gotify-Adresse (HTTPS)<input type="url" name="gotify_url" value="{{ notify_config.gotify_url }}" maxlength="350" placeholder="https://gotify.beispiel.de" autocomplete="url"></label>
+      <label>Gotify-App-Token {% if notify_config.gotify_token_enc %}<span class="muted small">(gespeichert; leer lassen zum Beibehalten)</span>{% endif %}
+        <input type="password" name="gotify_token" maxlength="250" autocomplete="new-password" placeholder="{{ 'Gespeichert – unverändert' if notify_config.gotify_token_enc else 'App-Token' }}">
+      </label>
+      <label>Gotify-Priorität <input type="number" name="gotify_priority" min="0" max="10" value="{{ notify_config.gotify_priority }}" required></label>
+      {% if notify_config.gotify_token_enc %}<label class="checkline"><input type="checkbox" name="remove_gotify_token" value="1"> Gespeichertes Gotify-Token entfernen</label>{% endif %}
+      <button class="secondary" type="submit">Gotify separat speichern</button>
+    </form>
+  </details>
+  <p class="muted small">Nach dem Einrichten von Gotify, Telegram oder Web Push auf einem Gerät hier Grenzbetrag und Ausgabenwarnungen aktivieren.</p>
+  <form method="post" action="{{ url_for('settings_notifications_save') }}" class="formstack notification-settings">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="scope" value="general">
+    <label class="checkline"><input type="checkbox" name="enabled" value="1" {% if notify_config.enabled %}checked{% endif %}> <strong>Warnungen bei größeren Ausgaben aktivieren</strong></label>
+    <div class="formgrid">
+      <label>Grenzbetrag (EUR, einschließlich)
+        <input name="threshold" inputmode="decimal" value="{{ ('%.2f'|format(notify_config.min_amount_cents / 100)).replace('.', ',') }}" maxlength="16" required placeholder="100,00">
+      </label>
+    </div>
+    <button type="submit" class="primary">Grenzbetrag und Hauptschalter speichern</button>
+  </form>
+  <div class="settings-shortcuts">
+    <form method="post" action="{{ url_for('settings_notifications_test') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="secondary" type="submit" {% if not notify_config.enabled %}disabled{% endif %}>Testbenachrichtigung senden</button></form>
+  </div>
+  <p class="muted small">Versandstatus: {{ notify_status.get('sent',0) }} erfolgreich, {{ notify_status.get('pending',0) + notify_status.get('sending',0) }} ausstehend, {{ notify_status.get('failed',0) }} fehlgeschlagen.
+  {% if notify_last_sent %}Letzter Versand: {{ notify_last_sent }} (Serverzeit).{% endif %}
+  Die Übermittlung erfolgt über einen separaten ausgehenden Dienst. Wenn er vorübergehend nicht erreichbar ist, bleibt die Finanzbuchung erhalten.</p>
+</div>
+</details>
+
+<section class="panel" id="datenfuehrung">
+ <div class="section-head"><div><h2>Datenführung und Sicherung</h2><p class="muted">Importsteuerung und bewusste Umstellung zum eigenständigen Finanzsystem.</p></div></div>
+ <p><strong>Führendes System:</strong> {{ 'Financisto / Android' if finance_mode=='import' else 'Web-Finanzverwaltung (SQLite)' }}
+ <span class="pill-status {{ 'status-on' if auto_enabled else 'status-off' }}">Auto-Import {{ 'aktiv' if auto_enabled else 'aus' }}</span></p>
+ <p class="muted">Prüfung weiterhin alle 60 Sekunden, vollständig übertragene Dateien nach mindestens 120 Sekunden. Ist die Automatik aus, bleiben die Sicherungen im <code>data/inbox</code> unverändert. Der <a href="{{ url_for('upload') }}">manuelle .backup-Import</a> bleibt zugänglich.</p>
+ <form method="post" action="{{ url_for('settings_auto_import') }}" class="formstack compact-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="enabled" value="{{ '0' if auto_enabled else '1' }}">
+  <button class="{{ 'secondary' if auto_enabled else 'primary' }}" type="submit" {% if (finance_mode=='web' and not auto_enabled) or (finance_mode=='import' and (pending_overwrite or web_writes) and not auto_enabled) %}disabled{% endif %}>Automatischen Import {{ 'deaktivieren' if auto_enabled else 'aktivieren' }}</button>
+ </form>
+ {% if finance_mode=='import' and (pending_overwrite or web_writes) and not auto_enabled %}
+ <p class="notice"><strong>Web-Änderungen vorhanden.</strong> Der nächste vollständige automatische Import könnte diese überschreiben. Eine Sicherung und ausdrückliche Bestätigung sind nötig.</p>
+ <form method="post" action="{{ url_for('settings_auto_import') }}" class="formstack danger-confirm">
+ <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="enabled" value="1">
+ <label class="checkline"><input type="checkbox" name="risk_ack" value="1" required>Ich akzeptiere das Überschreiben von Web-Buchungen beim nächsten Import.</label>
+ <label>UEBERSCHREIBEN eingeben<input name="confirm" pattern="UEBERSCHREIBEN" required></label>
+ <div class="formgrid"><label>Admin-Passwort<input name="admin_password" type="password" required></label><label>Frischer 2FA-Code<input name="admin_totp" maxlength="6" pattern="[0-9]{6}" required></label></div>
+ <button class="danger" type="submit">Auto-Import mit Datenüberschreibung aktivieren</button>
+ </form>
+ {% endif %}
+ {% if finance_mode=='import' %}
+ <details class="settings-create"><summary>Financisto als führendes System ablösen</summary>
+  <p><strong>Diese Umstellung deaktiviert den automatischen Import dauerhaft für den Webbetrieb.</strong> Vorher wird eine konsistente SQLite-Sicherung im Projekt unter <code>data/web-backups</code> erstellt. Neue Web-Buchungen verändern danach Kontostände. Ein alter .backup-Snapshot darf diese Daten nicht ersetzen.</p>
+  <form action="{{ url_for('settings_switch_to_web') }}" method="post" class="formstack">
+   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+   <label>Zur Bestätigung WEB eingeben<input name="confirm" required pattern="WEB" autocomplete="off" placeholder="WEB"></label>
+   <div class="formgrid"><label>Admin-Passwort<input name="admin_password" type="password" autocomplete="current-password" required></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label></div>
+   <button class="primary" type="submit">Web-Finanzverwaltung aktivieren und Sicherung erstellen</button>
+  </form>
+ </details>
+ {% else %}
+ <p class="hint"><strong>Web-Finanzverwaltung ist führend.</strong> Der manuelle .backup-Import bleibt als sichere Prüfung erhalten; er überschreibt keine Web-Buchungen. Es wurden bisher {{ web_writes }} Web-Änderungen registriert.</p>
+ <details class="settings-create"><summary>Financisto wieder als führendes System festlegen</summary>
+   {% if web_writes or web_transaction_count %}<p class="notice"><strong>Warnung: {{ web_writes }} Web-Änderungen und {{ web_transaction_count }} Web-Buchungen.</strong> Die Rückschaltung selbst löscht nichts, aber ein späterer erneuter Import kann alle über die Webseite geänderten Finanzdaten ersetzen. Eine SQLite-Sicherung wird vorher erstellt.</p>{% else %}<p>Vorher wird eine SQLite-Sicherung angelegt. Auto-Import bleibt zunächst aus.</p>{% endif %}
+   <p class="muted small"><strong>Wichtig bei Dauerbuchungen:</strong> Bei der Rückschaltung werden wiederkehrende Web-Regeln pausiert. Web-Dauerbuchungen werden nicht allein durch das Umschalten übertragen. Erstelle <strong>vorher</strong> unter „Rückexport nach Financisto“ eine geprüfte .backup-Datei mit aktivierter Wiederholungsoption und spiele diese bewusst in Android ein. Beim Umschalten werden die Web-Regeln pausiert.</p>
+   <form method="post" action="{{ url_for('settings_switch_to_import') }}" class="formstack">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label>FINANCISTO eingeben<input name="confirm" pattern="FINANCISTO" placeholder="FINANCISTO" required></label>
+    {% if web_writes or web_transaction_count %}<label class="checkline"><input type="checkbox" name="risk_ack" value="1" required>Ich akzeptiere den möglichen Verlust der Web-Änderungen beim späteren Import und habe die Warnung verstanden.</label>
+    <label>Zur ausdrücklichen Bestätigung DATENVERLUST eingeben<input name="loss_confirm" pattern="DATENVERLUST" required placeholder="DATENVERLUST"></label>{% endif %}
+    <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" autocomplete="current-password" required></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
+    <button type="submit" class="{{ 'danger' if web_writes or web_transaction_count else 'secondary' }}">Financisto als führendes System wählen und sichern</button>
+   </form>
+ </details>
+ {% endif %}
+ <a class="button secondary" href="{{ url_for('settings_download_backup') }}">Aktuelle SQLite-Sicherung herunterladen</a>
+ <p class="muted small">Die SQLite-Datei enthält die Finanzdaten und Benutzer, aber für eine vollständige Wiederherstellung mit 2FA zusätzlich die vorhandenen Secrets sicher getrennt aufbewahren. Keine Passwörter/Secrets im Download enthalten.</p>
+</section>
+
+<section class="panel" id="datensicherung">
+ <div class="section-head"><div><h2>Automatische Datensicherung</h2><p class="muted">Eigenständige SQLite-Sicherung des Web-Dashboards – unabhängig von Android-Backups.</p></div>
+ <span class="pill-status {{ 'status-on' if daily_backup_enabled else 'status-off' }}">{{ 'Täglich aktiv' if daily_backup_enabled else 'Deaktiviert' }}</span></div>
+ <p>Letzte automatische Sicherung: <strong>{{ daily_backup_status.last if daily_backup_status.last else 'Noch keine' }}</strong></p>
+ <p class="muted">Einmal pro Kalendertag (Europe/Berlin). Die letzten 14 automatischen Sicherungen bleiben unter <code>data/web-backups/</code> erhalten. Manuelle und vor Umstellungen erstellte Sicherungen werden dabei niemals gelöscht.</p>
+ <div class="settings-shortcuts">
+  <form method="post" action="{{ url_for('settings_create_backup') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="primary" type="submit">Jetzt Sicherung erstellen</button></form>
+  <a class="button secondary" href="{{ url_for('settings_download_backup') }}">SQLite-Sicherung herunterladen</a>
+ </div>
+ <details class="settings-create"><summary>Automatische Sicherung {{ 'deaktivieren' if daily_backup_enabled else 'aktivieren' }}</summary>
+  <form method="post" action="{{ url_for('settings_backup_schedule') }}" class="formstack compact-form">
+   <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="enabled" value="{{ '0' if daily_backup_enabled else '1' }}">
+   {% if daily_backup_enabled %}
+    <p class="notice">Ohne automatische Datenbanksicherungen besteht bei einem Serverdefekt erhöhtes Datenverlustrisiko.</p>
+    <div class="formgrid"><label>Admin-Passwort<input name="admin_password" type="password" autocomplete="current-password" required></label><label>Frischer 2FA-Code<input name="admin_totp" pattern="[0-9]{6}" maxlength="6" required></label></div>
+   {% endif %}
+   <button class="{{ 'danger' if daily_backup_enabled else 'primary' }}" type="submit">{{ 'Tagesbackup deaktivieren' if daily_backup_enabled else 'Tagesbackup aktivieren' }}</button>
+  </form>
+ </details>
+ <p class="muted small">Wiederherstellung ausschließlich lokal auf dem Docker-Host mit <code>./restore.sh &lt;Datei.sqlite3&gt;</code>. Sie ersetzt auch Benutzer und 2FA-Daten. Bewahre <code>secrets/app_secret</code> gesondert auf; ohne dieses Secret sind die 2FA-Schlüssel nicht wiederherstellbar.</p>
+</section>
+
+<section class="panel" id="financisto-export">
+ <div class="section-head"><div><h2>Rückexport nach Financisto (Testfunktion)</h2><p class="muted">Exportiert die aktuellen Konten, Stammdaten und Buchungen in eine komprimierte <code>.backup</code>-Datei. Nicht mit einem geprüften Android-Restore verwechseln.</p></div>
+ <span class="pill-status {{ 'status-on' if export_source_ready else 'status-off' }}">{{ 'Originalgrundlage gesichert' if export_source_ready else 'Originalgrundlage fehlt' }}</span></div>
+ <p class="notice"><strong>Wichtiger Sicherheitshinweis:</strong> Der Android-Rückimport ist noch nicht getestet. Verwende eine exportierte Datei zunächst nur auf einem getrennten Testgerät bzw. einem gesonderten Testprofil. Niemals die einzige produktive Financisto-Datenbank damit überschreiben.</p>
+ {% if export_source_ready %}
+ <form method="post" action="{{ url_for('settings_export_financisto') }}" class="formstack compact-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <div class="recurring-export-option">
+   <label class="checkline"><input type="checkbox" name="include_recurring" value="1"> Wiederkehrende Regeln aus der Web-Verwaltung in Financisto übernehmen</label>
+   <p class="muted small">In der Web-Verwaltung: <strong>{{ recurring_export_summary.automatic }} automatisch</strong>, {{ recurring_export_summary.manual }} manuell, {{ recurring_export_summary.paused }} pausiert, {{ recurring_export_summary.removed }} gelöscht/archiviert.</p>
+   <p class="muted small">Bei aktivierter Option werden <strong>nur automatisch freigegebene</strong> Regeln exportiert. Pausierte und gelöschte Originalvorlagen werden entfernt. Manuell aktive oder nicht unterstützte Regeln verhindern den Export mit einer Fehlermeldung statt sie versehentlich auf Android automatisch auszuführen. Unveränderte Finanzbuchungen bleiben erhalten.</p>
+   <p class="muted small">Ohne Häkchen gilt der bisherige Testexport: ursprüngliche Financisto-Dauerbuchungen bleiben unverändert enthalten.</p>
+  </div>
+  <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" required autocomplete="current-password"></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
+  <button type="submit" class="secondary">Financisto-Testexport herunterladen (.backup)</button>
+ </form>
+ {% else %}
+ <p class="hint">Für einen rückwärtskompatiblen Export muss die ursprüngliche <code>.backup</code>-Datei <strong>exakt</strong> zum letzten eingelesenen Datenstand passen. Die Anmeldung kann sie hier nachträglich hinterlegen. Diese Aktion importiert nichts und verändert keine Buchungen.</p>
+ <form method="post" enctype="multipart/form-data" action="{{ url_for('settings_upload_export_source') }}" class="formstack compact-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Original-Financisto-Sicherung<input type="file" name="export_source" accept=".backup" required></label>
+  <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" required autocomplete="current-password"></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
+  <button type="submit" class="secondary">Originaldatei nur als Exportgrundlage hinterlegen</button>
+ </form>
+ {% endif %}
+ <p class="muted small">Die Originalgrundlage liegt innerhalb der SQLite-Datei als Binärdaten (nicht separat verschlüsselt). Schütze deshalb die Datei und alle heruntergeladenen Sicherungen sorgfältig. Die regulären täglichen SQLite-Sicherungen enthalten sie künftig mit. Der manuelle Android-Import bleibt unverändert verfügbar.</p>
+</section>
+
+<section class="panel" id="buchungseinstellungen">
+ <div class="section-head"><div><h2>Buchungsliste</h2><p class="muted">Wie viele Buchungen pro Seite auf dem Dashboard angezeigt werden. Gilt für alle Benutzer.</p></div></div>
+ <form method="post" action="{{ url_for('settings_booking_page_size') }}" class="finance-inline-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Buchungen je Seite<select name="booking_page_size">
+   {% for value in (20,30,50,100) %}<option value="{{ value }}" {{ 'selected' if booking_page_size == value|string else '' }}>{{ value }}</option>{% endfor %}
+  </select></label>
+  <button type="submit" class="primary">Seitengröße speichern</button>
+ </form>
+</section>
+<section class="panel" id="standardkonto">
+ <div class="section-head"><div><h2>Standardkonto für neue Buchungen</h2><p class="muted">Das Konto gilt für neue Web-Buchungen; die Standardkategorie gilt gemeinsam für neue Ausgaben im Dashboard und über Telegram. Bereits gespeicherte Buchungen bleiben unverändert.</p></div></div>
+ <form method="post" action="{{ url_for('settings_default_account') }}" class="finance-inline-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Standardkonto
+    <select name="account_id"><option value="">– kein Standardkonto –</option>{% for a in default_account_choices %}<option value="{{ a.id }}" {{ 'selected' if default_account_id == (a.id|string) else '' }}>{{ a.title }} ({{ a.code }})</option>{% endfor %}</select>
+  </label>
+  <label>Standardkategorie für Ausgaben (Web und Telegram)
+    <select name="default_category_id">
+      <option value="">– Keine Standardkategorie –</option>
+      {% for id,title in expense_category_choices %}<option value="{{ id }}" {{ 'selected' if default_expense_category_id == id else '' }}>{{ title }}</option>{% endfor %}
+    </select>
+  </label>
+  <button type="submit" class="secondary">Vorgaben speichern</button>
+ </form>
+</section>
+{% endif %}
+<section class="panel" id="stammdaten">
+ <div class="section-head"><div><h2>Finanz-Stammdaten</h2><p class="muted">{% if viewer.role == 'admin' %}Kontenverwaltung (Administrator), Kontostandsabgleich, Kategorien und Empfänger (Administrator und Bearbeiter).{% else %}Empfänger und Kategorien bearbeiten, Kontostände abgleichen. Die Kontenverwaltung bleibt dem Administrator vorbehalten.{% endif %}</p></div></div>
+ {% if finance_mode != 'web' %}
+ <p class="hint"><strong>Nur Anzeige.</strong> Solange Financisto die Datenführung hat, ersetzt der nächste Import diese Stammdaten. Zur Bearbeitung muss ein Administrator die Web-Finanzverwaltung aktivieren.</p>
+ {% else %}
+ <p class="hint">Verwendete Stammdaten können umbenannt, aber nicht unkontrolliert gelöscht werden. Bei Kategorien bleibt die Hierarchie erhalten. Neue Konten brauchen einen Startsaldo.</p>
+ {% endif %}
+ <details class="settings-list" name="finance-master-group" data-master-section="payees"><summary>Empfänger ({{ payees|length }})</summary>
+ {% if finance_mode == 'web' %}
+ <form class="finance-inline-form" method="post" action="{{ url_for('settings_save_payee') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><label>Neuer Empfänger<input name="title" maxlength="120" required></label><button class="primary" type="submit">Anlegen</button></form>
+ {% endif %}
+ <div class="finance-master-search" role="search" aria-label="Empfänger durchsuchen">
+  <label for="master-search-payees">Schnellsuche – Empfänger</label>
+  <div class="finance-master-search-row">
+   <input id="master-search-payees" type="search" autocomplete="off" placeholder="Empfängername eingeben …" data-master-search aria-controls="master-items-payees">
+   <button type="button" class="secondary" data-master-clear hidden>Zurücksetzen</button>
+  </div>
+  <p class="finance-master-search-count small muted" data-master-count aria-live="polite">{{ payees|length }} Einträge</p>
+ </div>
+ <div class="finance-master-grid" id="master-items-payees">
+ {% for item in payees %}
+  {% if finance_mode=='web' %}
+  <div class="finance-master-item" data-master-item data-search-name="{{ item.title }}"><form method="post" action="{{ url_for('settings_save_payee') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ item.id }}"><input aria-label="Empfängername" name="title" value="{{ item.title }}" maxlength="120" required><button type="submit" class="secondary">Speichern</button></form><form method="post" action="{{ url_for('settings_delete_master') }}" data-confirm="Nur unbenutzte Empfänger werden gelöscht. Wirklich versuchen?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ item.id }}"><input type="hidden" name="group" value="payees"><button type="submit" class="secondary">Löschen</button></form></div>
+  {% else %}<span class="finance-master-item-readonly" data-master-item data-search-name="{{ item.title }}">{{ item.title }}</span>{% endif %}
+ {% endfor %}
+ </div>
+ <p class="finance-master-empty muted" data-master-empty hidden>Keine passenden Empfänger gefunden.</p></details>
+ <details class="settings-list" name="finance-master-group" data-master-section="categories"><summary>Kategorien und Unterkategorien ({{ categories|length }})</summary>
+ {% if finance_mode == 'web' %}
+ <form class="finance-inline-form" method="post" action="{{ url_for('settings_save_category') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><label>Neue Kategorie<input name="title" maxlength="100" required></label><label>Unterkategorie von<select name="parent_id"><option value="">Hauptkategorie</option>{% for c in categories %}<option value="{{ c.id }}">{{ category_names[c.id] }}</option>{% endfor %}</select></label><button type="submit" class="primary">Anlegen</button></form>
+ {% endif %}
+ <div class="finance-master-search" role="search" aria-label="Kategorien durchsuchen">
+  <label for="master-search-categories">Schnellsuche – Kategorien</label>
+  <div class="finance-master-search-row">
+   <input id="master-search-categories" type="search" autocomplete="off" placeholder="Haupt- oder Unterkategorie suchen …" data-master-search aria-controls="master-items-categories">
+   <button type="button" class="secondary" data-master-clear hidden>Zurücksetzen</button>
+  </div>
+  <p class="finance-master-search-count small muted" data-master-count aria-live="polite">{{ categories|length }} Einträge</p>
+ </div>
+ <div class="finance-master-grid" id="master-items-categories">
+ {% for item in categories %}
+ {% if finance_mode=='web' %}<div class="finance-master-item" data-master-item data-search-name="{{ category_names[item.id] }}"><form action="{{ url_for('settings_save_category') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ item.id }}"><label class="small">{{ category_names[item.id] }}</label><input name="title" value="{{ item.title }}" maxlength="100" required><button type="submit" class="secondary">Speichern</button></form><form action="{{ url_for('settings_delete_master') }}" method="post" data-confirm="Nur unbenutzte Kategorien ohne Unterkategorien werden gelöscht."><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ item.id }}"><input type="hidden" name="group" value="categories"><button type="submit" class="secondary">Löschen</button></form></div>
+ {% else %}<span class="finance-master-item-readonly" data-master-item data-search-name="{{ category_names[item.id] }}">{{ category_names[item.id] }}</span>{% endif %}
+ {% endfor %}
+ </div>
+ <p class="finance-master-empty muted" data-master-empty hidden>Keine passenden Kategorien gefunden.</p></details>
+ {% if viewer.role == 'admin' %}
+ <details class="settings-list" name="finance-master-group" data-master-section="accounts"><summary>Konten ({{ accounts|length }})</summary>
+ {% if finance_mode == 'web' %}
+ <form class="finance-inline-form" method="post" action="{{ url_for('settings_save_account') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><label>Neuer Kontoname<input name="title" maxlength="100" required></label><label>Währung<select name="currency_id">{% for curr in currencies %}<option value="{{ curr.id }}" {% if curr.code==preferred_currency %}selected{% endif %}>{{ curr.code }}</option>{% endfor %}</select></label><label>Startsaldo<input name="opening_balance" value="0,00" required></label><button class="primary" type="submit">Konto anlegen</button></form>
+ {% endif %}
+ {% if finance_mode == 'web' %}
+ <div class="account-tools">
+ <h3>Währungen verwalten</h3>
+ <div class="account-tools-grid">
+ <form class="finance-inline-form" action="{{ url_for('settings_create_currency') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><label>Weitere Währung hinzufügen<select name="code">{% for code in currency_catalog %}{% if code not in currencies|map(attribute='code')|list %}<option value="{{ code }}">{{ code }}</option>{% endif %}{% endfor %}</select></label><button type="submit" class="secondary">Hinzufügen</button></form>
+ <form class="finance-inline-form" action="{{ url_for('settings_default_currency') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><label>Standardwährung<select name="currency_code">{% for curr in currencies %}<option value="{{ curr.code }}" {% if curr.code==preferred_currency %}selected{% endif %}>{{ curr.code }}</option>{% endfor %}</select></label><button type="submit" class="secondary">Standard speichern</button></form>
+ </div>
+ <p class="hint">Neue Konten verwenden standardmäßig die gewählte Währung. Fremdwährungen werden nicht automatisch in EUR umgerechnet.</p>
+ </div>
+ <div class="account-tools" id="kontostand-abgleichen">
+ <h3>Kontostand abgleichen</h3>
+ {% set reconcile_source = 'settings' %}
+ {% include '_reconcile_form.html' %}
+ </div>
+ {% endif %}
+ <div class="finance-master-search" role="search" aria-label="Konten durchsuchen">
+  <label for="master-search-accounts">Schnellsuche – Konten</label>
+  <div class="finance-master-search-row">
+   <input id="master-search-accounts" type="search" autocomplete="off" placeholder="Kontoname eingeben …" data-master-search aria-controls="master-items-accounts">
+   <button type="button" class="secondary" data-master-clear hidden>Zurücksetzen</button>
+  </div>
+  <p class="finance-master-search-count small muted" data-master-count aria-live="polite">{{ accounts|length }} Einträge</p>
+ </div>
+ <div class="finance-master-grid" id="master-items-accounts">
+ {% for item in accounts %}
+ {% if finance_mode=='web' %}<div class="finance-master-item account-state-{{ 'inactive' if item.is_active == 0 else 'active' }}" data-master-item data-search-name="{{ item.title }}"><span class="account-state-label">{{ 'Inaktiv' if item.is_active == 0 else 'Aktiv' }}</span><form action="{{ url_for('settings_save_account') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ item.id }}"><input name="title" maxlength="100" required value="{{ item.title }}"><button class="secondary" type="submit">Speichern</button></form><form action="{{ url_for('settings_delete_master') }}" method="post" data-confirm="Konten mit Buchungen oder Restsaldo können nicht gelöscht werden."><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ item.id }}"><input type="hidden" name="group" value="accounts"><button class="secondary" type="submit">Löschen</button></form><form method="post" action="{{ url_for('settings_toggle_account',account_id=item.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="secondary" type="submit">{{ 'Aktivieren' if item.is_active == 0 else 'Deaktivieren' }}</button></form></div>
+ {% else %}<span class="finance-master-item-readonly" data-master-item data-search-name="{{ item.title }}">{{ item.title }}</span>{% endif %}
+ {% endfor %}
+ </div>
+ <p class="finance-master-empty muted" data-master-empty hidden>Keine passenden Konten gefunden.</p></details>
+{% endif %}
+{% if viewer.role == 'editor' and finance_mode == 'web' %}
+<div class="account-tools" id="kontostand-abgleichen">
+ <h3>Kontostand abgleichen</h3>
+ {% set reconcile_source = 'settings' %}
+ {% include '_reconcile_form.html' %}
+</div>
+{% endif %}
+</section>
+
+{% endblock %}

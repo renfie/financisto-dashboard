@@ -1,0 +1,33 @@
+# All site addresses are configured in .env (SITE_ADDRESSES), not in this file.
+# Never trust arbitrary X-Forwarded-For values. The trust list is restricted
+# to the exact IP of your Nginx Proxy Manager (TRUSTED_PROXY_IPS).
+# Until explicitly configured, only loopback (within this container) is trusted.
+{
+    default_sni {$SITE_HOST}
+    servers {
+        trusted_proxies static {$TRUSTED_PROXY_IPS:127.0.0.1/32}
+        trusted_proxies_strict
+    }
+}
+
+{$SITE_ADDRESSES} {
+    # Local CA used between this Caddy instance and LAN/NPM.
+    tls internal
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+    }
+    route {
+        # {client_ip} uses X-Forwarded-For only from explicitly trusted proxies.
+        # All other clients are checked against their actual TCP peer IP.
+        forward_auth dashboard:8000 {
+            uri /_internal/check-ip
+            header_up X-Verified-Client-IP {client_ip}
+        }
+        reverse_proxy dashboard:8000 {
+            header_up X-Verified-Client-IP {client_ip}
+        }
+    }
+}

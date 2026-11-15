@@ -1,0 +1,380 @@
+/* Local-only UI helpers: no trackers, no third-party libraries. */
+(function() {
+  const safeSession = {
+    setItem(k,v) {try {window.sessionStorage.setItem(k,v)} catch (_) {}},
+    getItem(k) {try {return window.sessionStorage.getItem(k)} catch (_) {return null}},
+    removeItem(k) {try {window.sessionStorage.removeItem(k)} catch (_) {}}
+  };
+  for (const target of document.querySelectorAll('form[data-confirm]')) {
+    target.addEventListener('submit', event => {
+      if (!confirm(target.dataset.confirm)) event.preventDefault();
+    });
+  }
+  const form = document.getElementById('filter-form');
+  if (form) {
+    for (const el of form.querySelectorAll('select,input[type=month]')) {
+      el.addEventListener('change', () => {
+        if (el.name === 'currency') form.elements.account.value = '';
+        form.submit();
+      });
+    }
+  }
+
+  const quick = document.getElementById('quick-filter-form');
+  if (!quick) return;
+  const input = document.getElementById('quick-filter');
+  if (!input) return;
+  let pending;
+  function submitQuick() {
+    // Ensure all searches start on page 1 and show the table, not the top of the page.
+    safeSession.setItem('financisto-quick-focus', '1');
+    quick.submit();
+  }
+  input.addEventListener('input', () => {
+    clearTimeout(pending);
+    pending = setTimeout(submitQuick, 650);
+  });
+  quick.addEventListener('submit', () => {
+    clearTimeout(pending);
+    safeSession.setItem('financisto-quick-focus', '1');
+  });
+  if (safeSession.getItem('financisto-quick-focus') === '1' &&
+      window.location.hash === '#buchungen') {
+    safeSession.removeItem('financisto-quick-focus');
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+})();
+
+(function(){const btn=document.getElementById('print-report'); if(btn) btn.addEventListener('click',()=>window.print());})();
+
+/* 1.7.0: mobile navigation & meaningful in-page links for collapsed sections. */
+(function() {
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  const nav = document.getElementById('mobile-nav');
+  if (toggle && nav) {
+    function setMenu(open) {
+      nav.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Menü schließen' : 'Menü öffnen');
+    }
+    setMenu(false);
+    toggle.addEventListener('click', () => setMenu(nav.hidden));
+    nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !nav.hidden) {
+        setMenu(false);
+        toggle.focus();
+      }
+    });
+  }
+  const filter = document.getElementById('dashboard-filters');
+  const historyFilter = document.getElementById('history-filters');
+  const balances = document.getElementById('dashboard-balances');
+  const charts = document.getElementById('dashboard-charts');
+  function openHashTarget() {
+    const hash = window.location.hash;
+    let target;
+    if ((hash === '#filter-form' || hash === '#dashboard-filters' || hash === '#filter-panel') && filter) {
+      filter.open = true;
+      target = hash === '#filter-form' ? document.getElementById('filter-form') : filter;
+    } else if ((hash === '#filter-form' || hash === '#history-filters' || hash === '#historischer-filterbereich') && historyFilter) {
+      historyFilter.open = true;
+      target = hash === '#filter-form' ? document.getElementById('filter-form') : historyFilter;
+    } else if ((hash === '#kontostaende' || hash === '#dashboard-balances') && balances) {
+      balances.open = true;
+      target = document.getElementById('kontostaende');
+    } else if ((hash === '#ausgabenkategorien' || hash === '#dashboard-charts') && charts) {
+      charts.open = true;
+      target = document.getElementById('ausgabenkategorien');
+    }
+    else if (hash === '#telegram-buchungen' || hash === '#benachrichtigungen') {
+      // Keep the settings page compact on ordinary visits, but reveal a section
+      // when the server redirects back to its anchor after saving a form.
+      const section = document.getElementById(hash.slice(1));
+      if (section && section.tagName === 'DETAILS') {
+        section.open = true;
+        target = section;
+      }
+    }
+    if (target) requestAnimationFrame(() => target.scrollIntoView({block:'start'}));
+  }
+  window.addEventListener('hashchange', openHashTarget);
+  openHashTarget();
+})();
+
+/* 1.9.1: exclusive settings accordion and context-aware booking fields. */
+(function () {
+  const sections = document.querySelectorAll('#stammdaten details.settings-list');
+  for (const section of sections) {
+    section.addEventListener('toggle', () => {
+      if (!section.open) return;
+      for (const other of sections) {
+        if (other !== section) other.open = false;
+      }
+    });
+  }
+  const form = document.getElementById('booking-form');
+  if (!form) return;
+  const kind = form.querySelector('select[name="kind"]');
+  const target = document.getElementById('booking-target-field');
+  const category = document.getElementById('booking-category-field');
+  const neutralSection = document.getElementById('booking-pass-through-field');
+  const neutralCheck = neutralSection?.querySelector('input[name="pass_through"]');
+  if (!kind || !target || !category) return;
+  function update() {
+    const transfer = kind.value === 'transfer';
+    const advanced = document.getElementById('booking-extra');
+    if (advanced) advanced.hidden = transfer;
+    const neutral = !transfer && !!neutralCheck?.checked;
+    target.hidden = !transfer;
+    category.hidden = transfer || neutral;
+    if (neutralSection) neutralSection.hidden = transfer;
+    if (neutralCheck) neutralCheck.disabled = transfer;
+    target.querySelector('select').disabled = !transfer;
+    target.querySelector('select').required = transfer;
+    category.querySelector('select').disabled = transfer || neutral;
+    const categoryQuick = document.getElementById('booking-category-quick');
+    if (categoryQuick) categoryQuick.hidden = transfer || neutral;
+  }
+  kind.addEventListener('change', () => {
+    // On a fresh form use the shared default for expenses only; do not
+    // reassign a stored category when editing or cloning an existing booking.
+    if (form.dataset.newBooking === 'true') {
+      const select = category.querySelector('select');
+      if (select) {
+        const candidate = kind.value === 'expense' ? select.dataset.defaultExpense : '';
+        select.value = candidate && Array.from(select.options).some(option => option.value === candidate)
+          ? candidate : '';
+      }
+    }
+    update();
+  });
+  neutralCheck?.addEventListener('change', update);
+  update();
+})();
+
+
+/* 1.9.6: immediate in-browser master-data filters (no server requests). */
+(function () {
+  function canonical(value) {
+    return String(value || '').normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('de-DE').trim();
+  }
+  const kinds = {payees: 'Empfänger', categories: 'Kategorien', accounts: 'Konten'};
+  for (const section of document.querySelectorAll('#stammdaten details[data-master-section]')) {
+    const field = section.querySelector('[data-master-search]');
+    const clear = section.querySelector('[data-master-clear]');
+    const counter = section.querySelector('[data-master-count]');
+    const empty = section.querySelector('[data-master-empty]');
+    const rows = Array.from(section.querySelectorAll('[data-master-item]'));
+    if (!field || !clear || !counter || !empty) continue;
+    const kind = kinds[section.dataset.masterSection] || 'Einträge';
+    const indexed = rows.map(row => ({row, text: canonical(row.dataset.searchName || row.textContent)}));
+    function apply() {
+      const search = canonical(field.value);
+      let visible = 0;
+      for (const item of indexed) {
+        const match = !search || item.text.includes(search);
+        item.row.hidden = !match;
+        if (match) visible += 1;
+      }
+      counter.textContent = search
+        ? `${visible} von ${indexed.length} ${kind} angezeigt`
+        : `${indexed.length} ${kind} insgesamt`;
+      empty.hidden = visible > 0;
+      clear.hidden = !field.value;
+    }
+    field.addEventListener('input', apply);
+    field.addEventListener('search', apply);
+    clear.addEventListener('click', () => {
+      field.value = '';
+      apply();
+      field.focus();
+    });
+    apply();
+  }
+})();
+
+/* 1.9.11: edit recurring rules in an accessible dialog, near the selected row. */
+(function () {
+  const panel = document.getElementById('regel-formular');
+  const source = document.getElementById('recurring-editor-data');
+  if (!panel || !source || typeof HTMLDialogElement === 'undefined') return;
+  const form = panel.querySelector('form');
+  if (!form) return;
+  let records = [];
+  try { records = JSON.parse(source.textContent || '[]'); } catch (_) { return; }
+  const byId = new Map(records.map(rule => [Number(rule.id), rule]));
+  const dialog = document.createElement('dialog');
+  dialog.className = 'recurring-form-dialog';
+  dialog.setAttribute('aria-labelledby', 'recurring-editor-title');
+  panel.parentNode.insertBefore(dialog, panel);
+  dialog.appendChild(panel);
+  const heading = document.getElementById('recurring-editor-title');
+  const submit = document.getElementById('recurring-save-button');
+  const close = panel.querySelector('[data-recurring-close]');
+  if (close) {
+    close.hidden = false;
+    close.addEventListener('click', () => dialog.close());
+  }
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) dialog.close();
+  });
+  function field(name, value) {
+    const target = form.elements.namedItem(name);
+    if (target) target.value = value == null ? '' : String(value);
+  }
+  function openEditor(rule, trigger) {
+    form.reset();
+    field('edit_id', rule ? rule.id : '');
+    field('title', rule ? rule.title : '');
+    field('kind', rule ? rule.kind : 'expense');
+    field('account_id', rule ? rule.account_id : '');
+    field('to_account_id', rule ? rule.to_account_id : '0');
+    field('category_id', rule ? rule.category_id : '0');
+    field('payee_id', rule ? rule.payee_id : '0');
+    const rawDigits = rule && rule.decimals != null ? Number(rule.decimals) : 2;
+    const digits = Number.isInteger(rawDigits) && rawDigits >= 0 && rawDigits <= 6 ? rawDigits : 2;
+    const amount = rule ? (Math.abs(Number(rule.amount_minor)) / Math.pow(10, digits)).toFixed(digits).replace('.', ',') : '';
+    field('amount', amount);
+    field('start_on', rule ? rule.start_on : new Date().toLocaleDateString('sv-SE'));
+    field('run_at', rule ? (rule.run_at || '00:00') : '00:00');
+    field('frequency', rule && rule.frequency !== 'custom' ? rule.frequency : 'monthly');
+    field('interval_count', rule ? rule.interval_count : 1);
+    field('day_of_month', rule ? rule.day_of_month : 1);
+    field('note', rule ? rule.note : '');
+    heading.textContent = rule ? `Regel bearbeiten: ${rule.title}` : 'Neue wiederkehrende Buchung';
+    submit.textContent = rule ? 'Änderung speichern und deaktivieren' : 'Vorlage anlegen (deaktiviert)';
+    dialog.showModal();
+    dialog.querySelector('input[name="title"]')?.focus({preventScroll:true});
+    if (trigger) dialog.addEventListener('close', () => trigger.focus({preventScroll:true}), {once:true});
+  }
+  for (const link of document.querySelectorAll('[data-recurring-edit]')) {
+    link.addEventListener('click', event => {
+      const rule = byId.get(Number(link.dataset.recurringEdit));
+      if (!rule) return;
+      event.preventDefault();
+      openEditor(rule, link);
+    });
+  }
+  const create = document.querySelector('[data-recurring-create]');
+  if (create) create.addEventListener('click', event => {
+    event.preventDefault();
+    openEditor(null, create);
+  });
+  // Fallback URL from a non-JS browser remains usable if JS becomes available later.
+  const selected = new URLSearchParams(window.location.search).get('edit');
+  const chosen = selected && byId.get(Number(selected));
+  if (chosen && window.location.hash === '#regel-formular') {
+    openEditor(chosen, null);
+  }
+})();
+
+/* 1.9.22: category creation without leaving the current booking form. */
+(function () {
+  const book = document.getElementById('booking-form');
+  const dlg = document.getElementById('booking-category-dialog');
+  const open = document.getElementById('booking-category-add');
+  const mini = document.getElementById('booking-category-create');
+  const category = document.getElementById('booking-category-select');
+  const status = document.getElementById('booking-category-message');
+  if (!book || !dlg || !open || !mini || !category || !status) return;
+  const kind = book.querySelector('select[name="kind"]');
+  const parent = mini.querySelector('select[name="parent_id"]');
+  const title = mini.querySelector('input[name="title"]');
+  function refreshParents() {
+    const selectedKind = kind.value === 'income' ? '1' : '0';
+    mini.elements.kind.value = kind.value;
+    for (const option of parent.options) {
+      if (!option.value) continue;
+      option.hidden = option.dataset.kind !== selectedKind;
+      option.disabled = option.dataset.kind !== selectedKind;
+    }
+    if (parent.selectedOptions[0]?.disabled) parent.value = '';
+  }
+  open.addEventListener('click', () => {
+    if (kind.value === 'transfer') return;
+    status.textContent = '';
+    refreshParents();
+    dlg.showModal();
+    title.focus();
+  });
+  dlg.querySelector('[data-close-category]')?.addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', event => { if (event.target === dlg) dlg.close(); });
+  mini.addEventListener('submit', async event => {
+    event.preventDefault();
+    refreshParents();
+    const submit = mini.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    status.textContent = 'Kategorie wird angelegt …';
+    try {
+      const response = await fetch(mini.action, {
+        method: 'POST', body: new FormData(mini),
+        credentials: 'same-origin', headers: {Accept: 'application/json'}
+      });
+      const data = await response.json();
+      if (!response.ok || !data.id) throw new Error(data.error || 'Kategorie konnte nicht angelegt werden.');
+      category.add(new Option(data.title, String(data.id), true, true));
+      const option = new Option(data.title, String(data.id));
+      option.dataset.kind = String(data.kind);
+      parent.add(option);
+      // Select the new category, preserving all other booking fields.
+      category.value = String(data.id);
+      dlg.close();
+    } catch (error) {
+      status.textContent = error.message || 'Anlegen fehlgeschlagen.';
+    } finally {
+      submit.disabled = false;
+    }
+  });
+  kind.addEventListener('change', refreshParents);
+})();
+
+/* 1.9.23: shared, non-binding account reconciliation preview. */
+(function () {
+  for (const form of document.querySelectorAll('form[data-reconcile-form]')) {
+    const account = form.querySelector('[data-reconcile-account]');
+    const amount = form.querySelector('[data-reconcile-actual]');
+    const preview = form.parentElement.querySelector('[data-reconcile-preview]');
+    if (!account || !amount || !preview) continue;
+    function update() {
+      const option = account.selectedOptions[0];
+      if (!option || !option.dataset.balance) {
+        preview.textContent = 'Wähle ein Konto und gib den aktuellen Stand ein.';
+        return;
+      }
+      const decimals = Number(option.dataset.decimals || '2');
+      const unit = 10 ** decimals;
+      const previousMinor = Number(option.dataset.balance);
+      const nf = new Intl.NumberFormat('de-DE', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+      const display = value => nf.format(value / unit) + ' ' + option.dataset.code;
+      const typed = amount.value.trim().replace(/\s/g, '');
+      const normalized = typed.includes(',') ? typed.replace(/\./g, '').replace(',', '.') : typed;
+      const validFormat = /^[-+]?\d+(?:\.\d+)?$/.test(normalized);
+      const fractionDigits = normalized.split('.')[1]?.length || 0;
+      const parsed = validFormat ? Number(normalized) : NaN;
+      const actualMinor = Math.round(parsed * unit);
+      if (!typed || !Number.isFinite(parsed) || fractionDigits > decimals || !Number.isSafeInteger(actualMinor)) {
+        preview.textContent = 'Bisheriger Kontostand: ' + display(previousMinor);
+        return;
+      }
+      const deltaMinor = actualMinor - previousMinor;
+      preview.textContent = 'Bisher: ' + display(previousMinor) +
+        ' · Korrektur: ' + (deltaMinor > 0 ? '+' : '') + display(deltaMinor);
+    }
+    account.addEventListener('change', update);
+    amount.addEventListener('input', update);
+    update();
+  }
+})();
+
+/* 1.9.29: grow a booking note only when its content needs space. */
+(function () {
+  const note = document.querySelector('#booking-form textarea[name="note"]');
+  if (!note) return;
+  function resize() { note.style.height = 'auto'; note.style.height = Math.min(170, Math.max(41, note.scrollHeight)) + 'px'; }
+  note.addEventListener('input', resize);
+  resize();
+})();

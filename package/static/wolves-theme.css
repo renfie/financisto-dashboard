@@ -1,0 +1,168 @@
+/* Financisto 1.9.17: Sea Wolves design, based on the user's existing
+   NPM error-page design. Presentation only; no finance or auth logic. */
+:root{
+  --wolves-ink:#27313a;
+  --wolves-muted:#66717b;
+  --wolves-gold:#b49a50;
+  --wolves-stroke:#e2e5e7;
+  --wolves-pale:#f4f4f4;
+  --wolves-paper:#ffffff;
+  color-scheme:light;
+  color:var(--wolves-ink);
+  background:#f6f7f7;
+  font-family:Arial,Helvetica,system-ui,sans-serif;
+}
+body{color:var(--wolves-ink);background:#f6f7f7;}
+body.app-authenticated .app-main-column{position:relative;isolation:isolate;background:#f7f8f8;min-height:100vh;}
+body.app-authenticated .app-main-column::before{
+  content:"";position:fixed;top:18%;right:2%;width:min(44vw,550px);
+  height:min(70vh,550px);pointer-events:none;background:
+    url('sea-wolves-watermark.webp') no-repeat center / contain;
+  opacity:.13;z-index:0;
+}
+body.app-authenticated .container,body.app-authenticated .footer{position:relative;z-index:1;}
+/* Clear editorial headings and original gold accent. */
+h1,h2,h3{color:#28343d;letter-spacing:-.025em;}
+h1{font-weight:620;}
+h2{font-weight:670;}
+.eyebrow{color:#967b36;letter-spacing:.14em;font-size:.72rem;}
+.heading{border-bottom:1px solid #e2e5e7;padding-bottom:17px;margin-bottom:23px;position:relative;}
+.heading::after{content:"";height:3px;width:64px;background:var(--wolves-gold);position:absolute;left:0;bottom:-2px;}
+.muted,.importnote{color:var(--wolves-muted);}
+/* Panels stay opaque so the background watermark cannot interfere with figures. */
+.panel,.history-kpi,.history-highlight{
+  background:#fff;border:1px solid var(--wolves-stroke);
+  border-radius:12px;box-shadow:0 7px 24px rgba(35,46,52,.035);
+}
+.panel{padding:22px;}
+.table-wrap{background:#fff;border-radius:8px;}
+.container th{background:#f4f5f5;color:#58636b;border-bottom:1px solid #e1e5e7;}
+.container td{border-color:#e9eced;}
+.container tr:hover td{background:#f8f8f6;}
+/* Controls: charcoal actions, gold focus rings, legible secondary buttons. */
+input,select,textarea{border-color:#cfd5d8;color:#27313a;background:#fff;}
+input:focus,select:focus,textarea:focus,.nav-entry:focus-visible,
+.mobile-menu-toggle:focus-visible,.disclosure-summary:focus-visible,
+button:focus-visible,.button:focus-visible,a:focus-visible{
+  outline:2px solid var(--wolves-gold);outline-offset:2px;
+}
+.button.primary,button.primary,.primary.button,
+.container :is(button.primary,a.button.primary){
+  background:#34404a;color:#fff;border-color:#34404a;
+}
+.button.primary:hover,button.primary:hover,.container :is(button.primary,a.button.primary):hover{background:#222b32;border-color:#222b32;}
+.button.secondary,button.secondary,.secondary.button,
+.container :is(button.secondary,a.button.secondary){
+  background:#f3f4f4;color:#35414a;border-color:#dce0e2;
+}
+.button.secondary:hover,button.secondary:hover,.container :is(button.secondary,a.button.secondary):hover{background:#e7e9e9;}
+/* Retain the semantically meaningful expense/income colors. */
+.income,.income-amount{color:#137a65;}
+.expense,.expense-amount{color:#b34b46;}
+/* Branding: exactly the wolf logo used in previous NPM design. */
+.brand-wolf{width:48px;height:48px;object-fit:contain;display:block;flex:none;}
+.sidebar-brand .brand-wolf{width:59px;height:59px;}
+.sidebar-brand strong{color:#27313a!important;font-weight:750!important;letter-spacing:.005em!important;}
+.sidebar-brand small{color:#777f85!important;font-size:.72rem!important;line-height:1.35;}
+.brand-name{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.brand-name .brand-tag{display:block;font-size:.65rem;color:#717b81;text-transform:uppercase;letter-spacing:.13em;font-weight:650;}
+/* Desktop sidebar: structured, restrained navigation, thin dividers. */
+@media(min-width:1081px){
+  .app-authenticated .app-shell{grid-template-columns:260px minmax(0,1fr);}
+  .app-authenticated .app-sidebar{
+    padding:19px 13px 22px;background:#fff;color:#354049;
+    border-right:1px solid #dfe3e5;
+  }
+  .sidebar-brand{padding:9px 9px 21px!important;margin-bottom:13px!important;
+    border-bottom:1px solid #d9dddf!important;color:#27313a!important;gap:11px!important;}
+  .sidebar-brand strong{font-size:1.14rem!important;}
+  .sidebar-bottom{border-top:1px solid #e0e3e5;padding-top:18px!important;margin-top:auto!important;color:#838a8e!important;}
+}
+.sidebar-nav,.mobile-nav{gap:3px!important;}
+.nav-entry{
+  min-height:45px;color:#47525a;font-weight:600;
+  border-radius:6px;border-left:3px solid transparent;
+  transition:background .14s ease,color .14s ease;
+}
+.nav-icon{color:#7f898f;font-size:1.18rem;}
+.nav-entry:hover,.mobile-nav .nav-entry:hover{
+  background:#f5f5f3;color:#212b34;
+}
+.nav-entry.active,.mobile-nav .nav-entry.active{
+  background:#f4f4f1!important;color:#263038!important;
+  border-left-color:var(--wolves-gold)!important;font-weight:760;
+}
+.nav-entry.active .nav-icon{color:#a1853c;}
+.nav-logout{color:#69737b;}
+.nav-logout:hover{color:#9f4239;background:#fff5f3;}
+/* Small screens: the same white header, a clear menu toggle and dropdown. */
+.app-authenticated .topbar,.app-guest .topbar{
+  background:#fff;color:#27313a;border-bottom:1px solid #e1e4e6;
+  box-shadow:0 3px 15px rgba(26,37,47,.035);
+}
+.app-authenticated .topbar .brand,.app-guest .topbar .brand{color:#27313a;font-weight:750;}
+.brand-secondary{color:#68737b;font-weight:500;}
+.mobile-menu-toggle{
+  display:inline-flex;background:#fff;color:#344049;border:1px solid #d0d6d8;
+  border-radius:7px;padding:9px 12px;
+}
+.mobile-menu-toggle:hover{background:#f4f4f4;}
+.mobile-nav{
+  background:#fff!important;border:1px solid #e0e4e6;box-shadow:0 15px 28px #23313c1c;
+  border-radius:9px!important;
+}
+.app-authenticated .topbar .mobile-nav .nav-entry{color:#47525a!important;}
+.app-authenticated .topbar .mobile-nav .nav-entry.active{color:#263038!important;}
+/* Remove previous cyan/teal emphasis from non-financial navigation. */
+.sorticon,.tour-counter{color:#998043;}
+.disclosure-summary:hover{background:#f7f7f5;}
+.disclosure-summary{border-radius:10px;}
+.disclosure-label{color:#2e3941;}
+.tour-halo{border-color:var(--wolves-gold);box-shadow:0 0 0 200vmax rgba(16,25,32,.59),0 0 0 4px rgba(180,154,80,.2);}
+.tour-actions .tour-next{background:#34404a;border-color:#34404a;}
+.tour-actions button{background:#f3f3f1;color:#34404a;border-color:#dce0e0;}
+/* Reports and print remain intentionally plain, high contrast. */
+@media(max-width:1080px){
+  body.app-authenticated .app-main-column::before{right:-35px;width:min(65vw,460px);top:24%;opacity:.10;}
+}
+@media(max-width:550px){
+  .brand-wolf{width:42px;height:42px;}
+  .app-authenticated .topbar{min-height:64px;padding:9px 13px;}
+  .app-authenticated .topbar .brand{font-size:1.05rem;}
+  body.app-authenticated .app-main-column::before{width:72vw;right:-18%;opacity:.08;}
+  .container .panel{padding:14px;}
+  .heading{padding-bottom:12px;}
+  .nav-entry{min-height:43px;}
+}
+@media(prefers-reduced-motion:reduce){.nav-entry{transition:none;}}
+@media print{
+  body,.app-main-column{background:#fff!important;color:#111!important;}
+  body.app-authenticated .app-main-column::before{display:none!important;}
+  .app-sidebar,.topbar,.mobile-nav,.mobile-menu-toggle{display:none!important;}
+  .panel,.history-kpi,.history-highlight{background:#fff!important;box-shadow:none!important;}
+  .heading::after{display:none!important;}
+}
+
+/* 1.9.18: user-defined headings may be longer than the product defaults. */
+.sidebar-brand .brand-name strong,.sidebar-brand .brand-name small,
+.sidebar-bottom{overflow-wrap:anywhere;}
+.topbar .brand{min-width:0;overflow-wrap:anywhere;}
+.topbar .brand .brand-secondary{min-width:0;overflow-wrap:anywhere;}
+
+/* 1.9.19: Historical period filters collapse like the dashboard filters.
+   Keep the current range visible in the summary, especially on phones. */
+.container .history-filter-panel:has(> .history-filter-disclosure){padding:0;overflow:visible;}
+.history-filter-disclosure .disclosure-summary{min-height:66px;}
+.history-filter-disclosure .disclosure-meta{line-height:1.45;}
+.history-filter-disclosure .disclosure-body{padding-top:17px;}
+.history-filter-disclosure .disclosure-body .hint{margin:13px 0 0;}
+@media(max-width:550px){
+ .container .history-filter-panel:has(> .history-filter-disclosure){padding:0;}
+ .history-filter-disclosure .disclosure-summary{min-height:59px;padding:11px 13px;}
+ .history-filter-disclosure .disclosure-label{font-size:1.0rem;}
+ .history-filter-disclosure .disclosure-meta{font-size:.73rem;}
+ .history-filter-disclosure .disclosure-body{padding:15px 13px;}
+ .history-filter-disclosure .filter-actions{gap:8px;}
+ .history-filter-disclosure .filter-actions>*{max-width:100%;}
+}
+#historischer-filterbereich,#history-filters{scroll-margin-top:92px;}

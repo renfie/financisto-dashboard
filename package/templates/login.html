@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Anmeldung · {{ app_title }} {{ app_subtitle }}{% endblock %}
+{% block content %}
+<section class="panel auth">
+  <div class="eyebrow">Geschützter Bereich</div>
+  <h1>Anmelden</h1>
+  <p class="muted">Bitte mit deinem persönlichen Passwort anmelden. Anschließend ist die zweite Anmeldung per Authenticator verpflichtend.</p>
+  <form method="post" autocomplete="on" class="formstack">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label>Benutzername<input name="username" autocomplete="username" required></label>
+    <label>Passwort<input type="password" name="password" autocomplete="current-password" required></label>
+    <button type="submit" class="primary">Anmelden</button>
+  </form>
+</section>
+{% endblock %}
