@@ -1,0 +1,93 @@
+# Financisto Dashboard — Installation and Operations (English)
+
+**Deutsch:** [Ausführliche Dokumentation](README.md) · **English:** You are here
+
+This is an English operations guide for the independently developed FieLanzen web dashboard. For a complete version-by-version history and additional technical details see the original [German manual](README.md) and the [technical documentation](docs/) (primarily German).
+
+## Requirements
+
+A Linux host with Python 3, Docker Engine and Docker Compose; a normal Linux account that owns the project directory and may access the Docker daemon. Do not run install or update scripts with `sudo` or as root.
+
+The application uses Docker containers for the dashboard, a background worker, notifications, and Caddy (HTTPS). Account data, configuration, and secrets are persisted via bind mounts on the host, not in disposable containers.
+
+## New installation
+
+Extract the release ZIP into its own directory. From inside the release's `package` directory:
+
+```bash
+cd package
+./install.sh
+```
+
+The setup wizard configures the project as the current user and checks the required environment and secrets. For interrupted initial setup:
+
+```bash
+./install.sh --resume
+```
+
+Verify an existing configuration:
+
+```bash
+./install.sh --verify
+```
+
+Do not install over an existing project directory or copy the release's `package/` tree directly onto production data.
+
+## Update an existing installation
+
+Extract a newer release into **a different directory** from the production installation. Run the updater as the normal user who owns the existing project:
+
+```bash
+/path/to/financisto-release-1.9.37/update.sh /path/to/existing/financisto-dashboard
+```
+
+The updater checks the directory structure, Docker access, file ownership and Python syntax before making changes. It backs up the prior source and uses SQLite's online backup API to create a consistent database snapshot. Configuration is preserved in the host's `.env` and secrets remain on the host.
+
+The user-facing `.env` values such as `SITE_HOST`, `SITE_ADDRESSES`, `APP_TITLE`, `APP_SUBTITLE` and `APP_FOOTER` are retained when updating. Repository example hostnames (`finance.example.org`) are placeholders only and must be replaced for a **new installation**.
+
+**Never use `docker compose down -v` on an existing installation**: removing volumes may remove information needed to restore the service.
+
+## Data management
+
+- **Manual import:** Financisto Android `.backup` archives can be imported explicitly using the web interface.
+- **Automatic import:** Optional SFTP/FolderSync import can be enabled or disabled in the administrative interface.
+- **Source-of-truth modes:** Financisto can remain the authoritative source, or the web application may become authoritative after an explicit switch. Import controls prevent unapproved overwrites of web changes.
+- **Export:** Import/return-export compatibility has caveats; some operations involving Android restores remain experimental. Test round trips on nonproduction data.
+- **Accounts and transactions:** Use the web interface to manage transactions and transfers where allowed by the active source-of-truth mode and assigned user role.
+- **Recurring transactions:** Can be set to paused, manual, or automatic execution by authorized users; the background worker checks eligible schedules periodically.
+- **Notifications:** Gotify, Telegram and Web Push support configuration per their respective administrative settings.
+
+## Backups and recovery
+
+The application's SQLite backups are **not** Android Financisto `.backup` archives. The background backup worker creates consistency-checked database snapshots. Store an additional encrypted copy away from the Docker host.
+
+When restoring, preserve the original application secret: TOTP and other encrypted information cannot necessarily be recovered with a newly generated secret. The existing `restore.sh` includes verification and interactive confirmation.
+
+See [Backup & Restore](docs/BACKUP_RESTORE.md) (German). Test a recovery in a separate installation before depending on it for production.
+
+## Access control and security
+
+The dashboard supports administrator, editor and read-only roles, login, and two-factor authentication. The dashboard can be served over HTTPS via Caddy. Only enable optional public access after TLS, user accounts and two-factor enrollment are complete.
+
+Never publish or commit real `.env` files, SQLite databases, user backups, personal bank data, login tokens, keys, or material in the bind-mounted `data/`, `secrets/` or `caddy/` folders.
+
+## Branding and language
+
+The application interface is **currently German**. This English guide documents the project; it does not yet provide an English language setting inside the dashboard.
+
+Existing display names such as `APP_TITLE`, `APP_SUBTITLE`, and `APP_FOOTER` can be customized in `.env`. Their configured values survive normal updates.
+
+## More detailed documentation
+
+- [Original detailed guide (German)](README.md)
+- [Backup and restore (German)](docs/BACKUP_RESTORE.md)
+- [Branding (German)](docs/BRANDING.md)
+- [Notifications (German)](docs/NOTIFICATIONS.md)
+- [Recurring transactions (German)](docs/RECURRING.md)
+- [Financisto export and limitations (German)](docs/FINANCISTO_EXPORT.md)
+- [PWA and Android installation (German)](docs/PWA_ANDROID.md)
+- [Telegram transactions (German)](docs/TELEGRAM_BOOKINGS.md)
+
+## License and upstream
+
+The independent dashboard is licensed under [GPL-2.0-only](../LICENSE). Refer to [NOTICE.md](../NOTICE.md) for attribution. The original Financisto Android project is at https://github.com/dsolonenko/financisto.
