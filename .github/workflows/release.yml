@@ -52,30 +52,44 @@ jobs:
           ZIP="financisto-dashboard-v${VERSION}.zip"
           mkdir -p "$RUNNER_TEMP/$RELEASE_DIR"
           cp -a package "$RUNNER_TEMP/$RELEASE_DIR/"
-          cp -a update.sh setup_financisto_sftp.sh README.txt README.md LICENSE NOTICE.md "$RUNNER_TEMP/$RELEASE_DIR/"
+          cp -a update.sh setup_financisto_sftp.sh README.txt README.md README.de.md LICENSE NOTICE.md "$RUNNER_TEMP/$RELEASE_DIR/"
+          cp -a docs "$RUNNER_TEMP/$RELEASE_DIR/"
           (cd "$RUNNER_TEMP" && zip -q -r "$GITHUB_WORKSPACE/$ZIP" "$RELEASE_DIR")
           sha256sum "$ZIP" > "$ZIP.sha256"
           unzip -tq "$ZIP" >/dev/null
           echo "Packed $ZIP"
 
-      - name: Write release notes
+      - name: Write bilingual release notes
         shell: bash
         run: |
           set -Eeuo pipefail
           VERSION='${{ steps.version.outputs.version }}'
           {
-            printf '## Financisto-Dashboard v%s\n\n' "$VERSION"
-            printf 'Komplettes Docker-Release mit Installation und sicherem Update.\n\n'
+            printf '## Financisto Dashboard v%s — English\n\n' "$VERSION"
+            printf 'Complete Docker distribution with installation and safe update scripts.\n\n'
+            printf '### Changes\n\n'
+            awk '/^## / { if (section++) exit; } section == 1 {print}' package/CHANGELOG.en.md
+            printf '\n### Downloads and license\n\n'
+            printf -- '- ZIP archive: `financisto-dashboard-v%s.zip`\n' "$VERSION"
+            printf -- '- SHA256 checksum: matching `.zip.sha256` file\n'
+            printf -- '- License: GPL-2.0-only (see LICENSE)\n'
+            printf -- '- Upstream Android app: https://github.com/dsolonenko/financisto\n'
+            printf '\nThis is an independent web dashboard, not an official Financisto app.\n'
+            printf 'No production financial data, filled-in .env files or secrets are included.\n'
+            printf 'Installation: `package/install.sh`; update existing installation: `update.sh`.\n\n'
+            printf '%s\n\n' '---'
+            printf '## Financisto-Dashboard v%s — Deutsch\n\n' "$VERSION"
+            printf 'Vollständiges Docker-Paket mit Installation und sicherem Update.\n\n'
             printf '### Änderungen\n\n'
-            awk 'NR>1 && /^## / {exit} {print}' package/CHANGELOG.md
+            awk '/^## / { if (section++) exit; } section == 1 {print}' package/CHANGELOG.md
             printf '\n### Download und Lizenz\n\n'
             printf -- '- ZIP-Datei: `financisto-dashboard-v%s.zip`\n' "$VERSION"
-            printf -- '- SHA256: gleichnamige Datei mit `.sha256`-Endung\n'
-            printf -- '- Lizenz: GPL-2.0-only; siehe `LICENSE`\n'
-            printf -- '- Originalprojekt: https://github.com/dsolonenko/financisto\n\n'
-            printf 'Die Anwendung ist ein unabhängiges Web-Dashboard, keine offizielle Financisto-App.\n'
-            printf 'Eigene Daten, Secrets und `.env`-Dateien sind nicht enthalten.\n\n'
-            printf 'Nach dem Entpacken liegt `install.sh` in `package/` und `update.sh` im Release-Hauptverzeichnis.\n'
+            printf -- '- SHA256-Prüfsumme: Datei mit Endung `.zip.sha256`\n'
+            printf -- '- Lizenz: GPL-2.0-only, siehe LICENSE\n'
+            printf -- '- Android-Original: https://github.com/dsolonenko/financisto\n'
+            printf '\nDies ist ein unabhängiges Web-Dashboard und keine offizielle Financisto-App.\n'
+            printf 'Eigene Finanzdaten, ausgefüllte .env-Dateien und Secrets sind nicht enthalten.\n'
+            printf 'Installation: `package/install.sh`; Update: `update.sh`.\n'
           } > release-notes.md
 
       - name: Publish GitHub Release
@@ -97,3 +111,20 @@ jobs:
             --title "Financisto-Dashboard v${VERSION}" \
             --notes-file release-notes.md \
             --latest
+
+      - name: Verify the new public download and retire obsolete v1.9.36
+        if: ${{ steps.version.outputs.version == '1.9.37' }}
+        shell: bash
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          set -Eeuo pipefail
+          NEW_TAG='v1.9.37'
+          FILE='financisto-dashboard-v1.9.37.zip'
+          gh release view "$NEW_TAG" --json assets --jq '.assets[].name' | grep -Fx "$FILE" >/dev/null
+          gh release view "$NEW_TAG" --json assets --jq '.assets[].name' | grep -Fx "$FILE.sha256" >/dev/null
+          # This runs only once a replacement ZIP and checksum are available.
+          if gh release view 'v1.9.36' >/dev/null 2>&1; then
+            gh release delete 'v1.9.36' --cleanup-tag --yes
+            echo 'Retired old v1.9.36 Release and tag, including public download.'
+          fi
