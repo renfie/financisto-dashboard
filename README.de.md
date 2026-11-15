@@ -13,7 +13,7 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.37 · 15. November 2026 (Dokumentation, Datenschutz-Bereinigung und neues Release).
+**Aktueller Quellstand:** v1.9.38 · 15. November 2026 (Dokumentation, Datenschutz-Bereinigung und neues Release).
 
 ## Funktionen
 
@@ -36,7 +36,7 @@ Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Re
 
 ## Screenshots
 
-Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.37 können abweichen.
+Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.38 können abweichen.
 
 ### Dashboard am Desktop
 
@@ -49,6 +49,14 @@ Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**,
 ### Buchungen erfassen
 
 ![Buchungsformular mit anonymisiertem Beispielkonto](docs/screenshots/buchung-erfassen-demo.png)
+
+## Caddy und HTTPS
+
+**Caddy ist im Docker-Compose-Projekt bereits enthalten** und übernimmt internes HTTPS sowie die Weiterleitung zum Dashboard. Die mit `tls internal` erzeugte lokale Caddy-Zertifizierungsstelle und die Zertifikate liegen persistent in `caddy/data/`; beim Update bleiben sie erhalten. Wird zusätzlich Nginx Proxy Manager verwendet, benötigt dieser für externe Browser ein eigenes öffentlich vertrauenswürdiges HTTPS-Zertifikat.
+
+**Ausführliche Anleitung:** [Caddy, HTTPS und Nginx Proxy Manager auf Deutsch](package/docs/CADDY.de.md) · [English](package/docs/CADDY.en.md).
+
+**Update-Hinweis:** Von v1.9.35 kann direkt auf v1.9.38 aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
 
 ## Repository-Struktur
 
