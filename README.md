@@ -1,38 +1,74 @@
 # Financisto-Dashboard (FieLanzen)
 
-Self-hosted Finanzdashboard mit Docker und browserbasierter Verwaltung, Berichten, wiederkehrenden Buchungen sowie Import/Export von Financisto-Backups.
+**Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Stand im Repository:** v1.9.36 (14. November 2026). Das Repository ist derzeit privat.
+**Aktueller Quellstand:** v1.9.36 · 14. November 2026.
 
-## Inhalt
+## Funktionen
 
-- `package/` – vollständiger Anwendungsquellcode inklusive Docker Compose, `install.sh`, Weboberfläche und Dokumentation
-- `update.sh` – Update-Skript für bestehende Installationen; vorhandene Daten bleiben erhalten
-- `setup_financisto_sftp.sh` – optionale Einrichtung des separaten SFTP-Importkontos
-- `README.txt` – Release-Hinweise zu v1.9.36
-- `package/CHANGELOG.md` – Versionshistorie
-- `package/docs/` – Dokumentation einzelner Funktionen
+- Konten, Buchungen, Umbuchungen, Empfänger und Kategorien verwalten; Rollen und Zwei-Faktor-Authentifizierung
+- Monatsberichte, Haushaltsauswertung, Kontostände, historische Vergleiche und Druckansichten
+- **Manueller Financisto-`.backup`-Import bleibt erhalten**; optional automatischer Import per SFTP/FolderSync, in der Weboberfläche steuerbar
+- Finanzverwaltung mit wahlweise **Financisto oder der Weboberfläche als führendem System**; Schutz vor unbeabsichtigtem Überschreiben eigener Buchungen
+- Wiederkehrende Buchungen und Umbuchungen, Benachrichtigungen über Web Push, Gotify oder Telegram
+- Responsive Oberfläche für PC, Tablet und Smartphone mit installierbarer PWA
+- Docker Compose, lokale HTTPS-Konfiguration und Backup-/Update-Skripte; persistente Daten in Bind-Mounts
+
+## Ursprung und Abgrenzung
+
+Dieses Dashboard ist eine **eigenständige Webanwendung** und **keine offizielle Version, Weiterentwicklung oder ein Fork** der Android-App Financisto. Es ist durch deren Nutzungs- und Datenmodell inspiriert und unterstützt das Importformat ihrer Sicherungsdateien sowie das Format des verbreiteten Android-Forks.
+
+- **Originalprojekt:** [Financisto – dsolonenko/financisto](https://github.com/dsolonenko/financisto), entwickelt von Denis Solonenko und Mitwirkenden.
+- **Unterstützter Android-Fork:** [Financisto Holo – tiberiusteng/financisto1-holo](https://github.com/tiberiusteng/financisto1-holo).
+
+Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Rechteinhabern. Für Android-App, deren Funktionsweise oder ihre Weiterentwicklung ist dieses Repository nicht zuständig.
+
+## Repository-Struktur
+
+| Pfad | Inhalt |
+| --- | --- |
+| `package/` | Anwendungsquellcode, Docker-Dateien, `install.sh`, Oberfläche und Dokumentation |
+| `update.sh` | Update vorhandener Installationen einschließlich Sicherung |
+| `setup_financisto_sftp.sh` | Optionale Einrichtung für den SFTP-Import |
+| `README.txt` | Hinweise zum übernommenen Release v1.9.36 |
+| `package/CHANGELOG.md` | Versionshistorie |
+| `package/docs/` | Ausführliche Funktions- und Betriebsdokumentation |
 
 ## Neuinstallation
 
-Das Repository herunterladen oder klonen, in das Verzeichnis `package/` wechseln und `./install.sh` als normalen Projektbenutzer **ohne sudo** ausführen. Das Skript führt die Ersteinrichtung durch. Details in [package/README.md](package/README.md).
+Repository klonen oder als ZIP herunterladen. Im ausgepackten Verzeichnis:
 
-## Update einer vorhandenen Installation
+```bash
+cd package
+./install.sh
+```
 
-Das Repository in ein **separates** Verzeichnis herunterladen oder klonen – nicht direkt über die produktive Installation kopieren. Im Wurzelverzeichnis des ausgecheckten Projekts:
+Das Skript ist als regulärer Linux-Projektbenutzer **ohne sudo** auszuführen. Weitere Hinweise stehen in [package/README.md](package/README.md).
+
+## Bestehende Installation aktualisieren
+
+Quellcode **getrennt von der produktiven Installation** auschecken und im Repository-Hauptverzeichnis als Eigentümer der vorhandenen Installation ausführen:
 
 ```bash
 ./update.sh /pfad/zur/bestehenden/financisto-dashboard-installation
 ```
 
-Das Update-Skript legt eine Sicherung an, kontrolliert Daten und Rechte und aktualisiert die Programmdateien. Es muss als der Benutzer laufen, dem die bestehende Installation gehört, **nicht mit sudo**. Einzelheiten stehen in [package/README.md](package/README.md) und [package/docs/BACKUP_RESTORE.md](package/docs/BACKUP_RESTORE.md).
+**Nicht** die vorhandenen Daten- und Konfigurationsverzeichnisse überschreiben. Das Update-Skript ist für die Datensicherung und die Übernahme der Programmdateien zuständig. Hinweise: [Backup & Restore](package/docs/BACKUP_RESTORE.md).
 
-## Sicherheit und Datenschutz
+## Datenschutz und Sicherheit
 
-Dieses Git-Repository enthält **keine produktiven** Kontodaten, SQLite-Datenbanken, Passwörter, Authentifizierungsschlüssel oder befüllten `.env`-Dateien. Solche Daten werden bei Git-Commits ausgeschlossen und gehören in die lokale Konfiguration bzw. die persistenten Bind-Mounts.
+Produktive SQLite-Datenbanken, Finanztransaktionen, Backups, Passwörter, private Schlüssel, Tokens, befüllte `.env`-Dateien und andere Laufzeitdaten gehören **nicht** in Git. Die Regeln in [`.gitignore`](.gitignore) schließen diese typischen Dateien aus. Vor jeder Veröffentlichung von Quellcode oder Releases muss der Inhalt dennoch kontrolliert werden.
 
-Die Anwendung unterstützt sowohl den manuellen als auch den konfigurierbaren automatischen Financisto-Backup-Import. Bei produktiven Finanzdaten stets Backups anlegen und die Import-/Führungsmodi beachten.
+## Lizenz
 
-## Downloads
+Dieses Dashboard wird unter der **GNU General Public License, Version 2 (GPL-2.0-only)** angeboten. Die Lizenzbedingungen stehen in [LICENSE](LICENSE); Hinweise zu Projektzuordnung und Drittrechten in [NOTICE.md](NOTICE.md).
 
-Auf der Repository-Seite unter **Code → Download ZIP** lässt sich der aktuelle Quellstand herunterladen. Ein separat verpacktes GitHub-Release mit Versions-Tag wurde noch nicht angelegt.
+Bei Verteilung der Software dürfen Empfänger ihre Kopie gemäß GPL v2 verwenden, verändern und weitergeben. Daraus entsteht **kein Schreibzugriff** auf dieses GitHub-Repository; den verwaltet ausschließlich dessen Eigentümer.
+
+Das ursprüngliche Android-Projekt Financisto steht ebenfalls unter GPL v2. Die Lizenzierung dieses Dashboards begründet weder eine offizielle Zugehörigkeit noch eine Freigabe fremder Marken oder Grafiken.
+
+## Downloads und Releases
+
+Über **Code → Download ZIP** lässt sich der aktuelle Quellstand herunterladen. Zusätzlich können versionierte ZIP-Pakete als **GitHub Releases** veröffentlicht werden.
+
+**Achtung:** Solange dieses Repository privat ist, sind auch die dortigen Releases nicht öffentlich abrufbar. Öffentliche Downloads erfordern ein öffentliches Repository oder eine separate öffentliche Veröffentlichungsquelle.
