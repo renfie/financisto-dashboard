@@ -88,7 +88,7 @@ fi
 # Capture the COMPLETE effective configuration first. Under `set -o pipefail`,
 # `sshd -T | grep -q` can fail even when the rule matches because grep closes
 # the pipe early and sshd receives SIGPIPE.
-if ! SSH_EFFECTIVE="$("$SSHD_BIN" -T -C "user=${UPLOAD_USER},host=homesrv,addr=192.168.2.100")"; then
+if ! SSH_EFFECTIVE="$("$SSHD_BIN" -T -C "user=${UPLOAD_USER},host=homesrv,addr=192.0.2.100")"; then
   restore_ssh_config
   fail 'sshd -T konnte die wirksame SSH-Konfiguration nicht ermitteln. Änderung rückgängig gemacht.'
 fi
