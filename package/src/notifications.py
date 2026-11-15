@@ -291,7 +291,7 @@ def main():
     while True:
         try:
             regular=drain_one(db,secret)
-            pushed=webpush.drain_one(db,secret,os.getenv('VAPID_SUBJECT','https://finance.fieler.de'))
+            pushed=webpush.drain_one(db,secret,os.getenv('VAPID_SUBJECT','https://finance.example.org'))
             if not regular and not pushed:
                 time.sleep(10)
         except (sqlite3.Error,OSError) as exc:
