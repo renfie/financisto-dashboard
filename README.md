@@ -1,5 +1,14 @@
 # Financisto-Dashboard (FieLanzen)
 
+<p align="center">
+  <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">
+</p>
+
+<p align="center">
+  <img src="package/static/icons/icon-192.png" alt="App-Symbol des Financisto-Dashboards" width="84">
+</p>
+
+
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
 **Aktueller Quellstand:** v1.9.36 · 14. November 2026.
