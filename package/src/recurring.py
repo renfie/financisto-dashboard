@@ -47,6 +47,9 @@ def ensure_schema(db):
         day_of_month INTEGER NOT NULL DEFAULT 1,
         start_on TEXT NOT NULL,
         run_at TEXT NOT NULL DEFAULT '00:00',
+        end_on TEXT,
+        max_occurrences INTEGER,
+        completed_on TEXT,
         next_on TEXT,
         active INTEGER NOT NULL DEFAULT 0,
         auto_post INTEGER NOT NULL DEFAULT 0,
@@ -90,6 +93,15 @@ def ensure_schema(db):
         except sqlite3.OperationalError:
             if 'run_at' not in {r[1] for r in db.execute('PRAGMA table_info(recurring_rules)')}:
                 raise
+    # 1.9.40: optional, inclusive end date / number of actual occurrences.
+    # NULL keeps pre-existing schedules unlimited. This migration is additive.
+    for column, decl in [('end_on', 'TEXT'), ('max_occurrences', 'INTEGER'), ('completed_on', 'TEXT')]:
+        if column not in cols:
+            try:
+                db.execute(f'ALTER TABLE recurring_rules ADD COLUMN {column} {decl}')
+            except sqlite3.OperationalError:
+                if column not in {r[1] for r in db.execute('PRAGMA table_info(recurring_rules)')}:
+                    raise
 
 
 def parse_rule(text):
@@ -261,6 +273,31 @@ def validate_rule(db, rule):
         raise ValueError('Ausgabe/Umbuchung muss negativ gespeichert sein.')
 
 
+def completed_runs(db, rule_id):
+    """Count handled occurrences, including matching existing bookings."""
+    return db.execute('SELECT COUNT(*) FROM recurring_runs WHERE rule_id=?', (rule_id,)).fetchone()[0]
+
+
+def is_finished(rule, next_on, count):
+    """Return true when the NEXT date is beyond either configured limit."""
+    return (
+        (rule['max_occurrences'] is not None and count >= int(rule['max_occurrences']))
+        or (rule['end_on'] is not None and next_on is not None and next_on > rule['end_on'])
+    )
+
+
+def advance_or_complete(db, rule, rule_id, current):
+    # Keep count, next date and enabled state in the same locked transaction.
+    completed = completed_runs(db, rule_id)
+    candidate = next_after(rule, current + dt.timedelta(days=1))
+    if is_finished(rule, candidate, completed):
+        db.execute('''UPDATE recurring_rules SET next_on=NULL,active=0,auto_post=0,
+                   completed_on=CURRENT_TIMESTAMP,updated_on=CURRENT_TIMESTAMP WHERE id=?''', (rule_id,))
+    else:
+        db.execute('''UPDATE recurring_rules SET next_on=?,updated_on=CURRENT_TIMESTAMP
+                   WHERE id=?''', (candidate, rule_id))
+
+
 def post_one(db, rule_id, minimum=None, *, automatic=False):
     # Caller must hold BEGIN IMMEDIATE transaction. Recheck mode inside lock.
     mode=db.execute("SELECT value FROM meta WHERE key='finance_mode'").fetchone()
@@ -272,6 +309,8 @@ def post_one(db, rule_id, minimum=None, *, automatic=False):
     if not rule['next_on']:
         raise ValueError('Kein nächster Termin festgelegt.')
     scheduled=dt.date.fromisoformat(rule['next_on'])
+    if is_finished(rule, scheduled.isoformat(), completed_runs(db, rule_id)):
+        raise ValueError('Wiederholung ist bereits beendet (Enddatum oder Anzahl erreicht).')
     current=minimum or today()
     if scheduled > current:
         raise ValueError('Regel ist noch nicht fällig.')
@@ -294,9 +333,7 @@ def post_one(db, rule_id, minimum=None, *, automatic=False):
     if same:
         db.execute('INSERT INTO recurring_runs(rule_id,due_on,booking_id) VALUES(?,?,?)',
                    (rule_id,scheduled.isoformat(),same['id']))
-        new_next=next_after(rule, current+dt.timedelta(days=1))
-        db.execute('''UPDATE recurring_rules SET next_on=?,updated_on=CURRENT_TIMESTAMP WHERE id=?''',
-                   (new_next,rule_id))
+        advance_or_complete(db, rule, rule_id, current)
         db.execute('''INSERT INTO audit_events(actor_id,event,detail,client_ip)
                       VALUES(NULL,'recurring_existing_booking',?,'system')''',
                    (f'{rule_id}:{scheduled.isoformat()}:{same["id"]}',))
@@ -323,9 +360,7 @@ def post_one(db, rule_id, minimum=None, *, automatic=False):
             raise ValueError('Kontostand konnte nicht aktualisiert werden')
     db.execute('INSERT INTO recurring_runs(rule_id,due_on,booking_id) VALUES(?,?,?)',
                (rule_id,scheduled.isoformat(),transaction_id))
-    new_next=next_after(rule, current+dt.timedelta(days=1))
-    db.execute('''UPDATE recurring_rules SET next_on=?,updated_on=CURRENT_TIMESTAMP WHERE id=?''',
-               (new_next,rule_id))
+    advance_or_complete(db, rule, rule_id, current)
     db.execute('''UPDATE meta SET value=CAST(value AS INTEGER)+1 WHERE key='ledger_web_writes' ''')
     db.execute('''INSERT INTO audit_events(actor_id,event,detail,client_ip) VALUES(NULL,?,?,?)''',
                ('recurring_posted_auto' if automatic else 'recurring_posted_manual',
@@ -345,6 +380,9 @@ def run_due(db_path):
             return 0
         matches=db.execute('''SELECT id FROM recurring_rules WHERE active=1 AND auto_post=1 AND deleted_on IS NULL
                 AND next_on IS NOT NULL
+                AND (end_on IS NULL OR next_on <= end_on)
+                AND (max_occurrences IS NULL OR (SELECT COUNT(*) FROM recurring_runs
+                        WHERE rule_id=recurring_rules.id) < max_occurrences)
                 AND (next_on < ? OR (next_on = ? AND COALESCE(run_at,'00:00') <= ?))
                 ORDER BY next_on,id LIMIT 40''',(today_str,today_str,clock_str)).fetchall()
         posted=0

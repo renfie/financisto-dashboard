@@ -244,6 +244,8 @@
     field('frequency', rule && rule.frequency !== 'custom' ? rule.frequency : 'monthly');
     field('interval_count', rule ? rule.interval_count : 1);
     field('day_of_month', rule ? rule.day_of_month : 1);
+    field('end_on', rule ? (rule.end_on || '') : '');
+    field('max_occurrences', rule ? (rule.max_occurrences || '') : '');
     field('note', rule ? rule.note : '');
     heading.textContent = rule ? `Regel bearbeiten: ${rule.title}` : 'Neue wiederkehrende Buchung';
     submit.textContent = rule ? 'Änderung speichern und deaktivieren' : 'Vorlage anlegen (deaktiviert)';

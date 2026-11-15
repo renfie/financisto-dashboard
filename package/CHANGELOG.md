@@ -1,3 +1,9 @@
+## 1.9.40 – Wiederholungsgrenzen und Hervorhebung zukünftiger Buchungen (15.11.2026)
+- Eingabemaske: Empfänger steht auf Mobilgeräten und am Desktop vor der Kategorie; Tastaturreihenfolge entsprechend angepasst.
+- Wiederkehrende Buchungen: Optionales inklusives Enddatum und/oder maximale Anzahl tatsächlicher Ausführungen. Sobald die erste Grenze erreicht wird, endet die automatische/manuelle Regel. Vorhandene Regeln bleiben unbegrenzt; bereits ausgeführte Termine zählen zum Maximum, vorhandene Buchungen werden niemals gelöscht.
+- Buchungen mit zukünftigem Datum erscheinen gelb und mit Hinweis in Dashboard-Tabellen, kompakten mobilen Karten und Web-Buchungsliste, bis das Datum erreicht ist (bei erneutem Laden der Seite). Nur die Darstellung ändert sich, nicht die Kontostandsberechnung.
+- Sprachübersetzungen der neuen Bedienelemente ergänzt. Keine Änderungen an Authentifizierung, Import, Secrets oder Caddy-CA.
+
 ## 1.9.39 – Deutsche und englische Weboberfläche und Installation (15.11.2026)
 - Bisherige deutschsprachige Oberfläche erhält vollständige lokale Übersetzungstabellen für Navigation, Formulare, Berichte, Einstellungen und zentrale Systemmeldungen.
 - Umschalter DE / EN bereits bei der Anmeldung, auf Mobilgeräten und in der Desktop-Seitenleiste; die Wahl gilt pro Sitzung und ist jederzeit änderbar.

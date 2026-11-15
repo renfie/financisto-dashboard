@@ -2250,7 +2250,9 @@ def booking_delete(booking_id):
 @login_required
 def recurring_list():
     with get_db() as db:
-        rules=db.execute('''SELECT r.*, a.title account_title, c.code currency_code,
+        rules=db.execute('''SELECT r.*,
+            (SELECT COUNT(*) FROM recurring_runs runs WHERE runs.rule_id=r.id) completed_count,
+            a.title account_title, c.code currency_code,
             c.decimals, p.title payee_title
             FROM recurring_rules r
             LEFT JOIN accounts a ON a.id=r.account_id
@@ -2330,6 +2332,17 @@ def recurring_form_payload(db, old=None):
         raise ValueError('Uhrzeit muss HH:MM sein (00:00 bis 23:59)')
     start_date=date.fromisoformat(start)
     if not 2000<=start_date.year<=2100: raise ValueError('Startdatum außerhalb des Bereichs')
+    end_on = request.form.get('end_on','').strip() or None
+    if end_on is not None:
+        end_date = date.fromisoformat(end_on)
+        if end_date < start_date or end_date.year > 2100:
+            raise ValueError('Enddatum muss am oder nach dem Startdatum liegen.')
+    max_raw = request.form.get('max_occurrences','').strip()
+    max_occurrences = None
+    if max_raw:
+        if not max_raw.isdigit() or not 1 <= int(max_raw) <= 10000:
+            raise ValueError('Anzahl der Ausführungen muss zwischen 1 und 10000 liegen.')
+        max_occurrences = int(max_raw)
     source=int(request.form.get('account_id','0'))
     dest=int(request.form.get('to_account_id','0')) if action=='transfer' else 0
     account=existing_account(db,source)
@@ -2343,7 +2356,8 @@ def recurring_form_payload(db, old=None):
     payload={'title':title,'kind':action,'account_id':source,'to_account_id':dest,
              'category_id':category,'payee_id':payee,'amount_minor':signed,'note':note,
              'frequency':frequency,'interval_count':period,'day_of_month':day_of_month,
-             'start_on':start,'run_at':run_at}
+             'start_on':start,'run_at':run_at,'end_on':end_on,
+             'max_occurrences':max_occurrences}
     validate_rule(db,payload)
     return payload
 
@@ -2364,16 +2378,17 @@ def recurring_save():
                     account_id=:account_id,to_account_id=:to_account_id,
                     category_id=:category_id,payee_id=:payee_id,amount_minor=:amount_minor,
                     note=:note,frequency=:frequency,interval_count=:interval_count,
-                    day_of_month=:day_of_month,start_on=:start_on,run_at=:run_at,active=0,auto_post=0,
-                    next_on=NULL,needs_review='',updated_on=CURRENT_TIMESTAMP
+                    day_of_month=:day_of_month,start_on=:start_on,run_at=:run_at,
+                    end_on=:end_on,max_occurrences=:max_occurrences,active=0,auto_post=0,
+                    next_on=NULL,completed_on=NULL,needs_review='',updated_on=CURRENT_TIMESTAMP
                     WHERE id=:id''',{**row,'id':int(edit)})
             else:
                 db.execute('''INSERT INTO recurring_rules(title,kind,account_id,to_account_id,
                     category_id,payee_id,amount_minor,note,frequency,interval_count,
-                    day_of_month,start_on,run_at,active,auto_post)
+                    day_of_month,start_on,run_at,end_on,max_occurrences,active,auto_post)
                     VALUES(:title,:kind,:account_id,:to_account_id,:category_id,:payee_id,
                            :amount_minor,:note,:frequency,:interval_count,:day_of_month,
-                           :start_on,:run_at,0,0)''',row)
+                           :start_on,:run_at,:end_on,:max_occurrences,0,0)''',row)
             audit(db,'recurring_rule_saved',edit or 'new')
         flash('Regel gespeichert, zunächst deaktiviert. Danach bewusst aktivieren.','success')
     except (ValueError,sqlite3.Error) as exc:
@@ -2407,8 +2422,14 @@ def recurring_status(rule_id):
                 validate_rule(db,row)
                 next_on=on_or_after(date.fromisoformat(row['start_on']),row['frequency'],
                     int(row['interval_count']),int(row['day_of_month']),recurring_today()).isoformat()
+                already_done=db.execute('SELECT COUNT(*) FROM recurring_runs WHERE rule_id=?',
+                    (rule_id,)).fetchone()[0]
+                if row['max_occurrences'] is not None and already_done>=int(row['max_occurrences']):
+                    raise ValueError('Die maximale Anzahl der Ausführungen ist bereits erreicht.')
+                if row['end_on'] is not None and next_on>row['end_on']:
+                    raise ValueError('Das Enddatum der Regel ist bereits erreicht.')
                 db.execute('''UPDATE recurring_rules SET active=1,auto_post=?,next_on=?,
-                    needs_review='',updated_on=CURRENT_TIMESTAMP WHERE id=?''',(int(auto),next_on,rule_id))
+                    needs_review='',completed_on=NULL,updated_on=CURRENT_TIMESTAMP WHERE id=?''',(int(auto),next_on,rule_id))
             else:
                 db.execute('''UPDATE recurring_rules SET active=0,auto_post=0,
                     updated_on=CURRENT_TIMESTAMP WHERE id=?''',(rule_id,))
@@ -2752,6 +2773,7 @@ def dashboard():
             last_import_source=import_source['value'] if import_source else 'Manuell',
             can_clone=(finance_setting(db,'finance_mode','import')=='web' and current_user()['role'] in ('admin','editor')),
             can_modify=(finance_setting(db,'finance_mode','import')=='web' and current_user()['role'] in ('admin','editor')),
+            today=datetime.now(MONTH_TZ).date().isoformat(),
             finance_mode=finance_setting(db,'finance_mode','import'))
 
 

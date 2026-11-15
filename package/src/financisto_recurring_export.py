@@ -91,6 +91,8 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             raise ExportError(f'Regel {rule["title"]}: manuell aktive Regeln können in Financisto unbeabsichtigt automatisch laufen. Bitte vor dem Export pausieren oder ausdrücklich auf Automatisch umstellen.')
         if rule['needs_review']:
             raise ExportError(f'Regel {rule["title"]}: noch nicht abgeschlossene Regelprüfung. Bitte bearbeiten.')
+        if rule.get('end_on') or rule.get('max_occurrences') is not None:
+            raise ExportError(f'Regel {rule["title"]}: Begrenzte Wiederholungen (Enddatum/Anzahl) können nicht zuverlässig in das Android-Format exportiert werden. Bitte die Regel vor dem Export deaktivieren.')
         from recurring import validate_rule
         try:
             validate_rule(db,rule)

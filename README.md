@@ -12,7 +12,7 @@
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Current release:** [v1.9.39](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This release adds a switchable English/German web interface and a bilingual first-time installer. Accounting and stored financial records are unchanged.
+**Current release:** [v1.9.40](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This release adds recurring-transaction end dates and occurrence limits, places the payee field before the category field, and highlights future-dated entries in yellow. Existing accounting behavior and saved financial data are unchanged.
 
 ## Features
 
@@ -20,7 +20,8 @@
 - Monthly reports, household spending summaries, account balances, historical comparisons, and printable reports
 - **Manual `.backup` import remains available**; optional SFTP/FolderSync auto-import can be enabled and disabled in the web interface
 - Choose **Financisto or the web dashboard as the source of truth**, with safeguards against accidentally overwriting web-created transactions
-- Recurring transactions and transfers; Web Push, Gotify and Telegram notifications
+- Recurring transactions and transfers with optional end date or maximum number of runs; Web Push, Gotify and Telegram notifications
+- Future-dated transactions appear in yellow until their date is reached (display only; posting and balance calculations remain unchanged)
 - Responsive layouts for desktop, tablet and smartphone, plus an installable Progressive Web App (PWA)
 - Docker Compose deployment, local HTTPS, backup/update scripts, and persistent bind-mounted data
 
@@ -35,7 +36,7 @@ All rights in third-party projects and names remain with their respective owners
 
 ## Screenshots
 
-These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.39.
+These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.40.
 
 ### Desktop dashboard
 
@@ -96,7 +97,7 @@ Check out the new version **in a separate directory**. Run the update script as 
 ./update.sh /path/to/existing/financisto-dashboard
 ```
 
-Updates can be applied **directly from v1.9.35 to v1.9.39**; no intermediate v1.9.36/v1.9.37 update is necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
+Updates can be applied **directly from v1.9.35 to v1.9.40**; no intermediate v1.9.36/v1.9.37 update is necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
 
 For additional details see the [English operations guide](package/README.en.md) and [backup/restore documentation](package/docs/BACKUP_RESTORE.md) (German).
 

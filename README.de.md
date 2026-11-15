@@ -13,7 +13,7 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.39 · 15. November 2026 (Dokumentation, Datenschutz-Bereinigung und neues Release).
+**Aktueller Quellstand:** v1.9.40 · 15. November 2026 (Enddatum/Anzahl für Wiederholungen, Empfänger vor Kategorie, gelbe Hervorhebung vorausdatierter Buchungen).
 
 ## Funktionen
 
@@ -21,7 +21,8 @@
 - Monatsberichte, Haushaltsauswertung, Kontostände, historische Vergleiche und Druckansichten
 - **Manueller Financisto-`.backup`-Import bleibt erhalten**; optional automatischer Import per SFTP/FolderSync, in der Weboberfläche steuerbar
 - Finanzverwaltung mit wahlweise **Financisto oder der Weboberfläche als führendem System**; Schutz vor unbeabsichtigtem Überschreiben eigener Buchungen
-- Wiederkehrende Buchungen und Umbuchungen, Benachrichtigungen über Web Push, Gotify oder Telegram
+- Wiederkehrende Buchungen mit optionalem Enddatum oder maximaler Anzahl an Ausführungen; Benachrichtigungen über Web Push, Gotify oder Telegram
+- Zukünftig datierte Buchungen werden bis zum Buchungsdatum gelb hervorgehoben (nur Anzeige, kein Aufschub der Kontostandsänderung)
 - Responsive Oberfläche für PC, Tablet und Smartphone mit installierbarer PWA
 - Docker Compose, lokale HTTPS-Konfiguration und Backup-/Update-Skripte; persistente Daten in Bind-Mounts
 
@@ -36,7 +37,7 @@ Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Re
 
 ## Screenshots
 
-Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.39 können abweichen.
+Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.40 können abweichen.
 
 ### Dashboard am Desktop
 
@@ -64,7 +65,7 @@ Alle Übersetzungen befinden sich lokal im Programm; es werden keine Finanzdaten
 
 **Ausführliche Anleitung:** [Caddy, HTTPS und Nginx Proxy Manager auf Deutsch](package/docs/CADDY.de.md) · [English](package/docs/CADDY.en.md).
 
-**Update-Hinweis:** Von v1.9.35 kann direkt auf v1.9.39 aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
+**Update-Hinweis:** Von v1.9.35 kann direkt auf v1.9.40 aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
 
 ## Repository-Struktur
 

@@ -1,3 +1,9 @@
+## 1.9.40 — Recurrence limits and future-dated transaction highlighting (2026-11-15)
+- Transaction entry: Payee appears before Category on desktop and mobile, including keyboard navigation order.
+- Recurring entries: Optional inclusive end date and/or maximum number of actual occurrences. The rule ends when the first configured limit is reached; legacy rules remain unlimited, previous executions count, existing transactions are kept.
+- Future-dated transactions are shaded yellow and labeled on dashboard tables, mobile cards and the recent web-entry list until their date is reached (after page refresh). This is display-only, without changing the existing balance calculation.
+- Updated translations; no changes to authentication, imports, secrets or the Caddy certificate authority.
+
 ## 1.9.39 — English and German web interface and installer (2026-11-15)
 - Bundled offline English translations for the web dashboard's navigation, forms, reports, settings and common notifications; the German original remains available.
 - DE / EN language control on sign-in, mobile header and desktop sidebar. Language can be changed at any time and is retained for the current session only.

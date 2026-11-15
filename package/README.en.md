@@ -1,5 +1,10 @@
 # Financisto Dashboard — Installation and Operations (English)
 
+## New in v1.9.40
+
+The payee field now precedes the category field. Recurring schedules can be limited by an inclusive end date and/or a maximum number of actual occurrences; existing rules remain unlimited. Future-dated transactions are highlighted yellow in lists without delaying their existing impact on account balances.
+
+
 **Deutsch:** [Ausführliche Dokumentation](README.md) · **English:** You are here
 
 This is an English operations guide for the independently developed FieLanzen web dashboard. For a complete version-by-version history and additional technical details see the original [German manual](README.md) and the [technical documentation](docs/) (primarily German).
@@ -38,7 +43,7 @@ Do not install over an existing project directory or copy the release's `package
 Extract a newer release into **a different directory** from the production installation. Run the updater as the normal user who owns the existing project:
 
 ```bash
-/path/to/financisto-release-1.9.39/update.sh /path/to/existing/financisto-dashboard
+/path/to/financisto-release-1.9.40/update.sh /path/to/existing/financisto-dashboard
 ```
 
 A direct upgrade from v1.9.35 to v1.9.38 is supported: no intermediate version is required. The updater checks the directory structure, Docker access, file ownership and Python syntax before making changes. It backs up the prior source and uses SQLite's online backup API to create a consistent database snapshot. Configuration is preserved in the host's `.env` and secrets remain on the host.

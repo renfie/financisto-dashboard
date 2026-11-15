@@ -1,6 +1,11 @@
 **Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
 
-## Neu in v1.9.39 – Deutsch und Englisch
+## Neu in v1.9.40
+
+Die Buchungsmaske zeigt den Empfänger vor der Kategorie. Wiederkehrende Regeln können durch ein Enddatum und/oder eine maximale Zahl von tatsächlichen Ausführungen begrenzt werden. Bereits angelegte Regeln bleiben unbegrenzt. Buchungen mit Datum in der Zukunft werden in der Buchungsliste gelb markiert, die bisherige sofortige Kontostandsänderung bleibt bestehen.
+
+
+## Neu in v1.9.40 – Deutsch und Englisch
 - Bei der Neuinstallation kann zwischen Deutsch und Englisch gewählt werden; alle Dialoge und Installationshinweise werden entsprechend angezeigt.
 - Weboberfläche mit Umschalter DE / EN auf Anmeldeseite, Desktop und Mobilgeräten. Benutzer können die Sprache jederzeit ohne erneute Anmeldung wechseln.
 - Die Sprachwahl wird nur für die aktuelle Sitzung gespeichert; Standard aus `DEFAULT_LANGUAGE` in `.env`, ohne Datenbankmigration.

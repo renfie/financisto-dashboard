@@ -22,12 +22,14 @@
 {% for r in rules %}
 <tr>
 <td><strong>{{ r.title }}</strong><div class="muted small">{{ r.account_title or 'Konto zuordnen' }} · {{ ('+' if r.amount_minor>0 else '−') }}{{ (r.amount_minor|abs / (10 ** (r.decimals or 2)))|money }} {{ r.currency_code or '' }}</div>{% if r.needs_review %}<div class="notice recurring-warning">{{ r.needs_review }}</div>{% endif %}</td>
-<td>{{ {'daily':'Täglich','weekly':'Wöchentlich','monthly':'Monatlich','quarterly':'Vierteljährlich','yearly':'Jährlich','custom':'Sonderregel'}.get(r.frequency,r.frequency) }}{% if r.interval_count>1 %} · alle {{ r.interval_count }} Intervalle{% endif %}</td>
-<td>{{ r.next_on or 'Noch nicht festgelegt' }}{% if r.auto_post and r.active %}<div class="muted small">ab {{ r.run_at or '00:00' }} Uhr (Berlin)</div>{% endif %}</td>
+<td>{{ {'daily':'Täglich','weekly':'Wöchentlich','monthly':'Monatlich','quarterly':'Vierteljährlich','yearly':'Jährlich','custom':'Sonderregel'}.get(r.frequency,r.frequency) }}{% if r.interval_count>1 %} · alle {{ r.interval_count }} Intervalle{% endif %}
+{% if r.max_occurrences %}<div class="muted small">{{ r.completed_count }} / {{ r.max_occurrences }} Ausführungen</div>{% endif %}
+{% if r.end_on %}<div class="muted small">Endet am {{ r.end_on[8:10] }}.{{ r.end_on[5:7] }}.{{ r.end_on[:4] }}</div>{% endif %}</td>
+<td>{{ r.next_on or ('Abgeschlossen' if r.completed_on else 'Noch nicht festgelegt') }}{% if r.auto_post and r.active %}<div class="muted small">ab {{ r.run_at or '00:00' }} Uhr (Berlin)</div>{% endif %}</td>
 <td>{% if finance_mode!='web' %}
   {% if r.source_kind=='financisto' %}<span class="pill-status status-off">Von Financisto verwaltet</span>
   {% else %}<span class="pill-status status-off">Nur Web – pausiert</span>{% endif %}
-  {% else %}<span class="pill-status {{ 'status-on' if r.active else 'status-off' }}">{{ ('Automatisch' if r.auto_post else 'Manuell') if r.active else 'Pausiert' }}</span>{% endif %}</td>
+  {% else %}<span class="pill-status {{ 'status-on' if r.active else 'status-off' }}">{{ ('Automatisch' if r.auto_post else 'Manuell') if r.active else ('Abgeschlossen' if r.completed_on else 'Pausiert') }}</span>{% endif %}</td>
 <td class="recurring-action-cell"><div class="recurring-actions">
 {% if viewer.role in ('admin','editor') and finance_mode=='web' %}
 <a class="button secondary" data-recurring-edit="{{r.id}}" href="{{ url_for('recurring_list',edit=r.id) }}#regel-formular">Bearbeiten</a>
@@ -83,9 +85,14 @@
 <div class="formgrid"><label>Wiederholung<select name="frequency">{% for code,label in [('daily','Täglich'),('weekly','Wöchentlich'),('monthly','Monatlich'),('quarterly','Vierteljährlich'),('yearly','Jährlich')] %}<option value="{{code}}" {% if edit_rule and edit_rule.frequency==code or not edit_rule and code=='monthly' %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
 <label>Alle wie viele Intervalle?<input type="number" min="1" max="120" name="interval_count" value="{{ edit_rule.interval_count if edit_rule else 1 }}" required></label></div>
 <div class="formgrid"><label>Tag im Monat (1–31)<input type="number" min="1" max="31" name="day_of_month" value="{{ edit_rule.day_of_month if edit_rule else 1 }}" required></label></div>
+<div class="formgrid recurring-limits">
+<label>Enddatum (optional)<input type="date" name="end_on" value="{{ edit_rule.end_on or '' if edit_rule else '' }}"></label>
+<label>Maximal so oft ausführen (optional)<input type="number" name="max_occurrences" min="1" max="10000" value="{{ edit_rule.max_occurrences or '' if edit_rule else '' }}" placeholder="Unbegrenzt"></label>
+</div>
+<p class="muted small">Ohne Enddatum und Anzahl wiederholt sich die Regel unbegrenzt. Werden beide Grenzen gesetzt, endet sie beim ersten erreichten Limit. Bereits ausgeführte Termine zählen mit; bestehende Buchungen bleiben erhalten.</p>
 <label>Notiz<textarea name="note" maxlength="1000" rows="2">{{ edit_rule.note if edit_rule else '' }}</textarea></label>
 <button type="submit" class="primary" id="recurring-save-button">{{ 'Änderung speichern und deaktivieren' if edit_rule else 'Vorlage anlegen (deaktiviert)' }}</button>
-</form><p class="muted small">Bei Monaten ohne den gewählten Tag wird der letzte Kalendertag verwendet. Die Ausführungsuhrzeit ist eine frühestmögliche Zeit für automatische Buchungen, keine sekundengenaue Garantie: Der Hintergrunddienst prüft alle 15 Minuten (Zeitzone Europe/Berlin). Vorhandene Regeln bleiben standardmäßig auf 00:00 Uhr. Manuelle Buchungen werden unabhängig von der Uhrzeit ausdrücklich ausgelöst.</p>
+</form><p class="muted small">Bei Monaten ohne den gewählten Tag wird der letzte Kalendertag verwendet. Die Ausführungsuhrzeit ist eine frühestmögliche Zeit für automatische Buchungen, keine sekundengenaue Garantie: Der Hintergrunddienst prüft alle 15 Minuten (Zeitzone Europe/Berlin). Vorhandene Regeln bleiben standardmäßig auf 00:00 Uhr und ohne Endbegrenzung. Manuelle Buchungen werden unabhängig von der Uhrzeit ausdrücklich ausgelöst.</p>
 </section>
 <script type="application/json" id="recurring-editor-data">{{ rules_data|tojson }}</script>
 {% endif %}

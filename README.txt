@@ -1,9 +1,13 @@
-FieLanzen v1.9.39 – Deutsch/Englisch für Weboberfläche und Installer (15.11.2026).
+Financisto-Dashboard v1.9.40 – Empfänger vor Kategorie, begrenzte Wiederholungen und gelb markierte zukünftige Buchungen.
+Direktes Update ab 1.9.35 mit update.sh im Release-Hauptverzeichnis, als Projektbenutzer ohne sudo.
+Vorhandene Finanzdaten, Secrets, Konfiguration und Caddy-CA bleiben erhalten.
+
+FieLanzen v1.9.40 – Deutsch/Englisch für Weboberfläche und Installer (15.11.2026).
 
 Direktes Update von v1.9.35 (keine Zwischenversion nötig):
   cd /home/pi/docker-files
-  unzip -o financisto-dashboard-v1.9.39.zip
-  ./financisto-release-1.9.39/update.sh /home/pi/docker-files/financisto-dashboard
+  unzip -o financisto-dashboard-v1.9.40.zip
+  ./financisto-release-1.9.40/update.sh /home/pi/docker-files/financisto-dashboard
 
 Bisherige .env, Konten, Buchungen, 2FA, Datenbank, Backups, Secrets und
 Caddy-Zertifikate bleiben erhalten. Das Update erstellt vorab eine SQLite-
