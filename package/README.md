@@ -1,3 +1,5 @@
+**Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
+
 ## Neu in v1.9.36
 
 - Dashboard-Buchungen auf Smartphone und Tablet kompakt: Text, Datum, Konto und Betrag; per Fingertipp Details und berechtigte Aktionen einblenden.
