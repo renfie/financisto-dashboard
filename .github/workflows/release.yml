@@ -1,0 +1,99 @@
+name: Build and publish Financisto Dashboard release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'package/VERSION'
+      - '.github/workflows/release.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: financisto-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check version and contents
+        id: version
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION="$(tr -d '[:space:]' < package/VERSION)"
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Invalid package/VERSION'; exit 1; }
+          TAG="v$VERSION"
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "$TAG" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match package/VERSION $TAG"
+            exit 1
+          fi
+          [[ -f package/src/app.py && -f package/install.sh && -f update.sh && -f LICENSE ]] || exit 1
+          if grep -r -l -E 'finance[.]fieler[.]de|192[.]168[.]2[.]61|192[.]168[.]2[.]100' package update.sh setup_financisto_sftp.sh; then
+            echo 'A private host/IP remains in release source. Aborting.'
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Package complete source ZIP
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION='${{ steps.version.outputs.version }}'
+          RELEASE_DIR="financisto-release-${VERSION}"
+          ZIP="financisto-dashboard-v${VERSION}.zip"
+          mkdir -p "$RUNNER_TEMP/$RELEASE_DIR"
+          cp -a package "$RUNNER_TEMP/$RELEASE_DIR/"
+          cp -a update.sh setup_financisto_sftp.sh README.txt README.md LICENSE NOTICE.md "$RUNNER_TEMP/$RELEASE_DIR/"
+          (cd "$RUNNER_TEMP" && zip -q -r "$GITHUB_WORKSPACE/$ZIP" "$RELEASE_DIR")
+          sha256sum "$ZIP" > "$ZIP.sha256"
+          unzip -tq "$ZIP" >/dev/null
+          echo "Packed $ZIP"
+
+      - name: Write release notes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION='${{ steps.version.outputs.version }}'
+          {
+            printf '## Financisto-Dashboard v%s\n\n' "$VERSION"
+            printf 'Komplettes Docker-Release mit Installation und sicherem Update.\n\n'
+            printf '### Änderungen\n\n'
+            awk 'NR>1 && /^## / {exit} {print}' package/CHANGELOG.md
+            printf '\n### Download und Lizenz\n\n'
+            printf -- '- ZIP-Datei: `financisto-dashboard-v%s.zip`\n' "$VERSION"
+            printf -- '- SHA256: gleichnamige Datei mit `.sha256`-Endung\n'
+            printf -- '- Lizenz: GPL-2.0-only; siehe `LICENSE`\n'
+            printf -- '- Originalprojekt: https://github.com/dsolonenko/financisto\n\n'
+            printf 'Die Anwendung ist ein unabhängiges Web-Dashboard, keine offizielle Financisto-App.\n'
+            printf 'Eigene Daten, Secrets und `.env`-Dateien sind nicht enthalten.\n\n'
+            printf 'Nach dem Entpacken liegt `install.sh` in `package/` und `update.sh` im Release-Hauptverzeichnis.\n'
+          } > release-notes.md
+
+      - name: Publish GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          set -Eeuo pipefail
+          TAG='${{ steps.version.outputs.tag }}'
+          VERSION='${{ steps.version.outputs.version }}'
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; leaving it unchanged."
+            exit 0
+          fi
+          gh release create "$TAG" \
+            "financisto-dashboard-v${VERSION}.zip" \
+            "financisto-dashboard-v${VERSION}.zip.sha256" \
+            --target "$GITHUB_SHA" \
+            --title "Financisto-Dashboard v${VERSION}" \
+            --notes-file release-notes.md \
+            --latest
