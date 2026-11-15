@@ -151,8 +151,8 @@ Der A5-Monatszettel öffnet nun in **demselben Browser-Tab**. Auf dem Monatszett
 HTTPS-Siteadressen werden dauerhaft in der .env-Datei hinterlegt:
 
 ```dotenv
-SITE_HOST=192.168.2.61
-SITE_ADDRESSES=https://192.168.2.61, https://finance.fieler.de
+SITE_HOST=192.0.2.61
+SITE_ADDRESSES=https://192.0.2.61, https://finance.example.org
 TRUSTED_PROXY_IPS=127.0.0.1/32
 ```
 
@@ -170,7 +170,7 @@ geteiltes Gateway einsetzen: sonst könnte eine direkt zugängliche Verbindung
 mittels gefälschter Header eine fremde IP vorgeben.
 
 Der Proxy muss die Client-IP mit `X-Forwarded-For` anhängen und den Hostnamen
-`finance.fieler.de` beibehalten. NPM kann `https://192.168.2.61:4443` als
+`finance.example.org` beibehalten. NPM kann `https://192.0.2.61:4443` als
 Upstream ansprechen, sofern dieser erreichbar ist; für die interne TLS-Strecke
 die lokale Caddy-CA im NPM vertrauen oder die Transportabsicherung separat
 prüfen. HTTPS für den Benutzer wird am NPM mit einem öffentlichen Zertifikat
@@ -210,7 +210,7 @@ beschreibbar sein. Diese Rechte niemals durch einen rekursiven chown ändern.
 
 Eine Domain, die nur in einer älteren Caddyfile vorkam und beim letzten
 Update nicht übernommen wurde, ist in `.env` einmalig nachzutragen, z.B.
-`SITE_ADDRESSES=https://192.168.2.61, https://finance.fieler.de`.
+`SITE_ADDRESSES=https://192.0.2.61, https://finance.example.org`.
 Niemals die Domain in die verwaltete Caddyfile eintragen.
 
 ## Version 1.6.4 – Update des Auto-Import-Dienstes
