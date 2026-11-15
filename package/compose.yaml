@@ -75,7 +75,7 @@ services:
     environment:
       DATABASE_PATH: /data/finanzen.sqlite3
       APP_SECRET_FILE: /run/finance-secrets/app_secret
-      VAPID_SUBJECT: https://${SITE_HOST:-finance.fieler.de}
+      VAPID_SUBJECT: https://${SITE_HOST:-finance.example.org}
     volumes:
       - ./data:/data
       - ./secrets/app_secret:/run/finance-secrets/app_secret:ro
