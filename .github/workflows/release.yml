@@ -112,19 +112,19 @@ jobs:
             --notes-file release-notes.md \
             --latest
 
-      - name: Verify the new public download and retire obsolete v1.9.36
-        if: ${{ steps.version.outputs.version == '1.9.37' }}
+      - name: Verify the new public download and retire obsolete v1.9.37
+        if: ${{ steps.version.outputs.version == '1.9.38' }}
         shell: bash
         env:
           GH_TOKEN: '${{ github.token }}'
         run: |
           set -Eeuo pipefail
-          NEW_TAG='v1.9.37'
-          FILE='financisto-dashboard-v1.9.37.zip'
+          NEW_TAG='v1.9.38'
+          FILE='financisto-dashboard-v1.9.38.zip'
           gh release view "$NEW_TAG" --json assets --jq '.assets[].name' | grep -Fx "$FILE" >/dev/null
           gh release view "$NEW_TAG" --json assets --jq '.assets[].name' | grep -Fx "$FILE.sha256" >/dev/null
           # This runs only once a replacement ZIP and checksum are available.
-          if gh release view 'v1.9.36' >/dev/null 2>&1; then
-            gh release delete 'v1.9.36' --cleanup-tag --yes
-            echo 'Retired old v1.9.36 Release and tag, including public download.'
+          if gh release view 'v1.9.37' >/dev/null 2>&1; then
+            gh release delete 'v1.9.37' --cleanup-tag --yes
+            echo 'Retired old v1.9.37 Release and tag, including public download.'
           fi
