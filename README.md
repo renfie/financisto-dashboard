@@ -12,7 +12,7 @@
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Current release:** [v1.9.37](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This maintenance release improves public-release privacy and documentation; it does not introduce changes to financial records or accounting logic.
+**Current release:** [v1.9.38](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This maintenance release fixes version validation in the updater and adds detailed Caddy documentation. It does not change accounting logic or stored financial data.
 
 ## Features
 
@@ -35,7 +35,7 @@ All rights in third-party projects and names remain with their respective owners
 
 ## Screenshots
 
-These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.37.
+These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.38.
 
 ### Desktop dashboard
 
@@ -48,6 +48,12 @@ These screenshots show **real dashboard layouts with example data substituted fo
 ### Enter a transaction
 
 ![Transaction-entry screen with example account](docs/screenshots/buchung-erfassen-demo.png)
+
+## Built-in Caddy HTTPS reverse proxy
+
+Caddy is **included as a separate Docker Compose service**, handling internal HTTPS and proxying authorized requests to the dashboard. It uses an **internal Caddy CA** (`tls internal`) for LAN and upstream TLS; publicly trusted certificates must be configured separately at an optional Nginx Proxy Manager. Caddy's CA keys, certificates and configuration are persistent bind-mounted data, retained when updating.
+
+**Full guide:** [Caddy / HTTPS / Nginx Proxy Manager (English)](package/docs/CADDY.en.md) · [Deutsch](package/docs/CADDY.de.md).
 
 ## Repository layout
 
@@ -82,7 +88,7 @@ Check out the new version **in a separate directory**. Run the update script as 
 ./update.sh /path/to/existing/financisto-dashboard
 ```
 
-The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
+Updates can be applied **directly from v1.9.35 to v1.9.38**; no intermediate v1.9.36/v1.9.37 update is necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
 
 For additional details see the [English operations guide](package/README.en.md) and [backup/restore documentation](package/docs/BACKUP_RESTORE.md) (German).
 
