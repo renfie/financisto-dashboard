@@ -80,4 +80,6 @@ Das ursprüngliche Android-Projekt Financisto steht ebenfalls unter GPL v2. Die 
 
 Über **Code → Download ZIP** lässt sich der aktuelle Quellstand herunterladen. Zusätzlich können versionierte ZIP-Pakete als **GitHub Releases** veröffentlicht werden.
 
-**Achtung:** Solange dieses Repository privat ist, sind auch die dortigen Releases nicht öffentlich abrufbar. Öffentliche Downloads erfordern ein öffentliches Repository oder eine separate öffentliche Veröffentlichungsquelle.
+**Automatische Veröffentlichung:** Der Workflow [Release erstellen](.github/workflows/release.yml) erstellt beim ersten Durchlauf sowie bei neuen Versionsständen in `package/VERSION` einen vollständigen Release-ZIP-Download mit SHA256-Prüfsumme. Bereits veröffentlichte Versionen bleiben unverändert. Alternativ kann der Workflow unter **Actions → Build and publish Financisto Dashboard release → Run workflow** manuell gestartet werden.
+
+Alle fertigen Versionen stehen unter [GitHub Releases](https://github.com/renfie/financisto-dashboard/releases). Solange das Repository privat ist, sind die Releases nur für Zugriffsberechtigte erreichbar. Öffentliche Downloads erfordern die Umstellung des Repositories auf **Public**.
