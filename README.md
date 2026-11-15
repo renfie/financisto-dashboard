@@ -1,101 +1,103 @@
-# Financisto-Dashboard (FieLanzen)
+# Financisto Dashboard (FieLanzen)
+
+**Language / Sprache:** **English** | [Deutsch](README.de.md)
 
 <p align="center">
-  <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">
+  <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves dashboard logo" width="260">
 </p>
 
 <p align="center">
-  <img src="package/static/icons/icon-192.png" alt="App-Symbol des Financisto-Dashboards" width="84">
+  <img src="package/static/icons/icon-192.png" alt="Financisto Dashboard app icon" width="84">
 </p>
 
+**An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
+**Current release:** [v1.9.37](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This maintenance release improves public-release privacy and documentation; it does not introduce changes to financial records or accounting logic.
 
-**Aktueller Quellstand:** v1.9.36 · 14. November 2026.
+## Features
 
-## Funktionen
+- Manage accounts, transactions, transfers, payees, and categories with user roles and two-factor authentication
+- Monthly reports, household spending summaries, account balances, historical comparisons, and printable reports
+- **Manual `.backup` import remains available**; optional SFTP/FolderSync auto-import can be enabled and disabled in the web interface
+- Choose **Financisto or the web dashboard as the source of truth**, with safeguards against accidentally overwriting web-created transactions
+- Recurring transactions and transfers; Web Push, Gotify and Telegram notifications
+- Responsive layouts for desktop, tablet and smartphone, plus an installable Progressive Web App (PWA)
+- Docker Compose deployment, local HTTPS, backup/update scripts, and persistent bind-mounted data
 
-- Konten, Buchungen, Umbuchungen, Empfänger und Kategorien verwalten; Rollen und Zwei-Faktor-Authentifizierung
-- Monatsberichte, Haushaltsauswertung, Kontostände, historische Vergleiche und Druckansichten
-- **Manueller Financisto-`.backup`-Import bleibt erhalten**; optional automatischer Import per SFTP/FolderSync, in der Weboberfläche steuerbar
-- Finanzverwaltung mit wahlweise **Financisto oder der Weboberfläche als führendem System**; Schutz vor unbeabsichtigtem Überschreiben eigener Buchungen
-- Wiederkehrende Buchungen und Umbuchungen, Benachrichtigungen über Web Push, Gotify oder Telegram
-- Responsive Oberfläche für PC, Tablet und Smartphone mit installierbarer PWA
-- Docker Compose, lokale HTTPS-Konfiguration und Backup-/Update-Skripte; persistente Daten in Bind-Mounts
+## Relationship to Financisto
 
-## Ursprung und Abgrenzung
+This project is a **standalone web application**. It is **not an official release, fork, or continuation** of the Financisto Android app. It supports the backup data format used by Financisto and an Android fork but does not claim affiliation with their authors.
 
-Dieses Dashboard ist eine **eigenständige Webanwendung** und **keine offizielle Version, Weiterentwicklung oder ein Fork** der Android-App Financisto. Es ist durch deren Nutzungs- und Datenmodell inspiriert und unterstützt das Importformat ihrer Sicherungsdateien sowie das Format des verbreiteten Android-Forks.
+- **Original Financisto project:** [dsolonenko/financisto](https://github.com/dsolonenko/financisto), by Denis Solonenko and contributors
+- **Compatible Android fork:** [Financisto Holo (tiberiusteng/financisto1-holo)](https://github.com/tiberiusteng/financisto1-holo)
 
-- **Originalprojekt:** [Financisto – dsolonenko/financisto](https://github.com/dsolonenko/financisto), entwickelt von Denis Solonenko und Mitwirkenden.
-- **Unterstützter Android-Fork:** [Financisto Holo – tiberiusteng/financisto1-holo](https://github.com/tiberiusteng/financisto1-holo).
-
-Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Rechteinhabern. Für Android-App, deren Funktionsweise oder ihre Weiterentwicklung ist dieses Repository nicht zuständig.
+All rights in third-party projects and names remain with their respective owners.
 
 ## Screenshots
 
-Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.36 können abweichen.
+These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.37.
 
-### Dashboard am Desktop
+### Desktop dashboard
 
-![Desktop-Dashboard mit anonymisierten Beispieldaten](docs/screenshots/dashboard-desktop-demo.png)
+![Desktop overview with example financial data](docs/screenshots/dashboard-desktop-demo.png)
 
-### Mobile Ansicht
+### Mobile dashboard
 
-<img src="docs/screenshots/dashboard-mobil-demo.png" alt="Mobile Finanzübersicht mit anonymisierten Beispieldaten" width="340">
+<img src="docs/screenshots/dashboard-mobil-demo.png" alt="Mobile finance dashboard with sample data" width="340">
 
-### Buchungen erfassen
+### Enter a transaction
 
-![Buchungsformular mit anonymisiertem Beispielkonto](docs/screenshots/buchung-erfassen-demo.png)
+![Transaction-entry screen with example account](docs/screenshots/buchung-erfassen-demo.png)
 
-## Repository-Struktur
+## Repository layout
 
-| Pfad | Inhalt |
+| Location | Purpose |
 | --- | --- |
-| `package/` | Anwendungsquellcode, Docker-Dateien, `install.sh`, Oberfläche und Dokumentation |
-| `update.sh` | Update vorhandener Installationen einschließlich Sicherung |
-| `setup_financisto_sftp.sh` | Optionale Einrichtung für den SFTP-Import |
-| `README.txt` | Hinweise zum übernommenen Release v1.9.36 |
-| `package/CHANGELOG.md` | Versionshistorie |
-| `package/docs/` | Ausführliche Funktions- und Betriebsdokumentation |
+| `package/` | Application sources, Docker Compose files, `install.sh`, templates, assets and product documentation |
+| `update.sh` | Update an existing installation, including backup and validation |
+| `setup_financisto_sftp.sh` | Optional setup of a dedicated SFTP import account |
+| `README.txt` | Brief release notes in German |
+| `package/CHANGELOG.md` | Detailed German version history |
+| `package/CHANGELOG.en.md` | English release notes for recent versions |
+| `package/README.md` | Detailed setup and operation guide (German) |
+| `package/README.en.md` | English setup and operation guide |
+| `package/docs/` | Additional technical guides (currently primarily in German) |
 
-## Neuinstallation
+## Installation
 
-Repository klonen oder als ZIP herunterladen. Im ausgepackten Verzeichnis:
+Clone the repository or download its source ZIP. From the checkout root, run the installation script as the regular Linux project user, **not as root**:
 
 ```bash
 cd package
 ./install.sh
 ```
 
-Das Skript ist als regulärer Linux-Projektbenutzer **ohne sudo** auszuführen. Weitere Hinweise stehen in [package/README.md](package/README.md).
+The script guides you through initial configuration. See the [English installation and operations guide](package/README.en.md) or the [German original](package/README.md). Do **not** run the installer over an existing deployment.
 
-## Bestehende Installation aktualisieren
+## Updating an existing installation
 
-Quellcode **getrennt von der produktiven Installation** auschecken und im Repository-Hauptverzeichnis als Eigentümer der vorhandenen Installation ausführen:
+Check out the new version **in a separate directory**. Run the update script as the Linux account that owns the existing installation:
 
 ```bash
-./update.sh /pfad/zur/bestehenden/financisto-dashboard-installation
+./update.sh /path/to/existing/financisto-dashboard
 ```
 
-**Nicht** die vorhandenen Daten- und Konfigurationsverzeichnisse überschreiben. Das Update-Skript ist für die Datensicherung und die Übernahme der Programmdateien zuständig. Hinweise: [Backup & Restore](package/docs/BACKUP_RESTORE.md).
+The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
 
-## Datenschutz und Sicherheit
+For additional details see the [English operations guide](package/README.en.md) and [backup/restore documentation](package/docs/BACKUP_RESTORE.md) (German).
 
-Produktive SQLite-Datenbanken, Finanztransaktionen, Backups, Passwörter, private Schlüssel, Tokens, befüllte `.env`-Dateien und andere Laufzeitdaten gehören **nicht** in Git. Die Regeln in [`.gitignore`](.gitignore) schließen diese typischen Dateien aus. Vor jeder Veröffentlichung von Quellcode oder Releases muss der Inhalt dennoch kontrolliert werden.
+## Privacy and security
 
-## Lizenz
+**Never commit or publish** production SQLite databases, `.backup` files containing financial information, filled-in `.env` configurations, passwords, keys, tokens or other runtime secrets. The repository [`.gitignore`](.gitignore) excludes typical sensitive files, but every public release still requires an explicit privacy check. Example domains and IP addresses use documentation-only placeholders rather than private deployment details.
 
-Dieses Dashboard wird unter der **GNU General Public License, Version 2 (GPL-2.0-only)** angeboten. Die Lizenzbedingungen stehen in [LICENSE](LICENSE); Hinweise zu Projektzuordnung und Drittrechten in [NOTICE.md](NOTICE.md).
+## License
 
-Bei Verteilung der Software dürfen Empfänger ihre Kopie gemäß GPL v2 verwenden, verändern und weitergeben. Daraus entsteht **kein Schreibzugriff** auf dieses GitHub-Repository; den verwaltet ausschließlich dessen Eigentümer.
+Own dashboard components are distributed under the **GNU General Public License version 2 (GPL-2.0-only)**; see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Recipients may modify and redistribute their own copies subject to the GPL, but this **does not grant write permission** to this repository. The original Financisto Android app is also licensed under GPL v2; compatibility does not imply endorsement or transfer of third-party branding rights.
 
-Das ursprüngliche Android-Projekt Financisto steht ebenfalls unter GPL v2. Die Lizenzierung dieses Dashboards begründet weder eine offizielle Zugehörigkeit noch eine Freigabe fremder Marken oder Grafiken.
+## Downloads and versioned releases
 
-## Downloads und Releases
+[**Download the latest release**](https://github.com/renfie/financisto-dashboard/releases/latest) or browse the [release history](https://github.com/renfie/financisto-dashboard/releases). Each release includes a complete Docker installation/update ZIP archive and its SHA256 checksum.
 
-Über **Code → Download ZIP** lässt sich der aktuelle Quellstand herunterladen. Zusätzlich können versionierte ZIP-Pakete als **GitHub Releases** veröffentlicht werden.
+A GitHub Actions [release workflow](.github/workflows/release.yml) creates a new versioned release when `package/VERSION` changes on `main`. Publishing is **not automatic when we discuss or edit code in ChatGPT**; source changes first need to be committed to GitHub and the version needs to be updated. Release notes are available in both English and German.
 
-**Automatische Veröffentlichung:** Der Workflow [Release erstellen](.github/workflows/release.yml) erstellt beim ersten Durchlauf sowie bei neuen Versionsständen in `package/VERSION` einen vollständigen Release-ZIP-Download mit SHA256-Prüfsumme. Bereits veröffentlichte Versionen bleiben unverändert. Alternativ kann der Workflow unter **Actions → Build and publish Financisto Dashboard release → Run workflow** manuell gestartet werden.
-
-Alle fertigen Versionen stehen unter [GitHub Releases](https://github.com/renfie/financisto-dashboard/releases). Solange das Repository privat ist, sind die Releases nur für Zugriffsberechtigte erreichbar. Öffentliche Downloads erfordern die Umstellung des Repositories auf **Public**.
+The repository and downloadable releases are public. Only authorized collaborators can modify the official repository.
