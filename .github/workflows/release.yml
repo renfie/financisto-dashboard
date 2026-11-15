@@ -39,6 +39,17 @@ jobs:
           [[ -f package/docs/CADDY.en.md && -f package/docs/CADDY.de.md ]] || exit 1
           bash -n update.sh
           bash -n package/install.sh
+          node --check package/static/i18n.js
+          python3 - <<'PYVERIFY'
+          import ast
+          from pathlib import Path
+          for py in Path('package/src').glob('*.py'):
+              ast.parse(py.read_text(encoding='utf-8'), filename=str(py))
+          assert "DEFAULT_LANGUAGE" in Path('package/compose.yaml').read_text()
+          assert "set_interface_language" in Path('package/src/app.py').read_text()
+          assert "choose_install_language" in Path('package/src/setup_secrets.py').read_text()
+          print('Checked Python syntax and language configuration')
+          PYVERIFY
           # Prevent repeat of the v1.9.37 bug (hard-coded package version in update.sh).
           if grep -Eq "VERSION'\)\.read_text.*== '1\.9\.[0-9]+'" update.sh; then
             echo 'Hard-coded update version check detected. Aborting.'
@@ -119,6 +130,16 @@ jobs:
             --title "Financisto-Dashboard v${VERSION}" \
             --notes-file release-notes.md \
             --latest
+
+      - name: Save release archive for verification and download handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: financisto-release-v${{ steps.version.outputs.version }}
+          path: |
+            financisto-dashboard-v${{ steps.version.outputs.version }}.zip
+            financisto-dashboard-v${{ steps.version.outputs.version }}.zip.sha256
+          retention-days: 3
+          if-no-files-found: error
 
       - name: Verify the new public download and retire obsolete v1.9.37
         if: ${{ steps.version.outputs.version == '1.9.38' }}

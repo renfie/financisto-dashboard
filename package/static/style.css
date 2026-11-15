@@ -727,3 +727,15 @@
 .push-preview p{margin:3px 0;font-size:.88rem;white-space:pre-line;overflow-wrap:anywhere}
 .push-preview #push-example-title{font-weight:700}
 @media(max-width:480px){.push-preferences-form button[type=submit]{width:100%;min-height:44px}}
+
+/* Bilingual interface: available on login, desktop and mobile. */
+.locale-toggle {display:inline-flex;align-items:center;gap:3px;margin-inline-start:auto;padding:3px;border:1px solid #70899370;border-radius:999px;background:#102b3540;z-index:12}
+.locale-form {margin:0;display:inline-flex}
+.locale-choice {display:inline-block;min-width:35px;padding:5px 7px;border:0;border-radius:999px;background:transparent;color:inherit;font-size:.78rem;font-weight:700;cursor:pointer;line-height:1.35}
+.locale-choice.current {background:#c5dde7;color:#112e36}
+.locale-choice:focus-visible {outline:2px solid #d2eefa;outline-offset:2px}
+@media(max-width:680px){.locale-toggle{flex-shrink:0;margin-inline-start:auto}.locale-choice{min-width:30px;padding:4px 6px}}
+
+.sidebar-language {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 15px;color:#d7ecef;font-size:.81rem}
+.sidebar-language .locale-toggle {margin:0}
+@media(max-width:1080px){.sidebar-language{display:none}}

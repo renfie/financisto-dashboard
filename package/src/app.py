@@ -51,6 +51,17 @@ INITIAL_IP = read_secret('INITIAL_IP_FILE', str(BASE / 'secrets' / 'initial_ip')
 
 
 app = Flask(__name__)
+# The installer sets the default language. Individual visitors can switch it
+# for the current browser session without changing any financial records.
+DEFAULT_LANGUAGE = os.getenv('DEFAULT_LANGUAGE', 'de').strip().lower()
+if DEFAULT_LANGUAGE not in ('de', 'en'):
+    DEFAULT_LANGUAGE = 'de'
+
+
+def interface_language():
+    requested = session.get('ui_language')
+    return requested if requested in ('de', 'en') else DEFAULT_LANGUAGE
+
 app.config.update(SECRET_KEY=SECRET, SESSION_COOKIE_SECURE=True,
                   SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict',
                   PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
@@ -278,7 +289,23 @@ def current_user():
 
 @app.context_processor
 def inject_user():
-    return {'viewer': current_user(), **APP_BRANDING}
+    return {'viewer': current_user(), 'ui_language': interface_language(), **APP_BRANDING}
+
+
+@app.post('/language')
+def set_interface_language():
+    # CSRF must be verified even for presentation-only session changes.
+    if not csrf_ok():
+        abort(400)
+    desired = request.form.get('language', '')
+    if desired not in ('de', 'en'):
+        abort(400)
+    session['ui_language'] = desired
+    # Redirect only to an on-site relative URL, never a user-supplied host.
+    destination = request.form.get('return_to', '/')
+    if not destination.startswith('/') or destination.startswith('//') or '\\' in destination:
+        destination = '/'
+    return redirect(destination, code=303)
 
 
 def login_required(f):
@@ -345,7 +372,11 @@ def pending_user():
 
 
 def complete_login(user):
+    # Keep the user's current language choice across the 2FA login transition.
+    chosen_language = session.get('ui_language')
     session.clear()
+    if chosen_language in ('de', 'en'):
+        session['ui_language'] = chosen_language
     session['logged_in'] = True
     session['user_id'] = user['id']
     session['auth_version'] = user['version']
@@ -465,7 +496,10 @@ def login():
             flash('Zu viele Anmeldeversuche. Bitte später erneut versuchen.', 'error')
         elif user and user['is_active'] and verify_password_hash(password, user['password_hash']):
             clear_attempts(key)
+            chosen_language = session.get('ui_language')
             session.clear()
+            if chosen_language in ('de', 'en'):
+                session['ui_language'] = chosen_language
             session['pending_user_id'] = user['id']
             session['pending_version'] = user['version']
             session.permanent = False

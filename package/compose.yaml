@@ -1,7 +1,7 @@
 name: financisto-dashboard
 services:
   dashboard:
-    image: financisto-dashboard:1.9.38
+    image: financisto-dashboard:1.9.39
     build: .
     container_name: financisto-dashboard-app
     restart: unless-stopped
@@ -16,6 +16,7 @@ services:
       # Editable in .env and preserved through future updates; no DB migration.
       APP_TITLE: ${APP_TITLE:-Financisto}
       APP_SUBTITLE: ${APP_SUBTITLE:-Dashboard}
+      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-de}
       APP_FOOTER: ${APP_FOOTER:-Privates Finanz-Dashboard · Daten bleiben auf deinem Server}
       # Only opt in AFTER the administrator enrolled TOTP and NPM HTTPS is configured.
       PUBLIC_ACCESS: ${PUBLIC_ACCESS:-0}
@@ -38,7 +39,7 @@ services:
       retries: 3
 
   background:
-    image: financisto-dashboard:1.9.38
+    image: financisto-dashboard:1.9.39
     container_name: financisto-dashboard-background
     restart: unless-stopped
     user: "${APP_UID:?APP_UID fehlt}:${APP_GID:?APP_GID fehlt}"
@@ -64,7 +65,7 @@ services:
       start_period: 10s
 
   notifications:
-    image: financisto-dashboard:1.9.38
+    image: financisto-dashboard:1.9.39
     container_name: financisto-dashboard-notifications
     restart: unless-stopped
     user: "${APP_UID:?APP_UID fehlt}:${APP_GID:?APP_GID fehlt}"

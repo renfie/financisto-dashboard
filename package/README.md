@@ -1,5 +1,13 @@
 **Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
 
+## Neu in v1.9.39 – Deutsch und Englisch
+- Bei der Neuinstallation kann zwischen Deutsch und Englisch gewählt werden; alle Dialoge und Installationshinweise werden entsprechend angezeigt.
+- Weboberfläche mit Umschalter DE / EN auf Anmeldeseite, Desktop und Mobilgeräten. Benutzer können die Sprache jederzeit ohne erneute Anmeldung wechseln.
+- Die Sprachwahl wird nur für die aktuelle Sitzung gespeichert; Standard aus `DEFAULT_LANGUAGE` in `.env`, ohne Datenbankmigration.
+- Übersetzungen sind lokal und schützen Buchungsdaten vor externen Übersetzungsdiensten.
+- [Sprachkonfiguration](docs/LANGUAGE.de.md) und [English guide](docs/LANGUAGE.en.md).
+- Bestehende Finanzdaten, Benutzer, 2FA, Caddy-Zertifikate und Importlogik bleiben unverändert.
+
 ## Neu in v1.9.38 – Updatekorrektur und Caddy-Dokumentation
 - Direkte Aktualisierung von v1.9.35 auf v1.9.38 ohne Zwischeninstallation möglich; die interne Versionsprüfung im Update-Skript verwendet die tatsächliche Releaseversion statt einer festen Versionsnummer.
 - [Caddy-/HTTPS-/NPM-Dokumentation auf Deutsch](docs/CADDY.de.md) sowie [auf Englisch](docs/CADDY.en.md).

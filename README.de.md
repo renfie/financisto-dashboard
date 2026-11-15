@@ -13,7 +13,7 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.38 · 15. November 2026 (Dokumentation, Datenschutz-Bereinigung und neues Release).
+**Aktueller Quellstand:** v1.9.39 · 15. November 2026 (Dokumentation, Datenschutz-Bereinigung und neues Release).
 
 ## Funktionen
 
@@ -36,7 +36,7 @@ Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Re
 
 ## Screenshots
 
-Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.38 können abweichen.
+Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.39 können abweichen.
 
 ### Dashboard am Desktop
 
@@ -50,13 +50,21 @@ Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**,
 
 ![Buchungsformular mit anonymisiertem Beispielkonto](docs/screenshots/buchung-erfassen-demo.png)
 
+## Deutsch und Englisch in der Weboberfläche
+
+Die Oberfläche lässt sich jetzt über **DE / EN** jederzeit zwischen Deutsch und Englisch umschalten – bereits bei der Anmeldung, auf dem Smartphone im Kopfbereich und am Desktop in der Seitenleiste. Der Wechsel erfordert **keine neue Anmeldung**. Die Auswahl gilt für die jeweilige Sitzung und wird nicht dauerhaft in den Finanzdaten oder Benutzerprofilen gespeichert. Nach dem Abmelden beziehungsweise Ablauf der Sitzung gilt wieder die Installationsvorgabe.
+
+Bei der **Neuinstallation fragt der Installer zuerst zweisprachig nach Deutsch oder Englisch** und führt die restliche Installation in dieser Sprache durch. Die Wahl wird als `DEFAULT_LANGUAGE=de` oder `DEFAULT_LANGUAGE=en` in der lokalen `.env` gespeichert. Bestehende Installationen bleiben standardmäßig deutsch, sofern der Administrator die Vorgabe nicht ausdrücklich ändert. Die Sprache kann trotzdem jederzeit über DE / EN gewechselt werden.
+
+Alle Übersetzungen befinden sich lokal im Programm; es werden keine Finanzdaten an Übersetzungsdienste gesendet. Vereinzelte ältere Spezial- oder Diagnosemeldungen können noch deutsch erscheinen. [Sprachkonfiguration (Deutsch)](package/docs/LANGUAGE.de.md) · [English](package/docs/LANGUAGE.en.md).
+
 ## Caddy und HTTPS
 
 **Caddy ist im Docker-Compose-Projekt bereits enthalten** und übernimmt internes HTTPS sowie die Weiterleitung zum Dashboard. Die mit `tls internal` erzeugte lokale Caddy-Zertifizierungsstelle und die Zertifikate liegen persistent in `caddy/data/`; beim Update bleiben sie erhalten. Wird zusätzlich Nginx Proxy Manager verwendet, benötigt dieser für externe Browser ein eigenes öffentlich vertrauenswürdiges HTTPS-Zertifikat.
 
 **Ausführliche Anleitung:** [Caddy, HTTPS und Nginx Proxy Manager auf Deutsch](package/docs/CADDY.de.md) · [English](package/docs/CADDY.en.md).
 
-**Update-Hinweis:** Von v1.9.35 kann direkt auf v1.9.38 aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
+**Update-Hinweis:** Von v1.9.35 kann direkt auf v1.9.39 aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
 
 ## Repository-Struktur
 

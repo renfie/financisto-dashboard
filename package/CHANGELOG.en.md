@@ -1,3 +1,11 @@
+## 1.9.39 — English and German web interface and installer (2026-11-15)
+- Bundled offline English translations for the web dashboard's navigation, forms, reports, settings and common notifications; the German original remains available.
+- DE / EN language control on sign-in, mobile header and desktop sidebar. Language can be changed at any time and is retained for the current session only.
+- Bilingual installer prompts for German or English at the beginning; the choice sets DEFAULT_LANGUAGE in the local .env file and controls subsequent install prompts.
+- No remote translation API, user-profile migration or changes to financial records, passwords, import logic or Caddy certificates.
+- English and German language documentation and bilingual release notes. A small number of rarely used legacy diagnostic messages may remain in German.
+- Supports updating directly from v1.9.35 to v1.9.39.
+
 ## 1.9.38 — Direct upgrade support and Caddy documentation (2026-11-15)
 - Fixed a release preflight bug: the updater now reads the actual version from `package/VERSION` instead of asserting version 1.9.36.
 - Supports updating directly from v1.9.35 to v1.9.38 without installing the intervening releases.

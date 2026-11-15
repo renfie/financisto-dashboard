@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 if [[ $(id -u) -eq 0 ]]; then
-  echo 'Bitte als normaler Projektbenutzer ohne sudo installieren.' >&2
+  echo 'Bitte als normaler Projektbenutzer ohne sudo installieren. / Install as a normal project user without sudo.' >&2
   exit 1
 fi
 if [[ $# -eq 0 ]]; then
@@ -12,6 +12,6 @@ elif [[ $# -eq 1 && $1 == '--verify' ]]; then
 elif [[ $# -eq 1 && $1 == '--resume' ]]; then
   exec python3 src/setup_secrets.py --resume
 else
-  echo 'Verwendung: ./install.sh [--verify|--resume]'
+  echo 'Verwendung / Usage: ./install.sh [--verify|--resume]'
   exit 2
 fi

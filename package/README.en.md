@@ -38,7 +38,7 @@ Do not install over an existing project directory or copy the release's `package
 Extract a newer release into **a different directory** from the production installation. Run the updater as the normal user who owns the existing project:
 
 ```bash
-/path/to/financisto-release-1.9.38/update.sh /path/to/existing/financisto-dashboard
+/path/to/financisto-release-1.9.39/update.sh /path/to/existing/financisto-dashboard
 ```
 
 A direct upgrade from v1.9.35 to v1.9.38 is supported: no intermediate version is required. The updater checks the directory structure, Docker access, file ownership and Python syntax before making changes. It backs up the prior source and uses SQLite's online backup API to create a consistent database snapshot. Configuration is preserved in the host's `.env` and secrets remain on the host.
@@ -79,7 +79,7 @@ Never publish or commit real `.env` files, SQLite databases, user backups, perso
 
 ## Branding and language
 
-The application interface is **currently German**. This English guide documents the project; it does not yet provide an English language setting inside the dashboard.
+The application now supports **German and English**. Use the DE / EN control on the login screen or in the navigation to switch for the current session. The installer asks for a language at setup; its choice becomes the default and can be overridden by every user. The chosen interface language is not saved in financial data or user profiles. See [Language settings](docs/LANGUAGE.en.md).
 
 Existing display names such as `APP_TITLE`, `APP_SUBTITLE`, and `APP_FOOTER` can be customized in `.env`. Their configured values survive normal updates.
 

@@ -12,7 +12,7 @@
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Current release:** [v1.9.38](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This maintenance release fixes version validation in the updater and adds detailed Caddy documentation. It does not change accounting logic or stored financial data.
+**Current release:** [v1.9.39](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This release adds a switchable English/German web interface and a bilingual first-time installer. Accounting and stored financial records are unchanged.
 
 ## Features
 
@@ -35,7 +35,7 @@ All rights in third-party projects and names remain with their respective owners
 
 ## Screenshots
 
-These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.38.
+These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.39.
 
 ### Desktop dashboard
 
@@ -48,6 +48,14 @@ These screenshots show **real dashboard layouts with example data substituted fo
 ### Enter a transaction
 
 ![Transaction-entry screen with example account](docs/screenshots/buchung-erfassen-demo.png)
+
+## Languages: English and German
+
+The web interface supports **German (DE) and English (EN)**. Use the **DE / EN switch** on the sign-in screen, mobile header or desktop sidebar. Switching applies immediately after reloading the current page and **does not require a new login**. The selection is stored in the browser's protected application session, not in financial database tables or in permanent user profile records; it resets to the installation default after logout or session expiry.
+
+The **first-time installer is bilingual**: its first prompt asks for **Deutsch / English**, and subsequent setup prompts are displayed in the chosen language. This choice sets `DEFAULT_LANGUAGE=de` or `DEFAULT_LANGUAGE=en` in the newly created `.env`. On an existing installation, `DEFAULT_LANGUAGE` is optional and defaults to German; every user can still switch in the web UI.
+
+Translations are bundled locally; no third-party translation service receives financial data. A few specialized or legacy diagnostic messages may still be shown in German. See [language configuration (English)](package/docs/LANGUAGE.en.md) or [Deutsch](package/docs/LANGUAGE.de.md).
 
 ## Built-in Caddy HTTPS reverse proxy
 
@@ -88,7 +96,7 @@ Check out the new version **in a separate directory**. Run the update script as 
 ./update.sh /path/to/existing/financisto-dashboard
 ```
 
-Updates can be applied **directly from v1.9.35 to v1.9.38**; no intermediate v1.9.36/v1.9.37 update is necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
+Updates can be applied **directly from v1.9.35 to v1.9.39**; no intermediate v1.9.36/v1.9.37 update is necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
 
 For additional details see the [English operations guide](package/README.en.md) and [backup/restore documentation](package/docs/BACKUP_RESTORE.md) (German).
 

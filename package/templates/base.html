@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="{{ ui_language|default('de') }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="{{ url_for('static',filename='style.css',v=app_version) }}">
   <link rel="stylesheet" href="{{ url_for('static',filename='wolves-theme.css',v=app_version) }}">
   <link rel="stylesheet" href="{{ url_for('static',filename='mobile.css',v=app_version) }}">
+  <script defer src="{{ url_for('static',filename='i18n.js',v=app_version) }}"></script>
   <script defer src="{{ url_for('static',filename='app.js',v=app_version) }}"></script>
   <script defer src="{{ url_for('static',filename='mobile.js',v=app_version) }}"></script>
   {% if viewer %}<meta name="tour-csrf" content="{{ csrf_token() }}">
@@ -47,12 +48,33 @@
   <aside class="app-sidebar" aria-label="Seitennavigation">
     <a class="sidebar-brand" href="{{ url_for('dashboard') }}"><img class="brand-wolf" src="{{ url_for('static',filename='sea-wolves-logo.webp') }}" alt="" width="59" height="59"><span class="brand-name"><strong>{{ app_title }}</strong><small>{{ app_subtitle }} · Version {{ app_version }}</small><span class="brand-tag">Deine Finanzen im Blick</span></span></a>
     <nav class="sidebar-nav" aria-label="Hauptnavigation">{{ menu_entries() }}</nav>
+    <div class="sidebar-language" role="group" aria-label="Language / Sprache">
+      <span class="sidebar-language-label">Sprache / Language</span>
+      <div class="locale-toggle">
+      {% for language in ('de','en') %}
+      <form method="post" action="{{ url_for('set_interface_language') }}" class="locale-form">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="return_to" value="{{ request.full_path if request.query_string else request.path }}">
+        <button type="submit" name="language" value="{{ language }}" class="locale-choice {{ 'current' if ui_language == language else '' }}" aria-pressed="{{ 'true' if ui_language == language else 'false' }}">{{ language|upper }}</button>
+      </form>
+      {% endfor %}
+      </div>
+    </div>
     <div class="sidebar-bottom">{{ app_footer }}</div>
   </aside>
 {% endif %}
   <div class="app-main-column">
     <header class="topbar">
       <a class="brand" href="{{ url_for('dashboard') }}"><img class="brand-wolf" src="{{ url_for('static',filename='sea-wolves-logo.webp') }}" alt="" width="48" height="48">{{ app_title }} <span class="brand-secondary">{{ app_subtitle }}</span></a>
+      <div class="locale-toggle" role="group" aria-label="Language / Sprache">
+        {% for language in ('de','en') %}
+        <form method="post" action="{{ url_for('set_interface_language') }}" class="locale-form">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="return_to" value="{{ request.full_path if request.query_string else request.path }}">
+          <button type="submit" name="language" value="{{ language }}" class="locale-choice {{ 'current' if ui_language == language else '' }}" aria-label="{{ 'Deutsch' if language == 'de' else 'English' }}" aria-pressed="{{ 'true' if ui_language == language else 'false' }}">{{ language|upper }}</button>
+        </form>
+        {% endfor %}
+      </div>
       {% if session.get('logged_in') %}
       <button class="mobile-menu-toggle" type="button" aria-label="Menü öffnen" aria-controls="mobile-nav" aria-expanded="false"><span aria-hidden="true">☰</span><span>Menü</span></button>
       <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation" hidden>{{ menu_entries() }}</nav>

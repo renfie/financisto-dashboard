@@ -182,7 +182,7 @@ mkdir -p "$TARGET/src" "$TARGET/docs"
 [[ ! -L "$TARGET/src" && ! -L "$TARGET/docs" ]] || error 'src/docs sind symbolische Links; Abbruch.'
 cp -R "$SOURCE/src/." "$TARGET/src/"
 cp -R "$SOURCE/docs/." "$TARGET/docs/"
-for name in restore.sh compose.yaml Caddyfile Dockerfile install.sh requirements.txt README.md CHANGELOG.md VERSION .dockerignore .gitignore; do
+for name in restore.sh compose.yaml Caddyfile Dockerfile install.sh requirements.txt README.md README.en.md CHANGELOG.md CHANGELOG.en.md VERSION .dockerignore .gitignore; do
   cp -f "$SOURCE/$name" "$TARGET/$name"
 done
 cp -R "$SOURCE/templates/." "$TARGET/templates/"

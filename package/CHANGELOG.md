@@ -1,3 +1,11 @@
+## 1.9.39 – Deutsche und englische Weboberfläche und Installation (15.11.2026)
+- Bisherige deutschsprachige Oberfläche erhält vollständige lokale Übersetzungstabellen für Navigation, Formulare, Berichte, Einstellungen und zentrale Systemmeldungen.
+- Umschalter DE / EN bereits bei der Anmeldung, auf Mobilgeräten und in der Desktop-Seitenleiste; die Wahl gilt pro Sitzung und ist jederzeit änderbar.
+- Installer fragt bei der Neuinstallation zweisprachig nach Deutsch/Englisch und verwendet die gewählte Sprache für Einrichtungsdialoge. Die Installationsvorgabe wird in der lokalen .env als DEFAULT_LANGUAGE gespeichert.
+- Keine externe Übersetzungs-API, keine Migration der Finanzdaten, keine dauerhafte Speicherung der individuellen Sprachwahl.
+- Ergänzte zweisprachige Installations-, Sprach- und Release-Dokumentation. Einzelne seltene ältere Diagnosemeldungen können weiterhin deutsch erscheinen.
+- Direkter Updatepfad von v1.9.35 auf v1.9.39, ohne Zwischenversion.
+
 ## 1.9.38 – Direkter Versionssprung und Caddy-Dokumentation (15.11.2026)
 - Fehler in der Update-Vorprüfung behoben: Die Prüfung verwendet die Versionsnummer aus `package/VERSION` statt des früher hart codierten Wertes 1.9.36.
 - Direkter Updatepfad von v1.9.35 auf v1.9.38, ohne v1.9.36 oder v1.9.37 dazwischen zu installieren.

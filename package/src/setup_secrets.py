@@ -23,6 +23,109 @@ BASE = Path(__file__).resolve().parent.parent
 SECRETS = BASE / 'secrets'
 ENV = BASE / '.env'
 
+# Language is selected before the interactive first-time installer starts.
+# The installed DEFAULT_LANGUAGE is only a default: each browser can switch
+# language via DE / EN independently during its current session.
+import builtins as _builtins
+_ORIGINAL_INPUT = _builtins.input
+_ORIGINAL_PRINT = _builtins.print
+_ORIGINAL_GETPASS = getpass.getpass
+INSTALL_LANGUAGE = 'de'
+
+_INSTALL_EN = {
+    'Bitte als normaler Benutzer ohne sudo installieren.': 'Install as a normal user without sudo.',
+    'Installation muss als Projektbenutzer ausgeführt werden.': 'Please run the installer as the project owner.',
+    'Bitte genau eine gültige IPv4- oder IPv6-Adresse eingeben.': 'Enter exactly one valid IPv4 or IPv6 address.',
+    'IP oder DNS-Name des Docker-Servers für HTTPS (ohne Port): ': 'Docker server IP or DNS hostname for HTTPS (without port): ',
+    'Ungültiger Hostname oder Server-IP.': 'Invalid server hostname or IP address.',
+    'HTTPS-Port auf dem Host [8443]: ': 'HTTPS port on host [8443]: ',
+    'Ungültiger Port (1–65535).': 'Invalid port number (1–65535).',
+    'Sicheres Admin-Passwort automatisch generieren? [J/n]: ': 'Automatically generate a secure admin password? [Y/n]: ',
+    'Admin-Passwort (mind. 12 Zeichen): ': 'Admin password (at least 12 characters): ',
+    'Passwort wiederholen: ': 'Repeat password: ',
+    'Passwort zu kurz oder Eingaben stimmen nicht überein.': 'Password is too short or entries do not match.',
+    'Das Passwort darf keine Zeilenumbrüche enthalten.': 'Password must not contain line breaks.',
+    'Ersteinrichtung Financisto-Dashboard': 'Financisto Dashboard initial setup',
+    'Das erste freigegebene Gerät sollte eine feste IP/DHCP-Reservierung besitzen.': 'The first authorized device should have a static IP or DHCP reservation.',
+    'IP-Adresse des ersten freigegebenen PCs: ': 'IP address of the first authorized computer: ',
+    'Secrets und Bind-Mounts eingerichtet.': 'Secrets and persistent bind mounts configured.',
+    '\nNEUES ADMIN-PASSWORT (nur einmal angezeigt):': '\nNEW ADMIN PASSWORD (displayed only once):',
+    'Bitte sofort sicher verwahren und nicht in Tickets/Chats kopieren.\n': 'Store it securely now; never copy it into tickets or chats.\n',
+    'Starte zunächst nur die Anwendung.': 'Starting only the application first.',
+    'Prüfe das Installationspasswort mit der echten Anmeldefunktion im Container ...': 'Verifying the installation password using the real login function inside the container ...',
+    'PASSWORTPRÜFUNG IM CONTAINER ERFOLGREICH': 'PASSWORD VERIFIED SUCCESSFULLY INSIDE THE CONTAINER',
+    'Benutzername: admin': 'Username: admin',
+    'Caddy verwendet eine lokale CA. Root-Zertifikat auf freigegebenen PCs installieren.': 'Caddy uses a local CA. Install its root certificate on authorized computers.',
+    'Aktuelles Admin-Passwort zum Prüfen (keine Änderung): ': 'Current admin password for verification (no changes): ',
+    'Bestehendes Admin-Passwort (keine Änderung): ': 'Existing admin password (no changes): ',
+    'Installation fortgesetzt. Keine Secrets überschrieben.': 'Setup resumed. No existing secrets were overwritten.',
+    'Installation oder Admin-Secret fehlt; nichts verändert.': 'Installation or admin secret is missing; nothing was changed.',
+    'Unvollständige Installationsdateien, keine Secrets geändert.': 'Incomplete installation files; no secrets changed.',
+    'Verwendung: install.sh [--verify|--resume]': 'Usage: install.sh [--verify|--resume]',
+    'Die Passwortprüfung in der laufenden Anwendung war nicht erfolgreich.': 'Password verification inside the running application failed.',
+    'Diese Instanz ist bereits eingerichtet. Es wurden keine Daten oder Zugangsdaten verändert. Für Updates: docker compose up -d --build. Zum Login-Test: ./install.sh --verify.': 'This installation already exists. No data or credentials were changed. For updates, use the release update.sh. To verify login: ./install.sh --verify.',
+    'INSTALLATION NICHT ABGESCHLOSSEN: Passwort wurde vom laufenden Dashboard nicht bestätigt. Caddy wurde deshalb nicht gestartet. Prüfe die Dashboard-Logs und den Secret-Mount, ohne Secrets zu löschen.': 'INSTALLATION INCOMPLETE: The dashboard did not confirm the password. Caddy was not started. Check dashboard logs and the secret mount without deleting secrets.',
+    'PASSWORTPRÜFUNG FEHLGESCHLAGEN: ': 'PASSWORD VERIFICATION FAILED: ',
+    'Installation nicht vollständig: Docker-Befehl fehlgeschlagen (Exit ': 'Installation incomplete: Docker command failed (Exit ',
+    'Die angelegten Secrets und Daten bleiben erhalten.': 'Created secrets and data remain intact.',
+}
+
+
+def t(message):
+    text = str(message)
+    if INSTALL_LANGUAGE != 'en':
+        return text
+    normalized = ' '.join(text.split())
+    if normalized in _INSTALL_EN:
+        return _INSTALL_EN[normalized]
+    for german, english in _INSTALL_EN.items():
+        if text.startswith(german) and len(german) > 10:
+            return english + text[len(german):]
+    if text.startswith('Port ') and 'ist bereits belegt' in text:
+        return text.replace('ist bereits belegt. Bitte einen anderen Port wählen.', 'is already in use. Choose another port.')
+    if text.startswith('\nInstallation abgeschlossen. URL:'):
+        return text.replace('Installation abgeschlossen', 'Installation complete')
+    return text
+
+
+def input(prompt=''):
+    return _ORIGINAL_INPUT(t(prompt))
+
+
+def print(*args, **kwargs):
+    return _ORIGINAL_PRINT(*(t(x) if isinstance(x, str) else x for x in args), **kwargs)
+
+
+def password_prompt(prompt=''):
+    return _ORIGINAL_GETPASS(t(prompt))
+
+getpass.getpass = password_prompt
+
+
+def choose_install_language():
+    global INSTALL_LANGUAGE
+    while True:
+        answer = _ORIGINAL_INPUT('Sprache wählen / Select language [1=Deutsch, 2=English] (1): ').strip().lower()
+        if answer in ('', '1', 'de', 'deutsch', 'german'):
+            INSTALL_LANGUAGE = 'de'
+            return
+        if answer in ('2', 'en', 'english', 'englisch'):
+            INSTALL_LANGUAGE = 'en'
+            return
+        _ORIGINAL_PRINT('Bitte 1 oder 2 eingeben / Please enter 1 or 2.')
+
+
+def use_installed_language():
+    global INSTALL_LANGUAGE
+    if ENV.exists():
+        for line in ENV.read_text(encoding='utf-8').splitlines():
+            if line.startswith('DEFAULT_LANGUAGE='):
+                selected = line.partition('=')[2].strip().strip('"\'').lower()
+                if selected in ('en', 'de'):
+                    INSTALL_LANGUAGE = selected
+                return
+
+
 # IMPORTANT: Same secret names and format as the released app.py. Changing
 # this format without changing the application would break existing logins.
 def project_owner():
@@ -80,7 +183,7 @@ def ask_https_port():
 
 def ask_password():
     mode = input('Sicheres Admin-Passwort automatisch generieren? [J/n]: ').strip().lower()
-    if mode not in ('n', 'nein'):
+    if mode not in ('n', 'nein', 'no'):
         return secrets.token_urlsafe(24), True
     while True:
         password = getpass.getpass('Admin-Passwort (mind. 12 Zeichen): ')
@@ -166,7 +269,7 @@ def install():
         owner_path(path,uid,gid)
     owner_path(SECRETS,uid,gid)
     ENV.write_text(
-        f'SITE_HOST={host}\nSITE_ADDRESSES=https://{host}\nTRUSTED_PROXY_IPS=127.0.0.1/32\nHTTPS_PORT={port}\nHTTPS_BIND_IP=0.0.0.0\nAPP_UID={uid}\nAPP_GID={gid}\nAPP_TITLE="Financisto"\nAPP_SUBTITLE="Dashboard"\nAPP_FOOTER="Privates Finanz-Dashboard · Daten bleiben auf deinem Server"\n',
+        f'SITE_HOST={host}\nSITE_ADDRESSES=https://{host}\nTRUSTED_PROXY_IPS=127.0.0.1/32\nHTTPS_PORT={port}\nHTTPS_BIND_IP=0.0.0.0\nAPP_UID={uid}\nAPP_GID={gid}\nAPP_TITLE="Financisto"\nAPP_SUBTITLE="Dashboard"\nAPP_FOOTER="Privates Finanz-Dashboard · Daten bleiben auf deinem Server"\nDEFAULT_LANGUAGE={INSTALL_LANGUAGE}\n',
         encoding='utf-8',
     )
     ENV.chmod(0o600)
@@ -213,7 +316,7 @@ def verify():
     password = getpass.getpass('Aktuelles Admin-Passwort zum Prüfen (keine Änderung): ')
     ok, error = verify_password_in_container(password)
     if not ok:
-        raise SystemExit('PASSWORTPRÜFUNG FEHLGESCHLAGEN: ' + error)
+        raise SystemExit(t('PASSWORTPRÜFUNG FEHLGESCHLAGEN: ') + t(error))
     print('PASSWORTPRÜFUNG IM CONTAINER ERFOLGREICH')
 
 
@@ -232,6 +335,10 @@ def resume():
 
 def main():
     os.umask(0o077)
+    if len(sys.argv) == 2 and sys.argv[1] == '--install':
+        choose_install_language()
+    else:
+        use_installed_language()
     if len(sys.argv) == 2 and sys.argv[1] == '--verify':
         verify()
     elif len(sys.argv) == 2 and sys.argv[1] == '--resume':
@@ -251,4 +358,6 @@ if __name__ == '__main__':
             'Die angelegten Secrets und Daten bleiben erhalten.'
         ) from None
     except RuntimeError as exc:
-        raise SystemExit(str(exc)) from None
+        raise SystemExit(t(str(exc))) from None
+    except SystemExit as exc:
+        raise SystemExit(t(str(exc))) from None
