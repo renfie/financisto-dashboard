@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Financisto Dashboard 1.9.37 – bereinigtes öffentliches Release.
+# Financisto Dashboard update script: supports direct upgrades to the packaged VERSION.
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -18,6 +18,8 @@ else
   TARGET="$SCRIPT_DIR"
 fi
 SOURCE="$RELEASE_DIR/package"
+RELEASE_VERSION="$(tr -d '[:space:]' < "$SOURCE/VERSION")"
+[[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Ungültige Releaseversion.' >&2; exit 1; }
 
 error() { printf '\nFEHLER: %s\n' "$*" >&2; exit 1; }
 [[ $EUID -ne 0 ]] || error 'Update bitte als Projektbenutzer ohne sudo ausführen; als Root ist ein versehentlicher Besitzwechsel möglich.'
@@ -45,7 +47,7 @@ for command in docker; do $command info >/dev/null 2>&1 || error "Docker ist fü
 printf 'Projektbenutzer: %s (UID %s, GID %s) – kein sudo erforderlich\n' "$OWNER_USER" "$OWNER_UID" "$OWNER_GID"
 
 # Parse before copying; no bytecode or state files are written to the project.
-SOURCE_DIR="$SOURCE" python3 - <<'PY'
+SOURCE_DIR="$SOURCE" EXPECTED_RELEASE_VERSION="$RELEASE_VERSION" python3 - <<'PY'
 import ast, os
 from pathlib import Path
 base = Path(os.environ['SOURCE_DIR'])
@@ -66,7 +68,7 @@ dockerfile = (base / 'Dockerfile').read_text(encoding='utf-8')
 copied_py = {p.stem for p in (base/'src').glob('*.py')}
 assert 'COPY src/ ./' in dockerfile, 'Dockerfile kopiert die neuen src-Dateien nicht.'
 assert 'COPY VERSION ./VERSION' in dockerfile, 'Version muss im Docker-Image vorhanden sein.'
-assert (base/'VERSION').read_text(encoding='utf-8').strip() == '1.9.36', 'Falsche Releaseversion.'
+assert (base/'VERSION').read_text(encoding='utf-8').strip() == os.environ['EXPECTED_RELEASE_VERSION'], 'Falsche Releaseversion.'
 imports = set()
 for stmt in ast.walk(ast.parse(app)):
     if isinstance(stmt, ast.ImportFrom) and stmt.module:
@@ -332,5 +334,5 @@ if [[ -d "$TARGET/__pycache__" && ! -L "$TARGET/__pycache__" ]]; then
   rmdir "$TARGET/__pycache__" 2>/dev/null || true
 fi
 
-printf '\nUPDATE 1.9.36 ERFOLGREICH.\nBackup: %s\nAusgeführt als %s (UID %s, GID %s); bestehende Eigentümer unverändert.\n' "$BACKUP_DIR" "$OWNER_USER" "$OWNER_UID" "$OWNER_GID"
+printf '\nUPDATE %s ERFOLGREICH.\nBackup: %s\nAusgeführt als %s (UID %s, GID %s); bestehende Eigentümer unverändert.\n' "$RELEASE_VERSION" "$BACKUP_DIR" "$OWNER_USER" "$OWNER_UID" "$OWNER_GID"
 echo 'Verwende die bestehende Dashboard-Adresse und dein bisheriges Administratorpasswort.'
