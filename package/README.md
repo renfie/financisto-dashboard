@@ -1,5 +1,11 @@
 **Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
 
+## Neu in v1.9.38 – Updatekorrektur und Caddy-Dokumentation
+- Direkte Aktualisierung von v1.9.35 auf v1.9.38 ohne Zwischeninstallation möglich; die interne Versionsprüfung im Update-Skript verwendet die tatsächliche Releaseversion statt einer festen Versionsnummer.
+- [Caddy-/HTTPS-/NPM-Dokumentation auf Deutsch](docs/CADDY.de.md) sowie [auf Englisch](docs/CADDY.en.md).
+- Keine Änderung an Buchungslogik, Finanzdaten, Passwörtern oder bestehender Caddy-CA.
+
+
 ## Neu in v1.9.36
 
 - Dashboard-Buchungen auf Smartphone und Tablet kompakt: Text, Datum, Konto und Betrag; per Fingertipp Details und berechtigte Aktionen einblenden.
