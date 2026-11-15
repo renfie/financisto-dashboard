@@ -1,3 +1,11 @@
+## 1.9.37 – Bereinigtes öffentliches Release und zweisprachige GitHub-Dokumentation (15.11.2026)
+- GitHub-Startseite vollständig auf Englisch, zusätzliche deutsche README und Sprachlinks.
+- Englische Installations-/Betriebsanleitung; bestehende ausführliche deutsche Anleitung bleibt erhalten.
+- Datenschutzbereinigte Screenshots in der Projektbeschreibung.
+- Private Hostnamen und interne IP-Adressen aus veröffentlichten Beispielen/Standardwerten entfernt; produktive Werte in der vorhandenen .env werden beim Update beibehalten.
+- Englische und deutsche Release-Hinweise sowie vollständiges ZIP mit SHA256-Prüfsumme.
+- Keine Änderungen an Finanzdaten, Buchungslogik, Importarten, Benutzerkonten oder Secrets.
+
 ## 1.9.36 – Kompakte Dashboard-Buchungsliste (14.11.2026)
 - Smartphone- und Tablet-Ansicht: kurze Buchungszeilen mit Betrag, Datum, Buchungstext und Konto; Details erst auf Fingertipp.
 - Ausklappdetails enthalten Kategorie, Empfänger, Notiz, Kontostand nach Buchung und bei Umbuchungen Quell- und Zielkonto.
