@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Financisto Dashboard 1.9.36 – konsistente Versionsanzeige nach Aufräumen.
+# Financisto Dashboard 1.9.37 – bereinigtes öffentliches Release.
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
