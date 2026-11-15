@@ -32,6 +32,22 @@ Dieses Dashboard ist eine **eigenständige Webanwendung** und **keine offizielle
 
 Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Rechteinhabern. Für Android-App, deren Funktionsweise oder ihre Weiterentwicklung ist dieses Repository nicht zuständig.
 
+## Screenshots
+
+Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.36 können abweichen.
+
+### Dashboard am Desktop
+
+![Desktop-Dashboard mit anonymisierten Beispieldaten](docs/screenshots/dashboard-desktop-demo.png)
+
+### Mobile Ansicht
+
+<img src="docs/screenshots/dashboard-mobil-demo.png" alt="Mobile Finanzübersicht mit anonymisierten Beispieldaten" width="340">
+
+### Buchungen erfassen
+
+![Buchungsformular mit anonymisiertem Beispielkonto](docs/screenshots/buchung-erfassen-demo.png)
+
 ## Repository-Struktur
 
 | Pfad | Inhalt |
