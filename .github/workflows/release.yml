@@ -36,6 +36,13 @@ jobs:
             exit 1
           fi
           [[ -f package/src/app.py && -f package/install.sh && -f update.sh && -f LICENSE ]] || exit 1
+          [[ -f package/docs/CADDY.en.md && -f package/docs/CADDY.de.md ]] || exit 1
+          bash -n update.sh package/install.sh
+          # Prevent repeat of the v1.9.37 bug (hard-coded package version in update.sh).
+          if grep -Eq "VERSION'\)\.read_text.*== '1\.9\.[0-9]+'" update.sh; then
+            echo 'Hard-coded update version check detected. Aborting.'
+            exit 1
+          fi
           if grep -r -l -E 'finance[.]fieler[.]de|192[.]168[.]2[.]61|192[.]168[.]2[.]100' package update.sh setup_financisto_sftp.sh; then
             echo 'A private host/IP remains in release source. Aborting.'
             exit 1
