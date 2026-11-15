@@ -1,3 +1,9 @@
+## 1.9.38 – Direkter Versionssprung und Caddy-Dokumentation (15.11.2026)
+- Fehler in der Update-Vorprüfung behoben: Die Prüfung verwendet die Versionsnummer aus `package/VERSION` statt des früher hart codierten Wertes 1.9.36.
+- Direkter Updatepfad von v1.9.35 auf v1.9.38, ohne v1.9.36 oder v1.9.37 dazwischen zu installieren.
+- Integrierten Caddy-Dienst mit HTTPS, eigener lokaler CA, optionaler Nginx-Proxy-Manager-Anbindung, .env-Konfiguration und dauerhaft gespeicherten Zertifikaten in englischer und deutscher Anleitung dokumentiert.
+- Das bestehende Caddy-/Finanzdaten-Verzeichnis, Zertifikate, Benutzerkonten, Import und Buchungslogik werden durch diese Korrektur nicht verändert.
+
 ## 1.9.37 – Bereinigtes öffentliches Release und zweisprachige GitHub-Dokumentation (15.11.2026)
 - GitHub-Startseite vollständig auf Englisch, zusätzliche deutsche README und Sprachlinks.
 - Englische Installations-/Betriebsanleitung; bestehende ausführliche deutsche Anleitung bleibt erhalten.
