@@ -1,3 +1,7 @@
+## Neu in v1.9.53
+
+Beim Antippen des Empfängerfelds werden bekannte Empfänger jetzt sofort alphabetisch vorgeschlagen – auch ohne Suchtext. Beim Tippen wird gefiltert. Das gemeinsam für Empfänger und Kategorien einstellbare Admin-Limit (Standard 20) bleibt erhalten; neue Empfänger sind weiterhin frei eingebbar.
+
 ## Neu in v1.9.52
 
 Die Anzahl der Vorschläge für Empfänger und Kategorien lässt sich in den Admin-Einstellungen auf 1–100 setzen (Standard: 20). Änderungen gelten ohne Neustart oder neues Release.
@@ -26,7 +30,7 @@ Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompa
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktuelles öffentliches Release:** v1.9.49 · 16. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.49).
+**Aktuelles öffentliches Release:** v1.9.53 · 16. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.53).
 
 
 ### Version 1.9.46 – Cashflow, Zeitraumfilter und kompakte Buchungsaktionen
