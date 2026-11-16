@@ -481,9 +481,10 @@
     if (highlighted === -1) input.removeAttribute('aria-activedescendant');
   }
 
-  function render() {
-    const query = normalize(input.value.trim());
-    if (!query || document.activeElement !== input) { close(); return; }
+  function render(showAll = false) {
+    // Opening the field shows known payees immediately; typing filters the list.
+    const query = showAll ? '' : normalize(input.value.trim());
+    if (document.activeElement !== input) { close(); return; }
     matches = payees.filter(name => normalize(name).includes(query))
       .sort((a, b) => {
         const aStart = normalize(a).startsWith(query);
@@ -510,8 +511,9 @@
     position();
   }
 
-  input.addEventListener('input', render);
-  input.addEventListener('focus', render);
+  input.addEventListener('input', () => render());
+  input.addEventListener('focus', () => render(true));
+  input.addEventListener('click', () => render(true));
   input.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !list.hidden) { event.preventDefault(); close(); return; }
     if (list.hidden) return;
