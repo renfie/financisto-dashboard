@@ -72,6 +72,8 @@
   const historyFilter = document.getElementById('history-filters');
   const balances = document.getElementById('dashboard-balances');
   const charts = document.getElementById('dashboard-charts');
+  const ledger = document.getElementById('dashboard-ledger');
+  const cashflow = document.getElementById('dashboard-cashflow');
   function openHashTarget() {
     const hash = window.location.hash;
     let target;
@@ -87,6 +89,14 @@
     } else if ((hash === '#ausgabenkategorien' || hash === '#dashboard-charts') && charts) {
       charts.open = true;
       target = document.getElementById('ausgabenkategorien');
+    }
+    else if ((hash === '#cashflow' || hash === '#dashboard-cashflow') && cashflow) {
+      cashflow.open = true;
+      target = document.getElementById('cashflow');
+    }
+    else if ((hash === '#buchungen' || hash === '#dashboard-ledger') && ledger) {
+      ledger.open = true;
+      target = document.getElementById('buchungen');
     }
     else if (hash === '#telegram-buchungen' || hash === '#benachrichtigungen') {
       // Keep the settings page compact on ordinary visits, but reveal a section
@@ -379,4 +389,13 @@
   function resize() { note.style.height = 'auto'; note.style.height = Math.min(170, Math.max(41, note.scrollHeight)) + 'px'; }
   note.addEventListener('input', resize);
   resize();
+})();
+
+/* 1.9.45: Offline-localized, accessible file picker. The real input remains intact. */
+(function(){
+ for(const picker of document.querySelectorAll('.custom-file-picker')){
+  const file=picker.querySelector('input[type="file"]'),label=picker.querySelector('.custom-file-picker-name');
+  if(!file||!label)return;
+  file.addEventListener('change',()=>{const name=file.files?.[0]?.name;label.textContent=name||window.FinancistoI18n?.translate(label.dataset.emptyLabel)||label.dataset.emptyLabel;});
+ }
 })();

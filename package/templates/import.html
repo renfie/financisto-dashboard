@@ -3,10 +3,14 @@
 {% block content %}
   <div class="heading"><div><div class="eyebrow">Datenverwaltung</div><h1>Financisto-Sicherung importieren</h1></div></div>
   <section class="panel narrow">
+    {% if ui_language == 'en' %}
+    <p>Upload a compressed Financisto <strong>.backup</strong> file. {% if finance_mode == 'web' %}<strong>Web accounting is authoritative.</strong> You can still upload and inspect a .backup file. Existing web transactions <strong>will not be overwritten</strong>. Reconciliation with a later import is a separate feature.{% else %}A manual import fully replaces the previous Financisto snapshot. A separate backup is recommended.{% endif %}</p>
+    {% else %}
     <p>Lade deine komprimierte <strong>.backup</strong>-Datei aus Financisto hoch. {% if finance_mode == 'web' %}<strong>Web-Finanzverwaltung ist führend.</strong> Du kannst weiterhin eine .backup-Datei hochladen und prüfen. Zur Sicherheit werden vorhandene Web-Buchungen dabei <strong>nicht überschrieben</strong>. Ein späterer Import-Abgleich ist eine gesonderte Funktion.{% else %}Ein manueller Import ersetzt den bisherigen Financisto-Snapshot vollständig. Eine gesonderte Sicherung wird empfohlen.{% endif %}</p>
+    {% endif %}
     <form method="post" enctype="multipart/form-data" class="formstack">
       <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-      <label>Sicherungsdatei (max. 30 MiB)<input type="file" name="file" accept=".backup,application/gzip" required></label>
+      <label>Sicherungsdatei (max. 30 MiB)<span class="custom-file-picker"><input type="file" name="file" accept=".backup,application/gzip" required aria-label="Sicherungsdatei auswählen"><span class="custom-file-picker-button">Datei auswählen</span><span class="custom-file-picker-name" data-empty-label="Keine ausgewählt">Keine ausgewählt</span></span></label>
       {% if destructive_pending and finance_mode == 'import' %}
       <p class="notice">Diese Sicherung kann vorhandene Web-Änderungen überschreiben. Beim ersten Hochladen wird nur die Datei geprüft. Erst eine erneute Auswahl mit ausdrücklicher Bestätigung darf importieren.</p>
       {% if manual_preview %}<p class="hint"><strong>Vorschau geprüft:</strong> {{ manual_preview[0] }} Buchungen, {{ manual_preview[1] }} Konten. Keine Daten verändert. Bitte dieselbe Datei erneut auswählen und die Übernahme bestätigen.</p>{% endif %}

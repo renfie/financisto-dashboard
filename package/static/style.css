@@ -775,3 +775,115 @@
   .dashboard-heading > .heading-actions { flex:1 1 100%; justify-content:flex-start; }
   .dashboard-heading > .heading-actions .importnote { text-align:left; }
 }
+
+/* v1.9.45 — Compact ledger period presets and separate optional filters. */
+#buchungen .ledger-section-head{margin-bottom:8px}
+#buchungen .ledger-toolbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 15px}
+#buchungen .ledger-periods{display:flex;align-items:center;flex-wrap:wrap;gap:3px;padding:4px;border:1px solid #d7e0e2;background:#f3f6f7;border-radius:11px}
+#buchungen .ledger-period-button,#buchungen .ledger-period-custom{padding:7px 11px;display:inline-flex;align-items:center;justify-content:center;min-height:34px;font-size:.81rem;font-weight:750;border-radius:8px;line-height:1.2;white-space:nowrap;color:#34535b}
+#buchungen .ledger-period-custom{padding-inline:12px}
+#buchungen .ledger-periods .is-active{background:#fff;border:1px solid #adc7c5;box-shadow:0 1px 4px #2141461b;color:#124e56}
+#buchungen .ledger-filter-toggle{flex:0 1 330px;position:relative;min-width:150px;max-width:100%}
+#buchungen .ledger-filter-toggle>summary{display:flex;align-items:center;justify-content:center;list-style:none;cursor:pointer;min-height:42px;padding:9px 14px;border:1px solid #d4ddde;background:#f7f9fa;color:#304954;border-radius:9px;font-weight:750;font-size:.83rem;white-space:nowrap}
+#buchungen .ledger-filter-toggle>summary::-webkit-details-marker{display:none}
+#buchungen .ledger-filter-toggle[open]>summary{border-color:#93b9b9;background:#f1f8f7}
+#buchungen .ledger-filter-panel{position:relative;margin-top:8px;max-width:480px}
+#buchungen .ledger-filter-panel .quick-filter-form{margin:0;padding:12px}
+#buchungen .ledger-filter-panel .quick-filter-row{gap:6px}
+#buchungen .ledger-filter-panel .quick-filter-row .primary{padding:8px 12px}
+#buchungen .ledger-advanced-link{display:block;margin:8px 0 0;padding:6px;color:#23616a;font-size:.82rem;font-weight:650;text-decoration:underline;text-underline-offset:2px}
+@media screen and (max-width:760px){
+ #buchungen .ledger-toolbar{display:block}
+ #buchungen .ledger-periods{margin-bottom:7px;justify-content:center}
+ #buchungen .ledger-period-button{flex:1 1 41px;padding-inline:6px}
+ #buchungen .ledger-filter-toggle{max-width:none;min-width:0;width:100%}
+ #buchungen .ledger-filter-toggle>summary{min-height:44px}
+}
+/* The full ledger uses narrow, truly inline actions on desktop; cards keep touch targets. */
+@media screen and (min-width:1351px) and (hover:hover) and (pointer:fine){
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions{display:flex;align-items:center;flex-wrap:nowrap;gap:4px;min-width:0;width:1%;white-space:nowrap;padding:8px 6px}
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions .button,
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions button{font-size:.70rem;min-height:30px;padding:5px 7px;white-space:nowrap;flex:0 0 auto;line-height:1.15}
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions form{margin:0;flex:0 0 auto}
+}
+/* Self-contained cash-flow visualization, offline and with no chart dependencies. */
+.cashflow-panel{overflow:hidden}
+.cashflow-title{flex-wrap:wrap;align-items:start;margin-bottom:9px}
+.cashflow-title h2{font-size:1.13rem}
+.cashflow-totals{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px 16px;font-size:.82rem;color:#566b71}
+.cashflow-totals span{display:flex;flex-direction:column;gap:2px}
+.cashflow-totals b{font-variant-numeric:tabular-nums;font-size:.94rem}
+.cashflow-legend{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px;margin-bottom:13px;font-size:.78rem;color:#657983}
+.cashflow-legend span{display:inline-flex;align-items:center;gap:6px}
+.cashflow-key{width:12px;height:12px;border-radius:3px;display:inline-block}
+.cashflow-key.income-key,.cashflow-income-bar{background:#208b79}
+.cashflow-key.expenses-key,.cashflow-expenses-bar{background:#c69a52}
+.cashflow-chart{display:flex;align-items:stretch;gap:9px;min-width:0;overflow-x:auto;border:1px solid #e3eaea;border-radius:12px;background:linear-gradient(to top,#f8faf9,#fff);padding:14px 9px 9px}
+.cashflow-column{flex:1 0 62px;min-width:60px;max-width:220px;text-align:center;display:flex;flex-direction:column;gap:5px;justify-content:flex-end}
+.cashflow-bars{height:146px;display:flex;align-items:flex-end;justify-content:center;gap:5px;border-bottom:1px solid #b8c6c9;position:relative}
+.cashflow-bars::before{position:absolute;content:"";height:1px;background:#ebf0ef;left:0;right:0;bottom:50%;z-index:0}
+.cashflow-bar{width:27%;max-width:30px;min-height:0;border-radius:5px 5px 0 0;position:relative;z-index:1}
+.cashflow-period-label{display:block;font-size:.74rem;font-weight:750;color:#4c656b}
+.cashflow-net{display:block;font-variant-numeric:tabular-nums;font-size:.74rem;white-space:nowrap}
+.cashflow-hint{margin:8px 0 0!important;font-size:.76rem}
+@media(max-width:760px){.cashflow-title{display:block}.cashflow-totals{justify-content:flex-start;margin-top:9px}.cashflow-column{flex-basis:60px}.cashflow-net{font-size:.70rem}}
+
+.custom-file-picker{position:relative;display:flex;gap:12px;align-items:center;min-height:45px;width:100%;border:1px solid #d2dedf;border-radius:9px;background:#fff;overflow:hidden;padding:7px 11px;cursor:pointer;font-weight:400}
+.custom-file-picker input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
+.custom-file-picker:focus-within{outline:2px solid #62c9c0;outline-offset:2px}
+.custom-file-picker-button{white-space:nowrap;background:#f0f3f4;border:1px solid #d2d9da;border-radius:6px;padding:6px 9px;color:#31464d;font-size:.82rem;font-weight:700}
+.custom-file-picker-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem;color:#657983}
+
+/* Cashflow net line, using the same calendar buckets as the two bar series. */
+.cashflow-chart{position:relative}
+.cashflow-net-line{position:absolute;top:14px;left:9px;width:calc(100% - 18px);height:146px;pointer-events:none;z-index:3;overflow:visible}
+.cashflow-net-line polyline{fill:none;stroke:#c37425;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 5;vector-effect:non-scaling-stroke}
+
+.cashflow-key.net-key{height:4px;width:15px;border-radius:3px;background:#c37425}
+
+
+/* v1.9.46: Collapsible ledger just below balances, direct page links. */
+.ledger-panel:has(.dashboard-disclosure){padding:0;overflow:visible}
+.ledger-disclosure-body{padding-top:14px}
+.ledger-sort-hint{font-size:.78rem;margin:0 0 12px;color:#63777f}
+#buchungen .pagination{flex-wrap:wrap;gap:12px 16px}
+#buchungen .pagination-pages{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:5px;max-width:100%}
+#buchungen .pagination-number{display:inline-flex;min-width:32px;height:34px;padding:5px 8px;align-items:center;justify-content:center;border-radius:7px;border:1px solid #d4dfe0;background:#f8fafa;font-weight:720;font-size:.83rem;color:#31525a;text-decoration:none;font-variant-numeric:tabular-nums}
+#buchungen a.pagination-number:hover{background:#e7f2f2;border-color:#9bbdbc}
+#buchungen .pagination-number.is-current{background:#0c6975;border-color:#0c6975;color:white;cursor:default}
+#buchungen .pagination-direction{padding:6px 10px;min-height:34px;font-size:.82rem}
+#buchungen .pagination-ellipsis{padding:0 3px;color:#667a80;font-weight:700}
+#buchungen .pagination a:focus-visible{outline:3px solid #148b94;outline-offset:2px}
+@media(max-width:760px){
+ .app-authenticated .container .ledger-panel:has(.dashboard-disclosure){padding:0!important}
+ #buchungen .pagination-pages{justify-content:center;width:100%;gap:4px}
+ #buchungen .pagination-number{min-width:34px;min-height:37px}
+ #buchungen .pagination-direction{min-width:auto;min-height:37px}
+}
+
+/* v1.9.46: cashflow shares month-category palette (#0c6975 / #b46620).
+   Every calendar bucket gets an equal-width CSS grid track. The SVG line's
+   0.5/N x coordinates therefore align with the centres of the same tracks.
+   Scroll only the plot at small widths; never stretch the line beyond bars. */
+.cashflow-key.income-key,.cashflow-income-bar{background:#0c6975}
+.cashflow-key.expenses-key,.cashflow-expenses-bar{background:#b46620}
+.cashflow-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable}
+.cashflow-chart{display:grid;grid-template-columns:repeat(var(--cashflow-count, 3),minmax(0,1fr));gap:0;width:100%;min-width:calc(var(--cashflow-count, 3) * 88px);max-width:980px;margin-inline:auto;overflow:visible}
+.cashflow-column{min-width:0;max-width:none;flex:none;width:auto;gap:5px}
+.cashflow-bars{width:100%}
+.cashflow-net-line{left:9px;width:calc(100% - 18px)}
+.cashflow-zero-line{stroke:#b2bfc2;stroke-width:1;stroke-dasharray:3 6;vector-effect:non-scaling-stroke}
+.cashflow-net-line polyline{stroke:#394f60;stroke-width:3;stroke-dasharray:7 5}
+.cashflow-key.net-key{width:19px;height:0;background:none;border-top:3px dashed #394f60;border-radius:0}
+.cashflow-line-help{font-size:.79rem;margin:10px 0 3px!important;color:#546d75}
+@media(max-width:760px){.cashflow-chart{margin-inline:0}}
+
+/* v1.9.47: ledger open and Cashflow closed when visiting the dashboard. */
+.cashflow-panel:has(.cashflow-disclosure){padding:0;overflow:visible}
+.cashflow-disclosure-body{padding-top:18px}
+.cashflow-disclosure .cashflow-title h3{font-size:1.08rem;margin:0 0 4px}
+#cashflow,#dashboard-cashflow{scroll-margin-top:92px}
+html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Collapse"}
+@media screen and (max-width:760px){
+ .app-authenticated .container .cashflow-panel:has(.cashflow-disclosure){padding:0!important}
+}

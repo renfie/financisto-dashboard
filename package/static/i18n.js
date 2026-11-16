@@ -4,6 +4,203 @@
   'use strict';
   const language = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'de';
   const catalog = {
+  "In der Web-Verwaltung:": "In web accounting:",
+  "Bei aktivierter Option werden": "When enabled,",
+  "nur automatisch freigegebene": "only automatically approved",
+  "Regeln exportiert. Pausierte und gelöschte Originalvorlagen werden entfernt. Manuell aktive oder nicht unterstützte Regeln verhindern den Export mit einer Fehlermeldung statt sie versehentlich auf Android automatisch auszuführen. Unveränderte Finanzbuchungen bleiben erhalten.": "rules are exported. Paused and deleted original templates are omitted. Active manual or unsupported rules cause an error instead of being run automatically on Android. Existing transactions remain unchanged.",
+  "Für einen rückwärtskompatiblen Export muss die ursprüngliche": "For backward-compatible export, the original",
+  "exakt": "exactly",
+  "zum letzten eingelesenen Datenstand passen. Die Anmeldung kann sie hier nachträglich hinterlegen. Diese Aktion importiert nichts und verändert keine Buchungen.": "match the latest imported data snapshot. You can upload the original backup here later. This action does not import or modify transactions.",
+  "Exportiert die aktuellen Konten, Stammdaten und Buchungen in eine komprimierte": "Exports current accounts, master data and transactions to a compressed",
+  "-Datei. Nicht mit einem geprüften Android-Restore verwechseln.": "file. Do not confuse this with a verified Android restore.",
+  "Für einen rückwärtskompatiblen Export": "For a backward-compatible export",
+  "Originalgrundlage fehlt": "Original backup unavailable",
+  "Financisto-Testexport herunterladen (.backup)": "Download experimental Financisto export (.backup)",
+  "Original-Financisto-Sicherung": "Original Financisto backup",
+  "In Web-Datenführung:": "In web accounting:",
+  "Automatische Datensicherung": "Automatic database backup",
+  "Letzte automatische Sicherung:": "Last automatic backup:",
+  "Noch keine": "None yet",
+  "Einmal pro Kalendertag (Europe/Berlin). Die letzten 14 automatischen Sicherungen bleiben unter": "Once per calendar day (Europe/Berlin). The last 14 automatic backups are kept in",
+  "erhalten. Manuelle und vor Umstellungen erstellte Sicherungen werden dabei niemals gelöscht.": "Manual backups and backups created before switching modes are never deleted.",
+  "Zur Bestätigung PRIVAT eingeben": "Type PRIVAT to confirm",
+  "Zur Bestätigung OEFFENTLICH eingeben": "Type OEFFENTLICH to confirm",
+  "Zur Bestätigung WEB eingeben": "Type WEB to confirm",
+  "Zur ausdrücklichen Bestätigung DATENVERLUST eingeben": "Type DATENVERLUST to confirm",
+  "Letzte tägliche SQLite-Sicherung:": "Last daily SQLite backup:",
+  "Nur für Administratoren · tatsächliche Prüfungen des gemeinsamen Hintergrunddienstes": "Administrators only · actual checks by the shared background worker",
+  "Automatischer Import": "Automatic import",
+  "Systemstatus & Hintergrunddienste": "System status & background services",
+  "Systemstatus und Hintergrunddienste": "System status and background services",
+  "Quellkonto danach": "Source-account balance after",
+  "Kontostand danach": "Account balance after",
+  "Die drei Bereiche werden": "The three sections are",
+  "getrennt gespeichert": "saved separately",
+  "Gespeicherte Telegram-Token entfernen": "Remove saved Telegram token",
+  "Gespeichertes Gotify-Token entfernen": "Remove saved Gotify token",
+  "Gotify-App-Token": "Gotify app token",
+  "Standardkonto": "Default account",
+  "Standardkategorie": "Default category",
+  "Alle Kategorien": "All categories",
+  "Bitte wählen": "Please choose",
+  "Konto zuordnen": "Assign account",
+  "Vorlage anlegen (deaktiviert)": "Create template (disabled)",
+  "Pausiert": "Paused",
+  "Bereit": "Ready",
+  "Wird geprüft": "Checking",
+  "Deaktiviert": "Disabled",
+  "Status aktuell": "Status current",
+  "Neue Kategorien": "New categories",
+  "Kategorien insgesamt": "categories in total",
+  "Telegram-Bot-Token": "Telegram bot token",
+  "Telegram konfigurieren (unabhängig von Gotify)": "Configure Telegram (independent of Gotify)",
+  "Gotify konfigurieren (unabhängig von Telegram)": "Configure Gotify (independent of Telegram)",
+  "Wichtig: Bei öffentlichem Zugriff erreicht jeder die Anmeldeseite. Richte Nginx Proxy Manager mit gültigem öffentlichem TLS-Zertifikat ein, entferne gegebenenfalls die bisherige NPM-Access-List für interne IPs und teste von einem externen Netzwerk. Split-DNS macht eine Webseite nicht öffentlich und schützt sie nicht vor Zugriff.": "Important: with public access enabled, anyone can reach the sign-in page. Configure Nginx Proxy Manager with a valid public TLS certificate, remove internal-only NPM access restrictions if necessary, and test from an external network. Split DNS neither makes a site public nor protects it from access.",
+  "Administratorgesteuerte Freigabe der Anmeldeseite. Passwort und individuelle 2FA bleiben für alle Benutzer Pflicht.": "Administrator-controlled sign-in access. Passwords and individual 2FA remain mandatory for all users.",
+  "Die Ausführung wiederkehrender Zahlungen liegt bei der Android-App, nicht beim Dashboard. Hier gespeicherte Vorlagen bleiben erhalten, sind aber für Web-Buchungen gesperrt. Neue oder im Web geänderte Vorlagen werden nicht allein durch die Umschaltung auf das Smartphone übertragen.": "Recurring payments are managed by the Android app rather than this dashboard. Stored templates are preserved but disabled for web transactions. Switching devices does not automatically transfer new or modified web templates.",
+  "Ausführung wiederkehrender Zahlungen": "Execution of recurring payments",
+  "Vollständig": "Complete",
+  "Zurücksetzen": "Reset",
+  "Buchungen": "Transactions",
+  "Letzte tägliche SQLite-Sicherung:": "Last daily SQLite backup:",
+  "Gespeichertes Gotify-Token entfernen": "Remove saved Gotify token",
+  "Zugriff und Sicherheit": "Access and security",
+  "Ausgaben nach Kategorien": "Expenses by category",
+  "Kategorien und Unterkategorien": "Categories and subcategories",
+  "Keine fällige Buchung": "No transaction due",
+  "Zielkonto (nur bei Umbuchung)": "Destination account (transfers only)",
+  "Vorlage anlegen (deaktiviert)": "Create template (disabled)",
+  "Letzter erfolgreicher Import": "Last successful import",
+  "Führendes System": "Source of truth",
+  "Tagessicherung bereits vorhanden": "Daily backup already exists",
+  "Prüfungen aktuell": "Checks up to date",
+  "Buchungen per Telegram": "Transactions via Telegram",
+  "Neue Konten brauchen einen Startsaldo.": "New accounts need an opening balance.",
+  "Prüfintervalle und nächste Termine anzeigen": "Show check intervals and next scheduled runs",
+  "Telegram-Buchungen speichern": "Save Telegram transaction settings",
+  "Gespeichertes Telegram-Token entfernen": "Remove saved Telegram token",
+  "Buchungen aus der freigegebenen Telegram-Gruppe erlauben": "Allow transactions from the authorized Telegram group",
+  "Ohne Rückfrage direkt buchen": "Post immediately without confirmation",
+  "(nur für gültige": "(for valid",
+  "Direkt über einen eigenen FieLanzen-Bot in deiner privaten Finanzgruppe. Kein Node-RED, kein weiterer Container. Nur ausdrücklich freigegebene Telegram-Benutzer dürfen buchen.": "Use a dedicated FieLanzen bot in your private finance group. No Node-RED or additional container is required. Only authorized Telegram users may enter transactions.",
+  "Ohne den Haken „Ohne Rückfrage“ erscheint zuerst ein Vorschlag mit Konto, Kategorie und Bestätigung. Mit Haken wird die Buchung direkt gespeichert und der Bot antwortet mit der Buchungsnummer. Wiederholte Telegram-Nachrichten-IDs werden niemals doppelt gebucht. Voraussetzung ist die aktivierte Web-Datenführung.": "Without “Post immediately”, the bot first presents the account, category and a confirmation. With this option enabled, the transaction is saved directly and the bot returns its number. Repeated Telegram message IDs never create duplicate transactions. Web accounting must be enabled.",
+  "Telegram-Syntax:": "Telegram syntax:",
+  "(Ausgabe mit gemeinsamer Standardkategorie und Telegram-Standardkonto),": "(expense with the shared default category and Telegram account),",
+  "(Kategorie, dann Konto),": "(category, then account),",
+  "(Einnahme auf Taschengeld mit Notiz). Ein": "(income with note). A",
+  "vor dem Betrag kennzeichnet eine Einnahme. Die Standardkategorie wird zentral im Bereich „Standardkonto für neue Buchungen“ eingestellt. Mit": "before an amount denotes income. Set the default category in “Default account for new transactions”. Use",
+  "ohne Angaben wird die Hilfe angezeigt.": "without arguments to display the help.",
+  "zeigt IDs an. Bitte keine PINs oder vollständigen Kontodaten an den Bot senden.": "shows IDs. Never send PINs or full bank account details to the bot.",
+  "Die drei Bereiche werden": "The three sections are",
+  "getrennt gespeichert": "saved separately",
+  ". Du kannst Telegram ohne Gotify einrichten. Erst danach bei Bedarf die Ausgabenwarnungen insgesamt aktivieren.": ". Telegram can be configured without Gotify. You can enable expense alerts afterward.",
+  "Benachrichtigt werden": "Notifications are sent for",
+  "neue, echte Ausgaben": "new, actual expenses",
+  "Diese Einstellungen betreffen nur": "These settings only apply to",
+  "Ausgabenwarnungen": "expense alerts",
+  ". Du kannst dafür denselben FieLanzen-Bot und dieselbe Finanzgruppe wie bei den Buchungen verwenden. Alternativ bleibt dein bisheriger Bot für Benachrichtigungen nutzbar. Mitglieder der Gruppe können Finanzmeldungen lesen.": ". You can use the same FieLanzen bot and group as for transactions, or keep your existing notification bot. Group members can read financial notifications.",
+  "Die Ausführungsuhrzeit ist eine frühestmögliche Zeit für automatische Buchungen": "Execution time is the earliest permitted time for automatic transactions",
+  "Automatisches Backup": "Automatic backup",
+  "Originalgrundlage gespeichert": "Original source saved",
+  "Der Android-Rückimport ist noch nicht getestet. Verwende eine exportierte Datei zunächst nur auf einem getrennten Testgerät bzw. einem gesonderten Testprofil. Niemals die einzige produktive Financisto-Datenbank damit überschreiben.": "Restoring the exported file to Android has not been fully tested. First try it on a separate test device or profile. Never overwrite your only production Financisto database.",
+  "Für einen rückwärtskompatiblen Export muss die ursprüngliche": "For a backward-compatible export, the original",
+  "Einträge": "entries",
+  "Kategorien insgesamt": "categories in total",
+  "Nur": "Only",
+  "automatisch freigegebene": "automatically enabled",
+  "manuell": "manual",
+  "pausiert": "paused",
+  "automatisch": "automatic",
+  "gelöscht/archiviert": "deleted/archived",
+  "Regeln exportiert. Pausierte und gelöschte Originalvorlagen werden entfernt. Manuell aktive oder nicht unterstützte Regeln verhindern den Export mit einer Fehlermeldung statt sie versehentlich auf Android automatisch auszuführen. Unveränderte Finanzbuchungen bleiben erhalten.": "rules are exported. Paused and deleted original templates are omitted. Manually active or unsupported rules block the export rather than running them accidentally on Android. Existing transactions remain unchanged.",
+  "Verwendete Stammdaten können umbenannt, aber nicht unkontrolliert gelöscht werden. Bei Kategorien bleibt die Hierarchie erhalten. Neue Konten brauchen einen Startsaldo.": "Master data already in use may be renamed but cannot be deleted without restrictions. Category hierarchies remain intact. New accounts require an opening balance.",
+  "Durchlaufende Posten („Durchlaufender Posten (Eingang/Ausgabe)“ einschließlich Unterkategorien) stehen weiterhin in der Buchungsliste und verändern den Kontostand, werden aber aus Einnahmen, Ausgaben und den Diagrammen des Dashboards herausgerechnet. In Financisto selbst gelten weiterhin dessen eigene Statistikregeln.": "Pass-through transactions, including subcategories, remain in the transaction list and affect the account balance, but are excluded from dashboard income, expenses and charts. Financisto uses its own statistics rules.",
+  "Der Buchungs-Kontostand wird aus dem aktuell gespeicherten Kontostand rückwärts berechnet und berücksichtigt Umbuchungen innerhalb derselben Währung. Bei Fremdwährungsumbuchungen ist der Verlauf nicht vollständig rekonstruierbar. Monatssaldo = Einnahmen − Ausgaben im gewählten Zeitraum; kein Kontostand. Umbuchungen erscheinen in der Buchungsliste, werden aber in den Einnahmen-/Ausgabensummen und Diagrammen nicht mitgezählt. Andere Währungen werden nicht mit EUR verrechnet.": "The running balance is calculated backward from the stored current balance and includes same-currency transfers. Cross-currency transfers cannot be fully reconstructed. Monthly net is income minus expenses for the selected period, not an account balance. Transfers are shown in the transaction list but are excluded from income/expense totals and charts. Other currencies are not converted to EUR.",
+  "Cashflow ein- oder ausklappen": "Expand or collapse cash flow",
+  "Cashflow-Auswertung": "Cash flow analysis",
+  "Vorlage anlegen (deaktiviert)": "Create template (disabled)",
+  "Änderung speichern und deaktivieren": "Save changes and disable",
+  "Zielkonto (nur bei Umbuchung)": "Destination account (transfers only)",
+  "Kein Zielkonto": "No destination account",
+  "Ausführen ab (nur Automatik, Europe/Berlin)": "Run from (automatic only, Europe/Berlin)",
+  "Betrag, positiv eingeben": "Enter a positive amount",
+  "Manuelle Buchung": "Manual transaction",
+  "Automatische Buchung": "Automatic transaction",
+  "Fällige Buchung ausführen": "Run due transaction",
+  "Noch keine wiederkehrenden Vorlagen vorhanden.": "No recurring templates yet.",
+  "Nach dem Speichern bleibt die Regel deaktiviert, bis du sie bewusst freigibst.": "The rule remains disabled after saving until you explicitly enable it.",
+  "Bei Monaten ohne den gewählten Tag wird der letzte Kalendertag verwendet. Die Ausführungsuhrzeit ist eine frühestmögliche Zeit für automatische Buchungen, keine sekundengenaue Garantie: Der Hintergrunddienst prüft alle 15 Minuten (Zeitzone Europe/Berlin). Vorhandene Regeln bleiben standardmäßig auf 00:00 Uhr und ohne Endbegrenzung. Manuelle Buchungen werden unabhängig von der Uhrzeit ausdrücklich ausgelöst.": "For months without the selected day, the last calendar day is used. The execution time is the earliest permitted time for automatic postings, not an exact-time guarantee: the background worker checks every 15 minutes (Europe/Berlin). Existing rules default to 00:00 with no end limit. Manual transactions run only when explicitly triggered.",
+  "Manuell: Eine fällige Buchung wird erst nach deinem ausdrücklichen Klick eingetragen. Automatisch: Der Hintergrunddienst trägt sie bei Fälligkeit ein (kein Bank-Dauerauftrag). Pausiert: Es wird nichts gebucht.": "Manual: a due transaction is posted only when you explicitly click. Automatic: the worker posts transactions when due (not a bank standing order). Paused: no transactions are posted.",
+  "Systemstatus & Hintergrunddienste": "System status & background services",
+  "Systemstatus und Hintergrunddienste": "System status and background services",
+  "Prüfungen aktuell": "Checks up to date",
+  "Status prüfen": "Check status",
+  "Führendes System": "Source of truth",
+  "Web-Dashboard": "Web dashboard",
+  "Letzter erfolgreicher Import": "Last successful import",
+  "Letzte Datenbanksicherung": "Latest database backup",
+  "Manuell": "Manual",
+  "Automatisch": "Automatic",
+  "Letzte Prüfung": "Last check",
+  "Nächste Prüfung": "Next check",
+  "Financisto-Import": "Financisto import",
+  "SQLite-Datensicherung": "SQLite database backup",
+  "Tagessicherung bereits vorhanden": "Daily backup already exists",
+  "Täglich aktiv": "Daily backup enabled",
+  "Keine fällige Buchung": "No transaction due",
+  "Noch keine Tagessicherung": "No daily backup yet",
+  "Im Sicherungsverzeichnis nicht vorhanden": "Not found in backup directory",
+  "Öffentlicher Zugriff": "Public access",
+  "Öffentlichen Login deaktivieren": "Disable public login",
+  "Öffentlichen Login bewusst freigeben": "Explicitly enable public login",
+  "Administratorpasswort": "Administrator password",
+  "Frischer 2FA-Code": "Fresh 2FA code",
+  "Push ist auf diesem Gerät aktiviert. Weitere Geräte müssen separat angemeldet werden.": "Push is enabled on this device. Other devices must be authorized separately.",
+  "Push ist auf diesem Gerät aktiviert.": "Push is enabled on this device.",
+  "Push ist auf diesem Gerät deaktiviert.": "Push is disabled on this device.",
+  "Telegram-Bot-Token": "Telegram bot token",
+  "Telegram-Chat-ID": "Telegram chat ID",
+  "Gespeichert – unverändert": "Saved – unchanged",
+  "Gespeichertes Bot-Token löschen": "Delete saved bot token",
+  "Gespeichertes Telegram-Token entfernen": "Remove saved Telegram token",
+  "Gespeichertes Gotify-Token entfernen": "Remove saved Gotify token",
+  "Gruppen-Chat-ID (negative Zahl)": "Group chat ID (negative number)",
+  "Freigegebene Telegram-Benutzer-IDs (durch Komma getrennt)": "Allowed Telegram user IDs (comma-separated)",
+  "Gotify-Adresse (HTTPS)": "Gotify URL (HTTPS)",
+  "Gotify-App-Token": "Gotify app token",
+  "Gotify-Priorität": "Gotify priority",
+  "Gotify separat speichern": "Save Gotify settings separately",
+  "Telegram separat speichern": "Save Telegram settings separately",
+  "Einrichtung:": "Setup:",
+  "Bot mit": "Create a bot using",
+  "anlegen und in die Telegram-Finanzgruppe aufnehmen. Bot-Token hier eintragen und einmal ohne Aktivierung speichern. Anschließend": "and add it to the Telegram finance group. Enter the bot token, save the settings once without enabling it, then send",
+  "in der Gruppe senden und Gruppen-Chat-ID sowie die jeweiligen Benutzer-IDs hier übernehmen. Bei mehreren Bots in der Gruppe gegebenenfalls": "in the group and copy the group chat ID and authorized user IDs here. For multiple bots in one group, use",
+  "verwenden. Erst danach aktivieren.": "instead. Only then enable the bot.",
+  "(bereits verschlüsselt gespeichert – leer lassen zum Beibehalten)": "(stored encrypted – leave blank to keep)",
+  "(gespeichert; leer lassen zum Beibehalten)": "(stored; leave blank to keep)",
+  "(gespeichert: leer lassen zum Beibehalten)": "(stored; leave blank to keep)",
+  "Rückexport nach Financisto (Testfunktion)": "Export back to Financisto (experimental)",
+  "Wichtiger Sicherheitshinweis:": "Important security notice:",
+  "Originalgrundlage gesichert": "Original backup preserved",
+  "In Web-Datenführung:": "In web accounting:",
+  "In der Web-Datenführung:": "In web accounting:",
+  "Finanz-Stammdaten": "Financial master data",
+  "Kontenverwaltung (Administrator), Kontostandsabgleich, Kategorien und Empfänger (Administrator und Bearbeiter).": "Manage accounts (administrator), reconcile balances, and manage categories and payees (administrator and editor).",
+  "Kategorien und Unterkategorien": "Categories and subcategories",
+  "Schnellsuche – Kategorien": "Quick search – categories",
+  "Haupt- oder Unterkategorie suchen …": "Search parent or subcategory …",
+  "gespeichert": "saved",
+  "Gespeichert": "Saved",
+  "Keine": "None",
+  "Keiner": "None",
+  "Buchungsliste ein- oder ausklappen": "Expand or collapse transaction list",
+  "Buchungsseiten": "Transaction pages",
+  "Buchungsliste": "Transaction list",
+  "Cashflow-Diagramm": "Cash flow chart",
+  "Gestrichelte Linie: Netto = Einnahmen − Ausgaben": "Dashed line: net = income − expenses",
+  "Die gestrichelte Linie zeigt den Netto-Saldo je Zeitraum: oberhalb der Mittellinie ein Überschuss, darunter ein Fehlbetrag. Sie hat eine eigene Skala um null und stellt keinen Kontostand dar.": "The dashed line shows the net balance for each period: above the center line means a surplus, below means a deficit. Its scale is centered on zero and does not show an account balance.",
+  "Sortierbar nach Datum, Betrag, Empfänger, Kategorie oder Konto.": "Sort by date, amount, payee, category or account.",
+
   "In einer Authenticator-App ein neues Konto hinzufügen und den QR-Code scannen.": "Add a new account in your authenticator app and scan the QR code.",
   "Falls der QR-Code nicht gelesen wird, den Schlüssel manuell hinterlegen.": "If you cannot scan the QR code, enter the secret key manually.",
   "Den angezeigten sechsstelligen Code eingeben und bestätigen.": "Enter and confirm the six-digit code shown in your authenticator app.",
@@ -714,13 +911,237 @@
   "Neue Konten verwenden standardmäßig die gewählte Währung. Fremdwährungen werden nicht automatisch in EUR umgerechnet.": "New accounts use the selected currency by default. Other currencies are not automatically converted to EUR.",
   "Einnahmen, Ausgaben und Umbuchungen – mit Empfängersuche und direkter Neuanlage.": "Income, expenses and transfers – with payee search and quick entry.",
   "Bitte 2FA zuerst einrichten": "Set up 2FA first",
-  "Privates Finanz-Dashboard · Daten bleiben auf deinem Server": "Private finance dashboard · Your data stays on your server"
+  "Privates Finanz-Dashboard · Daten bleiben auf deinem Server": "Private finance dashboard · Your data stays on your server",
+  // Additional fixed labels and explanatory text (no user account data).
+  "Schnellfilter (alle Buchungen zwischen den gewählten Monaten)": "Quick filter (all transactions between the selected months)",
+  "Empfänger, Kategorie, Konto, Notiz, Datum oder Betrag": "Payee, category, account, note, date or amount",
+  "Empfänger / Notiz / Kategorie": "Payee / note / category",
+  "Letzter Android-Import:": "Last Android import:",
+  "Letzte Sicherung:": "Latest backup:",
+  "Letzter Financisto-Import:": "Last Financisto import:",
+  "Letzter Import:": "Last import:",
+  "Letzte Rückmeldung des Hintergrunddienstes:": "Last background-worker response:",
+  "Letzte tägliche SQLite-Sicherung:": "Last daily SQLite backup:",
+  "Letzter Versand:": "Last delivery:",
+  "Für": "For",
+  "ist ein Authenticator (TOTP) erforderlich. Die Einrichtung muss abgeschlossen sein, bevor das Dashboard geöffnet werden kann.": "requires an authenticator (TOTP). Setup must be completed before you can open the dashboard.",
+  "Vorlagen aus Financisto übernehmen, prüfen und einzeln aktivieren. Keine automatische Rückbuchung vergangener Jahre.": "Import, review and activate individual Financisto templates. Past years are not posted retroactively.",
+  "Vorlagen aus aktueller Financisto-Sicherung übernehmen": "Import templates from the latest Financisto backup",
+  "Importiert nur Datensätze mit": "Only records with",
+  "und Wiederholungsregel. Konten, Buchungen und Salden werden nicht verändert.": "and a recurrence rule are imported. Accounts, transactions and balances remain unchanged.",
+  "Vorlagen prüfen – Vorschau öffnen": "Review templates – open preview",
+  "Nur diese Regel entfernen. Bereits gebuchte Umsätze bleiben erhalten.": "Remove only this rule. Previously posted transactions are preserved.",
+  "Vorlagen werden deaktiviert übernommen. Bereits angelegte Regeln werden beim erneuten Import nicht überschrieben.": "Templates are imported in a disabled state. Previously created rules are not overwritten on re-import.",
+  "Die Vorlagen werden deaktiviert übernommen. Bereits angelegte Regeln werden beim erneuten Import nicht überschrieben.": "Templates are imported in a disabled state. Previously created rules are not overwritten on re-import.",
+  "Wird im Kontostand berücksichtigt, aber nicht als eigene Einnahme oder Ausgabe ausgewertet.": "Included in the account balance, but excluded from your own income and expense reporting.",
+  "Damit der automatische Import keine Web-Buchungen überschreibt, ist die Buchungserfassung noch gesperrt. Der Administrator kann unter": "To prevent automatic imports from overwriting web transactions, entering new transactions is currently disabled. The administrator can switch to",
+  "bewusst auf die Web-Finanzverwaltung umstellen. Dabei wird vorher eine vollständige SQLite-Sicherung erstellt.": "to make the web dashboard the authoritative accounting system. A complete SQLite backup is created first.",
+  "Unterstützung wird geprüft …": "Checking support …",
+  "Welche Informationen dürfen angezeigt werden?": "What information may be displayed?",
+  "Nur für Administratoren: Benutzer, Konten, Import, Sicherungen und Zugriff.": "Administrators only: users, accounts, imports, backups and access.",
+  "Nur für Administratoren · tatsächliche Prüfungen des gemeinsamen Hintergrunddienstes": "Administrators only · actual background worker checks",
+  "Prüfintervalle und nächste Termine anzeigen": "Show check intervals and next scheduled runs",
+  "Wiederkehrende Buchungen werden derzeit von Financisto verwaltet; unser Hintergrunddienst führt keine Web-Dauerbuchungen aus.": "Recurring transactions are currently managed by Financisto; the web scheduler does not run any web recurrence rules.",
+  "Der Benutzer muss beim nächsten Login seine 2FA erneut einrichten.": "This user must set up two-factor authentication again at the next sign-in.",
+  "Benutzernamen zur Bestätigung exakt eingeben": "Enter the exact username to confirm",
+  "Neuen Benutzer hinzufügen": "Add new user",
+  "Gespeichertes Bot-Token löschen": "Delete saved bot token",
+  "Telegram konfigurieren (unabhängig von Gotify)": "Configure Telegram (independent of Gotify)",
+  "Über Telegram senden": "Send via Telegram",
+  "Gotify konfigurieren (unabhängig von Telegram)": "Configure Gotify (independent of Telegram)",
+  "Über Gotify senden": "Send via Gotify",
+  "Warnungen bei größeren Ausgaben aktivieren": "Enable large-expense notifications",
+  "Grenzbetrag (EUR, einschließlich)": "Threshold (EUR, inclusive)",
+  "Nach dem Einrichten von Gotify, Telegram oder Web Push auf einem Gerät hier Grenzbetrag und Ausgabenwarnungen aktivieren.": "After configuring Gotify, Telegram or Web Push, set your spending threshold and enable notifications here.",
+  "Importsteuerung und bewusste Umstellung zum eigenständigen Finanzsystem.": "Control imports and explicitly switch to independent web-based accounting.",
+  "Web-Änderungen vorhanden.": "Web changes detected.",
+  "Der nächste vollständige automatische Import könnte diese überschreiben. Eine Sicherung und ausdrückliche Bestätigung sind nötig.": "The next full automatic import could overwrite them. A backup and explicit confirmation are required.",
+  "Ich akzeptiere das Überschreiben von Web-Buchungen beim nächsten Import.": "I accept overwriting web transactions with the next import.",
+  "Diese Umstellung deaktiviert den automatischen Import dauerhaft für den Webbetrieb.": "This change disables automatic importing for web-based accounting.",
+  "Der manuelle .backup-Import bleibt als sichere Prüfung erhalten; er überschreibt keine Web-Buchungen.": "Manual .backup import remains available for safe review and does not overwrite web transactions.",
+  "Vorher wird eine SQLite-Sicherung angelegt. Auto-Import bleibt zunächst aus.": "An SQLite backup is created first. Automatic importing remains disabled initially.",
+  "Bei der Rückschaltung werden wiederkehrende Web-Regeln pausiert. Web-Dauerbuchungen werden nicht allein durch das Umschalten übertragen.": "Switching back pauses recurring web rules. Switching modes alone does not transfer web recurrence rules.",
+  "Ich akzeptiere den möglichen Verlust der Web-Änderungen beim späteren Import und habe die Warnung verstanden.": "I understand the warning and accept that a future import may discard web changes.",
+  "Eigenständige SQLite-Sicherung des Web-Dashboards – unabhängig von Android-Backups.": "Independent SQLite backup of the web dashboard, separate from Android backups.",
+  "Ohne automatische Datenbanksicherungen besteht bei einem Serverdefekt erhöhtes Datenverlustrisiko.": "Without automatic database backups, server failures carry a higher risk of data loss.",
+  "Rückexport nach Financisto (Testfunktion)": "Export back to Financisto (experimental)",
+  "Wiederkehrende Regeln aus der Web-Verwaltung in Financisto übernehmen": "Include recurring web rules in Financisto export",
+  "Ohne Häkchen gilt der bisherige Testexport: ursprüngliche Financisto-Dauerbuchungen bleiben unverändert enthalten.": "If unchecked, the original Financisto recurrence rules are preserved unchanged in the experimental export.",
+  "Wie viele Buchungen pro Seite auf dem Dashboard angezeigt werden. Gilt für alle Benutzer.": "Number of transactions displayed per page on the dashboard. Applies to all users.",
+  "Seitengröße speichern": "Save page size",
+  "Standardkategorie für Ausgaben (Web und Telegram)": "Default expense category (web and Telegram)",
+  "Empfänger und Kategorien bearbeiten, Kontostände abgleichen. Die Kontenverwaltung bleibt dem Administrator vorbehalten.": "Edit payees and categories and reconcile balances. Account management remains restricted to administrators.",
+  "Währungen verwalten": "Manage currencies",
+  "Du kannst weiterhin eine .backup-Datei hochladen und prüfen. Zur Sicherheit werden vorhandene Web-Buchungen dabei": "You can still upload and review a .backup file. For safety, existing web transactions are",
+  "nicht überschrieben": "not overwritten",
+  "Ich möchte die Web-Buchungen beim Import überschreiben.": "I want to overwrite web transactions during import.",
+  "werden nach vollständiger Übertragung geprüft und automatisch übernommen. Alte Sicherungen ersetzen keinen neueren Stand. Die manuelle Haushaltsbuch-Tabelle bleibt unangetastet.": "are validated and imported automatically only after upload completion. Older backups do not replace newer data. The manual household table is left untouched.",
+  "Über die Web-Erfassung, Telegram oder neue wiederkehrende Buchungen ab dem gewählten Betrag. Keine Warnung bei Umbuchungen, Importen, Depot-/Saldoabgleichen oder bloßen Änderungen. Der Grenzbetrag ist in EUR; andere Währungen werden nicht ohne Umrechnung berücksichtigt.": "For new transactions entered on the web, via Telegram, or by recurring rules at or above the threshold. Transfers, imports, reconciliations and edits do not trigger alerts. The threshold is in EUR; other currencies are not converted.",
+  "Nur für Administratoren · Versand über Gotify und/oder einen Telegram-Bot.": "Administrators only · delivery via Gotify and/or a Telegram bot.",
+  "Finanz-Stammdaten sowie System und Sicherheit.": "Finance master data, system and security.",
+  "Empfänger, Kategorien und Kontostände verwalten.": "Manage payees, categories and account balances.",
+  // Further fixed labels found by auditing rendered templates.
+  "Importiere als Erstes eine Financisto-Sicherungsdatei, um deine Auswertungen zu sehen.": "Import a Financisto backup file first to see your financial reports.",
+  "Sicherung importieren": "Import backup",
+  "Nach dem Speichern bleibt die Regel deaktiviert, bis du sie bewusst freigibst.": "The rule remains disabled after saving until you explicitly enable it.",
+  "Noch keine Financisto-Buchungen importiert.": "No Financisto transactions have been imported yet.",
+  "Saldo der Auswahl": "Balance for selection",
+  "Monatssaldo": "Monthly balance",
+  "Markierte Kategorien werden": "Selected categories are",
+  "angezeigt oder gedruckt. Die Summen werden entsprechend neu berechnet.": "shown or printed. Totals are recalculated accordingly.",
+  "Jeder neue Benutzer muss beim ersten Login eine eigene 2FA einrichten.": "Every new user must set up their own 2FA on first sign-in.",
+  ". Nur die tatsächliche Endgeräte-IP eintragen, nicht pauschal die IP des Nginx Proxy Managers.": ". Enter the actual client device IP, not the Nginx Proxy Manager address by default.",
+  "anlegen und in die Telegram-Finanzgruppe aufnehmen. Bot-Token hier eintragen und einmal ohne Aktivierung speichern. Anschließend": "and add it to the Telegram finance group. Enter the bot token here and save once without enabling it. Then",
+  "in der Gruppe senden und Gruppen-Chat-ID sowie die jeweiligen Benutzer-IDs hier übernehmen. Bei mehreren Bots in der Gruppe gegebenenfalls": "in the group, then enter the group chat ID and the relevant user IDs here. If several bots share the group, you may need to",
+  "(bereits verschlüsselt gespeichert – leer lassen zum Beibehalten)": "(already stored encrypted – leave empty to keep it)",
+  "(nur für gültige": "(only for valid",
+  "vor dem Betrag kennzeichnet eine Einnahme. Die Standardkategorie wird zentral im Bereich „Standardkonto für neue Buchungen“ eingestellt. Mit": "before the amount indicates income. The default category is configured in “Default account for new transactions”. With",
+  "zeigt IDs an. Bitte keine PINs oder vollständigen Kontodaten an den Bot senden.": "shows IDs. Never send PINs or complete bank account details to the bot.",
+  "Freigegebene Telegram-Benutzer-IDs (durch Komma getrennt)": "Allowed Telegram user IDs (comma-separated)",
+  "(Ausgabe mit gemeinsamer Standardkategorie und Telegram-Standardkonto),": "(expense using the shared default category and Telegram account),",
+  "(Kategorie, dann Konto),": "(category, then account),",
+  "(Einnahme auf Taschengeld mit Notiz). Ein": "(income to the allowance account with a note). A",
+  "ohne Angaben wird die Hilfe angezeigt.": "without arguments shows help.",
+  "neue, echte Ausgaben": "new actual expenses",
+  "Die drei Bereiche werden": "The three sections are",
+  ". Du kannst Telegram ohne Gotify einrichten. Erst danach bei Bedarf die Ausgabenwarnungen insgesamt aktivieren.": ". You can set up Telegram without Gotify. Then, if needed, enable expense alerts globally.",
+  "Diese Einstellungen betreffen nur": "These settings apply only to",
+  ". Du kannst dafür denselben FieLanzen-Bot und dieselbe Finanzgruppe wie bei den Buchungen verwenden. Alternativ bleibt dein bisheriger Bot für Benachrichtigungen nutzbar. Mitglieder der Gruppe können Finanzmeldungen lesen.": ". You can use the same FieLanzen bot and finance group as for transactions, or your existing notification bot. Group members can read financial notifications.",
+  "Telegram separat speichern": "Save Telegram settings separately",
+  "Gotify separat speichern": "Save Gotify settings separately",
+  "Grenzbetrag und Hauptschalter speichern": "Save threshold and master switch",
+  "Vorher wird eine konsistente SQLite-Sicherung im Projekt unter": "A consistent SQLite backup is first created in the project at",
+  "erstellt. Neue Web-Buchungen verändern danach Kontostände. Ein alter .backup-Snapshot darf diese Daten nicht ersetzen.": "is created. New web transactions then change balances. An old .backup snapshot must not replace that data.",
+  "Web-Finanzverwaltung aktivieren und Sicherung erstellen": "Enable web accounting and create backup",
+  "Einmal pro Kalendertag (Europe/Berlin). Die letzten 14 automatischen Sicherungen bleiben unter": "Once per calendar day (Europe/Berlin). The last 14 automatic backups are retained at",
+  "erhalten. Manuelle und vor Umstellungen erstellte Sicherungen werden dabei niemals gelöscht.": "Manual and pre-migration backups are never deleted automatically.",
+  "Letzte automatische Sicherung:": "Latest automatic backup:",
+  "SQLite-Sicherung herunterladen": "Download SQLite backup",
+  "Wiederherstellung ausschließlich lokal auf dem Docker-Host mit": "Restore locally on the Docker host only, using",
+  ". Sie ersetzt auch Benutzer und 2FA-Daten. Bewahre": ". The restore also replaces user and 2FA data. Keep",
+  "gesondert auf; ohne dieses Secret sind die 2FA-Schlüssel nicht wiederherstellbar.": "separately; without this secret the 2FA keys cannot be recovered.",
+  "Exportiert die aktuellen Konten, Stammdaten und Buchungen in eine komprimierte": "Exports current accounts, master data and transactions to a compressed",
+  "-Datei. Nicht mit einem geprüften Android-Restore verwechseln.": "file. Do not confuse this with a verified Android restore.",
+  "In der Web-Verwaltung:": "In web accounting:",
+  "Bei aktivierter Option werden": "When enabled,",
+  "Original-Financisto-Sicherung": "Original Financisto backup",
+  "Vorgaben speichern": "Save preferences",
+  "Standard speichern": "Save default",
+  ". Ein späterer Import-Abgleich ist eine gesonderte Funktion.Ein manueller Import ersetzt den bisherigen Financisto-Snapshot vollständig. Eine gesonderte Sicherung wird empfohlen.": ". A later import reconciliation is a separate feature. A manual import fully replaces the previous Financisto snapshot. Creating a separate backup is recommended.",
+  "(unter Einstellungen umschaltbar). Übertragene": "(can be changed in Settings). Uploaded",
+  "angezeigt. Jeder Code funktioniert genau einmal, falls du keinen Zugriff auf die Authenticator-App hast.": "displayed. Each code works only once if you lose access to your authenticator app.",
+  ". Gib den aktuellen sechsstelligen Code deiner Authenticator-App oder einen einmaligen Wiederherstellungscode ein.": ". Enter the current six-digit code from your authenticator app or a one-time recovery code.",
+  "Vorlage aus Buchung vom": "Cloned from transaction dated",
+  "Neue Regel": "New rule",
+  "Finanz-Stammdaten sowie System und Sicherheit.Empfänger, Kategorien und Kontostände verwalten.": "Finance master data, system and security. Manage payees, categories and account balances.",
+  "Wenn er vorübergehend nicht erreichbar ist, bleibt die Finanzbuchung erhalten.": "If the service is temporarily unavailable, the recorded financial transaction is preserved.",
+  "Sortierreihenfolge: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €.": "Sorting: active accounts with balances first (alphabetically), then inactive accounts, unknown balances, and finally zero-balance accounts.",
+  // Remaining exact fragments in help and status messages.
+  "Lade deine komprimierte": "Upload your compressed",
+  "Kategorien und Unterkategorien": "Categories and subcategories",
+  "Neuere Monate können deshalb unvollständig sein. Die Monatswerte sind keine Kontostände.": "More recent months may therefore be incomplete. Monthly figures are not account balances.",
+  "Bei ausbleibenden Prüfungen wird der Status als veraltet angezeigt. Die Zeiten aktualisieren sich beim Neuladen der Seite.": "If checks stop arriving, their status is shown as stale. Timestamps update when the page is reloaded.",
+  "Regeln exportiert. Pausierte und gelöschte Originalvorlagen werden entfernt. Manuell aktive oder nicht unterstützte Regeln verhindern den Export mit einer Fehlermeldung statt sie versehentlich auf Android automatisch auszuführen. Unveränderte Finanzbuchungen bleiben erhalten.": "rules are exported. Paused and deleted original templates are omitted. Manually active or unsupported rules block export with an error instead of inadvertently running them automatically on Android. Existing transactions remain unchanged.",
+  "Für einen rückwärtskompatiblen Export muss die ursprüngliche": "For backward-compatible export, the original",
+  "zum letzten eingelesenen Datenstand passen. Die Anmeldung kann sie hier nachträglich hinterlegen. Diese Aktion importiert nichts und verändert keine Buchungen.": "must match the last imported data snapshot. You can attach the original here later. This action does not import or alter any transactions.",
+  "unverändert. Der": "unchanged. The",
+  "bleibt zugänglich.": "remains accessible.",
+  "Prüfung weiterhin alle 60 Sekunden, vollständig übertragene Dateien nach mindestens 120 Sekunden. Ist die Automatik aus, bleiben die Sicherungen im": "Checks run every 60 seconds, with files processed at least 120 seconds after complete upload. When automatic importing is disabled, backups stay in",
+  "Neue Web-Buchungen verändern danach Kontostände. Ein alter .backup-Snapshot darf diese Daten nicht ersetzen.": "New web transactions then affect account balances. An old .backup snapshot must not replace them.",
+  "Sort order: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €.": "Sort order: active accounts with a nonzero balance alphabetically, then inactive accounts, unknown balances, and finally accounts with zero balance.",
+  "Die letzte Buchung im System": "The last transaction in the system",
+  "Die letzte importierte Financisto-Buchung": "The last imported Financisto transaction",
+  "Umstellungen und Datenführung": "Modes and authoritative data source",
+  "Neue Einträge": "New entries",
+
+  "Erweiterte Monats-, Konto- und Kategoriefilter": "Advanced month, account and category filters",
+  "Monatsauswahl": "Month selection",
+  "Zeitraum und Buchungsfilter": "Period and transaction filters",
+  "Zeitraum der Buchungsliste": "Transaction-list period",
+  "Buchungsfilter öffnen": "Open transaction filters",
+  "Filter · aktiv": "Filter · active",
+  "Cashflow · Einnahmen, Ausgaben und Saldo": "Cash flow · Income, expenses and net balance",
+  "Netto": "Net",
+  "Netto = Einnahmen − Ausgaben": "Net = income − expenses",
+  "Cashflow-Summen": "Cash-flow totals",
+  "Cashflow-Balkendiagramm mit Einnahmen, Ausgaben und Netto je Zeitraum": "Cash-flow bar chart showing income, expenses and net balance by period",
+  "Zukünftige Buchungen nicht enthalten": "Future-dated transactions excluded",
+  "Ohne Umbuchungen und durchlaufende Posten": "Excluding transfers and pass-through transactions",
+  "Der Cashflow zeigt Buchungen bis heute; zukünftige Buchungen bleiben in der Liste sichtbar. Konto- und Kategoriefilter gelten auch hier, der Schnell-Suchtext nur für die Buchungsliste. Kontostände werden nicht neu berechnet.": "Cash flow includes transactions dated up to today; future-dated transactions remain visible in the ledger. Account and category filters also apply here, while quick search affects only the transaction list. Account balances are not recalculated.",
+  "Einnahmen nach Kategorie": "Income by category",
+  "Einnahmen nach Kategorien": "Income by category",
+  "Empfänger / Notiz": "Payee / note",
+  "Zwischensumme": "Subtotal",
+  "Erstellt:": "Generated:",
+  "Keine ausgewählt": "No file selected",
+  "Übertragene": "Uploaded",
+  "Automatischen Import aktivieren": "Enable automatic import",
+  "Automatischen Import deaktivieren": "Disable automatic import",
+  "Sicherung prüfen (ohne Übernahme)": "Review backup (no import)",
+  "Buchungsfilter": "Transaction filters",
+  "Nach Kategorien": "By category",
+  "Quelle: Financisto": "Source: Financisto",
+  "Keine Umbuchungen": "No transfers",
+  "Saldo ≠ Kontostand": "Net ≠ account balance",
+  "PRIVATE HAUSHALTSZETTEL": "PRIVATE HOUSEHOLD LEDGER",
+  "Privater Haushaltszettel": "Private household sheet",
+  "Haushalt": "Household",
+  "Erstellt": "Created",
+  "Kategorie(n) ausgeblendet": "Categories hidden",
+  "Rechnungsankündigung": "Upcoming invoice",
+  "Einrichtung:": "Setup:",
+  "Gleichzeitig laufende": "Running concurrently",
+  "Sicherungsdatei auswählen": "Choose backup file",
+  "Bei Monaten ohne den gewählten Tag wird der letzte Kalendertag verwendet. Die Ausführungsuhrzeit ist eine frühestmögliche Zeit für automatische Buchungen, keine sekundengenaue Garantie: Der Hintergrunddienst prüft alle 15 Minuten (Zeitzone Europe/Berlin). Vorhandene Regeln bleiben standardmäßig auf": "For months without the selected day, the last calendar day is used. The scheduled time is the earliest permitted execution time, not a guarantee to the second: the background worker checks every 15 minutes (Europe/Berlin). Existing rules default to",
+  "über die Web-Erfassung, Telegram oder neue wiederkehrende Buchungen ab dem gewählten Betrag. Keine Warnung bei Umbuchungen, Importen, Depot-/Saldoabgleichen oder bloßen Änderungen. Der Grenzbetrag ist in EUR; andere Währungen werden nicht ohne Umrechnung verglichen.": "via web entry, Telegram, or new recurring transactions at or above the threshold. No alerts for transfers, imports, investment/balance adjustments, or edits. The threshold is in EUR; other currencies are not compared without conversion.",
+  "Bei der Rückschaltung werden wiederkehrende Web-Regeln pausiert. Web-Dauerbuchungen werden nicht allein durch das Umschalten übertragen. Erstelle": "When switching back, recurring web rules are paused. Web recurring transactions are not transferred just by switching modes. Create",
+  "unter „Rückexport nach Financisto“ eine geprüfte .backup-Datei mit aktivierter Wiederholungsoption und spiele diese bewusst in Android ein. Beim Umschalten werden die Web-Regeln pausiert.": "a verified .backup file under “Export back to Financisto”, with the recurrence option enabled, and deliberately restore it on Android. Web rules are paused when switching modes.",
+  "Kontenverwaltung (Administrator), Kontostandsabgleich, Kategorien und Empfänger (Administrator und Bearbeiter).Empfänger und Kategorien bearbeiten, Kontostände abgleichen. Die Kontenverwaltung bleibt dem Administrator vorbehalten.": "Manage accounts (administrator), reconcile balances, and edit categories and payees (administrator and editor). Account management remains restricted to the administrator.",
+  "Nicht überschrieben": "Not overwritten",
+  "Vorhandene Buchungen": "Existing transactions",
+  "Sicherungsdatei prüfen": "Review backup file",
+  "Financisto": "Financisto",
+  "Hausbuch": "Household ledger",
+
+  "Bot mit": "Create a bot with",
+  "anlegen und in die Telegram-Finanzgruppe aufnehmen. Bot-Token hier eintragen und einmal ohne Aktivierung speichern. Anschließend": "and add it to the Telegram finance group. Enter the bot token, save the settings once without enabling the bot, then send",
+  "in der Gruppe senden und Gruppen-Chat-ID sowie die jeweiligen Benutzer-IDs hier übernehmen. Bei mehreren Bots in der Gruppe gegebenenfalls": "in the group and copy the chat ID and authorized user IDs here. If multiple bots share the group, use",
+  "-Datei. Nicht mit einem geprüften Android-Restore verwechseln.": " file. Do not confuse this with a verified Android restore.",
+  "Zur Bestätigung WEB eingeben": "Type WEB to confirm",
+  "Zur Bestätigung PRIVAT eingeben": "Type PRIVAT to confirm",
+  "Nur für Administratoren · tatsächliche Prüfungen des gemeinsamen Hintergrunddienstes": "Administrators only · actual checks by the shared background worker",
+  "Gespeichert – unverändert": "Saved – unchanged",
+  "Vorlage anlegen (deaktiviert)": "Create template (disabled)",
+  "Systemstatus & Hintergrunddienste": "System status & background services",
+  "Prüfungen aktuell": "Checks up to date",
+  "Originalgrundlage gesichert": "Original backup preserved",
+  "Gespeichertes Gotify-Token entfernen": "Remove saved Gotify token",
+  "Gespeichertes Telegram-Token entfernen": "Remove saved Telegram token",
+  "Financisto-Import": "Financisto import",
+  "Kategorien und Unterkategorien": "Categories and subcategories",
+  "In der Web-Verwaltung:": "In web accounting:",
+  "Bei aktivierter Option werden": "When enabled,",
+  "Automatisch": "Automatic",
+  "Manuell": "Manual",
+  "Push ist auf diesem Gerät aktiviert. Weitere Geräte müssen separat angemeldet werden.": "Push is enabled on this device. Additional devices must be authorized separately.",
+  // 1.9.48: dynamic account section, report captions and remaining fixed labels.
+  "Konten": "Accounts",
+  "Haushalt": "Household",
+  "Buchungen": "Transactions",
+  "Buchungen insgesamt": "Transactions total",
+  "Quelle": "Source",
+  "Sortierung: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €.": "Sort order: active accounts with balances first (alphabetically), followed by inactive accounts, unknown balances, and finally accounts with zero balance.",
+  "Alles im Blick. Bis auf den letzten Cent.": "Your finances at a glance. Down to the last cent.",
+  "Wichtig bei Dauerbuchungen:": "Important for recurring transactions:",
+  "FINANCISTO eingeben": "Enter FINANCISTO to confirm",
+  "vorher": "before switching",
 };
   const replacements = [
     [/^Monat (\d{4}-\d{2}) drucken$/, 'Print month $1'],
     [/^Monat ([A-Za-zäöüÄÖÜß]+)$/, 'Month $1'],
     [/^Schritt (\d+) von (\d+)$/, 'Step $1 of $2'],
     [/^Buchungen pro Seite:\s*(\d+)$/, '$1 transactions per page'],
+    [/^Letzter Android-Import:\s*/, 'Last Android import: '],
     [/^Letzter Import:\s*/, 'Last import: '],
     [/^Letzter Financisto-Import:\s*/, 'Last Financisto import: '],
     [/^Letzte Sicherung:\s*/, 'Latest backup: '],
@@ -741,6 +1162,143 @@
     'Jan':'Jan','Feb':'Feb','Mrz':'Mar','Apr':'Apr','Jun':'Jun','Jul':'Jul',
     'Aug':'Aug','Sep':'Sep','Okt':'Oct','Nov':'Nov','Dez':'Dec'
   };
+
+  // Text including dates/counts is rendered by Jinja as one text node.
+  // Translate only known UI formats; leave user-entered strings untouched.
+  function translateMonthLabel(text) {
+    return text.replace(/\b(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember|Jan|Feb|Mrz|Apr|Jun|Jul|Aug|Sep|Okt|Nov|Dez)\b/g,
+      month => germanMonths[month] || month);
+  }
+  function translateDynamicCaption(value) {
+    // Captions with variable counts, dates or protected confirmation words.
+    const cashflowSummary = value.match(/^(\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · ([A-Z]{3}) · (\d+) Zeiträume$/);
+    if (cashflowSummary) return `${cashflowSummary[1]} to ${cashflowSummary[2]} · ${cashflowSummary[3]} · ${cashflowSummary[4]} periods`;
+    // Account, payee, category and note values are never rewritten.
+    let extra;
+    extra = value.match(/^(\d+)(?: von (\d+))? Buchungen von (\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · (\d+) pro Seite$/);
+    if (extra) return `${extra[1]}${extra[2] ? ' of '+extra[2] : ''} transactions from ${extra[3]} to ${extra[4]} · ${extra[5]} per page`;
+    extra = value.match(/^(\d+) Einträge$/);
+    if (extra) return `${extra[1]} entries`;
+    extra = value.match(/^Konten \((\d+)\)$/);
+    if (extra) return `Accounts (${extra[1]})`;
+    extra = value.match(/^([€$£]) · (\d+) Buchungen$/);
+    if (extra) return `${extra[1]} · ${extra[2]} transactions`;
+    extra = value.match(/^Kategorien und Unterkategorien \((\d+)\)$/);
+    if (extra) return `Categories and subcategories (${extra[1]})`;
+    extra = value.match(/^Empfänger \((\d+)\)$/);
+    if (extra) return `Payees (${extra[1]})`;
+    extra = value.match(/^(\d+) Zeiträume$/);
+    if (extra) return `${extra[1]} periods`;
+    extra = value.match(/^Zur Bestätigung (PRIVAT|OEFFENTLICH|WEB|DATENVERLUST) eingeben$/);
+    if (extra) return `Type ${extra[1]} to confirm`;
+    extra = value.match(/^Zur Bestätigung „(.+)“ eingeben$/);
+    if (extra) return `Type “${extra[1]}” to confirm`;
+    extra = value.match(/^(\d+) automatisch, (\d+) manuell, (\d+) pausiert, (\d+) gelöscht\/archiviert\.$/);
+    if (extra) return `${extra[1]} automatic, ${extra[2]} manual, ${extra[3]} paused, ${extra[4]} deleted/archived.`;
+    extra = value.match(/^([\d.]+) Kategorien insgesamt$/);
+    if (extra) return `${extra[1]} categories total`;
+    extra = value.match(/^Letzte tägliche SQLite-Sicherung: (.+)\.$/);
+    if (extra) return `Last daily SQLite backup: ${extra[1]}.`;
+    // Keep arbitrary categories, account names and payees unchanged.
+    let fmt;
+    fmt = value.match(/^(\d+) automatisch$/);
+    if (fmt) return `${fmt[1]} automatic`;
+    fmt = value.match(/^,?\s*(\d+) manuell, (\d+) pausiert, (\d+) gelöscht\/archiviert\.$/);
+    if (fmt) return `, ${fmt[1]} manual, ${fmt[2]} paused, ${fmt[3]} deleted/archived.`;
+    fmt = value.match(/^([\d.]+) Einträge$/);
+    if (fmt) return `${fmt[1]} entries`;
+    fmt = value.match(/^([\d.]+) Kategorien insgesamt$/);
+    if (fmt) return `${fmt[1]} categories total`;
+    fmt = value.match(/^([\d.]+) Buchungen von (\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · ([\d.]+) pro Seite$/);
+    if (fmt) return `${fmt[1]} transactions from ${fmt[2]} to ${fmt[3]} · ${fmt[4]} per page`;
+    let meta = value.match(/^(.+?) – (.+?) · ([A-Z]{3}) · (Alle Konten|Konto ausgewählt)((?: · Kategorie gefiltert)?(?: · Suche aktiv)?)$/);
+    if (meta) return `${translateMonthLabel(meta[1])} – ${translateMonthLabel(meta[2])} · ${meta[3]} · ${catalog[meta[4]]}${meta[5].replace('Kategorie gefiltert','category filtered').replace('Suche aktiv','search active')}`;
+    let special = value.match(/^(.+?) bis (.+?) · (\d+) Monate einschließlich der Grenzen$/);
+    if (special) return `${translateMonthLabel(special[1])} to ${translateMonthLabel(special[2])} · ${special[3]} months inclusive`;
+    special = value.match(/^Alle (\d+) Monate von (.+?) bis (.+?) einschließlich · Beträge in (.+)$/);
+    if (special) return `All ${special[1]} months from ${translateMonthLabel(special[2])} to ${translateMonthLabel(special[3])} inclusive · amounts in ${special[4]}`;
+    special = value.match(/^(Alle Konten|Konto ausgewählt) · (\d+) angezeigte Buchungen · (.+)$/);
+    if (special) return `${catalog[special[1]]} · ${special[2]} transactions shown · ${special[3]}`;
+    special = value.match(/^(\d+) · (\d+) Buchungen$/);
+    if (special) return `${special[1]} · ${special[2]} transactions`;
+    special = value.match(/^Zwischensumme (.+)$/);
+    if (special) return `Subtotal ${special[1]}`;
+    special = value.match(/^(.*?) von (\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · (\d+) pro Seite · Sortierung nach Datum, Betrag, Empfänger, Kategorie oder Konto$/);
+    if (special && /^\d+(?: von \d+)? Buchungen$/.test(special[1])) {
+      return `${special[1].replace(' von ', ' of ').replace(' Buchungen',parseInt(special[1],10) === 1 ? ' transaction' : ' transactions')} from ${special[2]} to ${special[3]} · ${special[4]} per page · sorted by date, amount, payee, category or account`;
+    }
+    special = value.match(/^([0-9]{4}-[0-9]{2}-[0-9]{2}) bis ([0-9]{4}-[0-9]{2}-[0-9]{2}) · ([A-Z]{3}) · Ohne Umbuchungen und durchlaufende Posten · Zukünftige Buchungen nicht enthalten$/);
+    if (special) return `${special[1]} to ${special[2]} · ${special[3]} · Excluding transfers and pass-through transactions · Future-dated transactions excluded`;
+    special = value.match(/^([0-9]{4}-[0-9]{2}-[0-9]{2}) bis ([0-9]{4}-[0-9]{2}-[0-9]{2}) · ([A-Z]{3}) · Ohne Umbuchungen und durchlaufende Posten · Zukünftige Buchungen nicht enthalten$/);
+    if (special) return `${special[1]} to ${special[2]} · ${special[3]} · Excluding transfers and pass-through transactions · Future-dated transactions excluded`;
+    let match = value.match(/^(Letzter Android-Import|Letzter Financisto-Import|Letzter Import|Letzte Sicherung):\s*(.+)$/);
+    if (match) return (catalog[match[1]+':'] || catalog[match[1]]) + ': ' + match[2];
+    match = value.match(/^(.+?) \/ (.+?) · (\d+) Kategorien · Monatsvergleich$/);
+    if (match) return `${translateMonthLabel(match[1])} / ${translateMonthLabel(match[2])} · ${match[3]} categories · monthly comparison`;
+    match = value.match(/^(\d+)(?: von (\d+))? Buchungen von (\d{4}-\d{2}) bis (\d{4}-\d{2}) · (\d+) pro Seite · Sortierung nach Datum, Betrag, Empfänger, Kategorie oder Konto$/);
+    if (match) return `${match[1]}${match[2] ? ' of '+match[2] : ''} transactions from ${match[3]} to ${match[4]} · ${match[5]} per page · sorted by date, amount, payee, category or account`;
+    match = value.match(/^(\d+) Umbuchungen werden bei den Einnahmen\/Ausgaben ausgeschlossen\.$/);
+    if (match) return `${match[1]} transfers are excluded from income and expenses.`;
+    match = value.match(/^(\d+) · (\d+) Buchungen$/);
+    if (match) return `${match[1]} · ${match[2]} transactions`;
+    match = value.match(/^(\d+) Kategorie\(n\) ausgeblendet\. Summen beziehen sich nur auf sichtbare Buchungen\.$/);
+    if (match) return `${match[1]} categories hidden. Totals include only visible transactions.`;
+    match = value.match(/^Gefilterte Auswertung: (\d+) Kategorie\(n\) ausgeblendet · (\d+) Buchung\(en\) nicht enthalten\. Einnahmen, Ausgaben und Saldo gelten nur für die angezeigte Auswahl\.$/);
+    if (match) return `Filtered report: ${match[1]} categories hidden · ${match[2]} transactions excluded. Income, expenses and balance refer only to the visible selection.`;
+    match = value.match(/^(\d+) · (\d+) angezeigte Buchungen · (.+)$/);
+    if (match) return `${match[1]} · ${match[2]} transactions shown · ${match[3]}`;
+    match = value.match(/^(\d+) Buchungen, (\d+) Konten\. Keine Daten verändert\. Bitte dieselbe Datei erneut auswählen und die Übernahme bestätigen\.$/);
+    if (match) return `${match[1]} transactions, ${match[2]} accounts. No data changed. Select the same file again and confirm import.`;
+    match = value.match(/^Die Datei enthält (\d+) Transaktionsdatensätze\. Davon werden ausschließlich (\d+) als wiederkehrende Vorlagen markierte Regeln zur Übernahme angeboten\.$/);
+    if (match) return `The file contains ${match[1]} transaction records. Only ${match[2]} marked as recurring templates are offered for import.`;
+    match = value.match(/^Wiederkehrende Vorlagen prüfen · (\d+) (.+)$/);
+    if (match) return `Review recurring templates · ${match[1]} ${match[2]}`;
+    match = value.match(/^Vorlage aus Buchung vom (\d{2}\.\d{2}\.\d{4}) · Neues Datum ist heute, Betrag bleibt absichtlich leer\. Es wird erst beim Speichern eine neue Buchung angelegt\.$/);
+    if (match) return `Cloned from transaction dated ${match[1]} · The date is today and the amount is intentionally blank. A new transaction is created only when you save.`;
+    match = value.match(/^([0-9]+) Web-Änderungen und ([0-9]+) Web-Buchungen\.$/);
+    if (match) return `${match[1]} web changes and ${match[2]} web transactions.`;
+    match = value.match(/^Warnung: (\d+) Web-Änderungen und (\d+) Web-Buchungen\.$/);
+    if (match) return `Warning: ${match[1]} web changes and ${match[2]} web transactions.`;
+    match = value.match(/^Automatische Sicherung (.+)$/);
+    if (match) return `Automatic backup ${match[1]}`;
+    match = value.match(/^(.+?) ist vom (\d{2}\.\d{2}\.\d{4})\. Neuere Monate können deshalb unvollständig sein\. Die Monatswerte sind keine Kontostände\.$/);
+    if (match && (match[1] === 'Die letzte Buchung im System' || match[1] === 'Die letzte importierte Financisto-Buchung')) return `${catalog[match[1]]} is dated ${match[2]}. More recent months may be incomplete. Monthly figures are not account balances.`;
+    match = value.match(/^Sortierreihenfolge: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €\.$/);
+    if (match) return 'Sorting: active accounts with balances alphabetically, then inactive accounts, unknown balances, and finally accounts with zero balance.';
+    match = value.match(/^(.+?)(?: · Kategorie gefiltert)?(?: · Suche aktiv)?$/);
+    if (match && (value.includes(' · Kategorie gefiltert') || value.endsWith(' · Suche aktiv'))) return value.replace(' · Kategorie gefiltert', ' · category filter active').replace(' · Suche aktiv', ' · search active');
+    match = value.match(/^(\d+) · (\d+) Buchungen$/);
+    if (match) return `${match[1]} · ${match[2]} transactions`;
+    match = value.match(/^(\d+) Kategorie\(n\) ausgeblendet\. Summen beziehen sich nur auf sichtbare Buchungen\.$/);
+    if (match) return `${match[1]} categories hidden. Totals include only visible transactions.`;
+    match = value.match(/^Letzte Rückmeldung des Hintergrunddienstes: (.+)\. Bei ausbleibenden Prüfungen wird der Status als veraltet angezeigt\. Die Zeiten aktualisieren sich beim Neuladen der Seite\.$/);
+    if (match) return `Last background-worker response: ${match[1]}. If checks stop, the status becomes stale. Times update when you reload the page.`;
+    match = value.match(/^Versandstatus: (\d+) erfolgreich, (\d+) ausstehend, (\d+) fehlgeschlagen\. Letzter Versand: (.+) \(Serverzeit\)\. Die Übermittlung erfolgt über einen separaten ausgehenden Dienst\. Wenn er vorübergehend nicht erreichbar ist, bleibt die Finanzbuchung erhalten\.$/);
+    if (match) return `Delivery status: ${match[1]} successful, ${match[2]} pending, ${match[3]} failed. Last delivery: ${match[4]} (server time). Messages are sent by a separate outbound service. If unavailable, your transaction is preserved.`;
+    match = value.match(/^Der manuelle \.backup-Import bleibt als sichere Prüfung erhalten; er überschreibt keine Web-Buchungen\. Es wurden bisher (\d+) Web-Änderungen registriert\.$/);
+    if (match) return `Manual .backup import remains available for safe review and does not overwrite web transactions. ${match[1]} web changes have been recorded.`;
+    match = value.match(/^([A-Za-zäöüÄÖÜß]+\s+\d{4}) \/ ([A-Za-zäöüÄÖÜß]+\s+\d{4}) · (\d+) Kategorien · Monatsvergleich$/);
+    if (match) return `${translateMonthLabel(match[1])} / ${translateMonthLabel(match[2])} · ${match[3]} categories · monthly comparison`;
+
+    match = value.match(/^Empfänger \((\d+)\)$/);
+    if (match) return `Payees (${match[1]})`;
+    match = value.match(/^Ausführungsmodus für (.+)$/);
+    if (match) return `Execution mode for ${match[1]}`;
+    match = value.match(/^(\d+) Vorlagen deaktiviert übernehmen$/);
+    if (match) return `Import ${match[1]} templates as disabled`;
+    match = value.match(/^(\d+) Vorlagen? (?:als )?wiederkehrend.+$/);
+    if (match) return `${match[1]} recurring templates`;
+    match = value.match(/^(\d+) Buchungen, (\d+) Konten\. Keine Daten verändert\. Bitte dieselbe Datei erneut auswählen und die Übernahme bestätigen\.$/);
+    if (match) return `${match[1]} transactions, ${match[2]} accounts. No data changed. Select the same file again and confirm import.`;
+    match = value.match(/^(\d+) bis (\d+) · (\d+) Monate einschließlich der Grenzen$/);
+    if (match) return `${match[1]} to ${match[2]} · ${match[3]} months inclusive`;
+    match = value.match(/^Alle (\d+) Monate von (\d{4}-\d{2}) bis (\d{4}-\d{2}) einschließlich · Beträge in (\w+)$/);
+    if (match) return `All ${match[1]} months from ${match[2]} to ${match[3]} inclusive · amounts in ${match[4]}`;
+    match = value.match(/^(\d+) \/ (\d+) Ausführungen$/);
+    if (match) return `${match[1]} / ${match[2]} executions`;
+    return null;
+  }
+
   function translate(value) {
     if (language !== 'en' || typeof value !== 'string') return value;
     const key = value.replace(/\s+/g, ' ').trim();
@@ -752,6 +1310,8 @@
       if (source.endsWith(':') && key.startsWith(source)) return translated + key.slice(source.length);
     }
     if (Object.prototype.hasOwnProperty.call(germanMonths,key)) return germanMonths[key];
+    const dynamic = translateDynamicCaption(key);
+    if (dynamic !== null) return dynamic;
     for (const [pattern,replacement] of replacements) {
       if (pattern.test(key)) return key.replace(pattern,replacement);
     }

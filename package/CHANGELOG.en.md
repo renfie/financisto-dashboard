@@ -1,3 +1,48 @@
+## 1.9.49 — Consolidated release since public v1.9.43 (2026-11-16)
+- **English interface (v1.9.44–1.9.49):** More complete offline translation for dashboard summaries, history, accounts, imports, A5/A4 reports, settings, notifications, Web Push, system status, Telegram, Gotify and the experimental Financisto export. Dynamic labels with counts, dates, months and mixed formatted text have improved support. User-created account/category/payee names and notes remain unchanged.
+- **Final language fix (v1.9.49):** The recurring-rules warning in the switch-back-to-Financisto form is now fully English in EN mode. The confirmation label reads “Enter FINANCISTO to confirm”; the required technical confirmation token is still exactly `FINANCISTO`.
+- **Cash flow (since v1.9.45):** Added income/expense bars and a dashed net line with a clear explanation; chart colors match category comparisons, net-line alignment is corrected and mobile scrolling is supported. Transfers, pass-through transactions, reconciliations and future-dated bookings are excluded from realized cash flow.
+- **Date presets and filtering (v1.9.45):** 1-week, 1-/3-/6-month shortcuts for the transaction list and a separate expandable advanced search; existing two-month comparisons and month selection are preserved.
+- **Dashboard structure (v1.9.46–1.9.47):** Account balances → transactions → expenses by category → cash flow. The transaction list starts expanded and cash flow collapsed. Sections remain user-toggleable; deep links open the relevant section.
+- **Pagination and row actions (v1.9.45–1.9.46):** Clickable page numbers plus Previous/Next, and more compact inline Clone/Edit/Delete actions on desktop.
+- **Reports and footers (v1.9.48):** Translated additional A5-report captions, account notices and import guidance. Existing `.env` variables support different footers: `APP_FOOTER` (German) and optional `APP_FOOTER_EN` (English). Existing settings are preserved on upgrade.
+- **Safety and compatibility:** No changes to accounting, import, balance or recurring-rule logic, existing finance records, SQLite schema, users, 2FA, Caddy certificates or permissions. Manual Financisto `.backup` import remains available.
+- **Upgrade:** Complete ZIP distribution including `update.sh`, with direct upgrade support from v1.9.43 through v1.9.48. The updater backs up SQLite, program files and `.env` before installation.
+
+## 1.9.48 — Local test build: English text and configurable footers (2026-11-16)
+- Completed account-header, balance sorting and Financisto import text translation.
+- Server-rendered English/German fixed labels in the A5 household report, preserving user category names and transaction text.
+- Added optional APP_FOOTER_EN alongside existing APP_FOOTER in .env; preserves existing customization on upgrade.
+- No financial records, booking logic, users or Caddy configuration changed.
+
+## 1.9.47 — Default panels and expanded offline English translations (local test build, 2026-11-16)
+- The dashboard ledger is expanded by default; cash flow is collapsed by default. Deep links to either panel expand the relevant section.
+- Additional English translations for transaction captions, recurring rules, push notifications, background job status, public access, Telegram, Gotify, Financisto export and financial master data.
+- Specific dynamic labels, counts, dates and protected confirmation terms are translated without modifying account names, payees, notes or financial records.
+- No changes to booking calculations, persistent data, database schema or Docker services. Not pushed to GitHub; local testing only.
+
+## 1.9.46 — Collapsible ledger, numbered pagination and cash-flow alignment (2026-11-16)
+- Moved the transaction list directly below account balances and made it collapsible. Pagination and transaction deep links expand it automatically.
+- Added numbered page links with ellipses alongside Previous/Next; existing period and search filters remain.
+- Kept category comparison and cash flow below the ledger. Cash-flow colors now match the month/category palette; the dark dashed net line has an explicit caption and centered zero reference.
+- Fixed net-line alignment in the three-month chart by sharing equal-width tracks with the bars; smaller screens scroll the plot when necessary.
+- Presentation changes only; no financial data, database, booking or import modifications. Local test build, not pushed to GitHub.
+
+## 1.9.45 — Cash flow, quick periods, compact actions and translation fixes (2026-11-16)
+- Independent 1W, 1M, 3M and 6M transaction-list presets. Existing two-month comparison and advanced filters remain available.
+- Full-text search moved into a separate compact Filter control.
+- Offline cash-flow chart with income, expenses and net amounts for the ledger period. Internal transfers, pass-through entries, balance adjustments and future-dated entries are excluded from realized cash flow.
+- Desktop Clone, Edit and Delete actions now fit inline without unnecessarily widening transaction rows; touch controls on mobile stay unchanged.
+- Improved English for historical analysis, printed reports, imports, dynamic captions and a locally translated file picker.
+- No database-schema, stored transaction, recurring-rule or data-import changes.
+
+## 1.9.44 — More complete English interface translation (2026-11-16)
+- Fixed untranslated dashboard captions: import date, monthly comparison, transaction counts, sort summary, quick filter and its search placeholder.
+- Added safe local translation patterns for known interface captions containing dates, month names, counts and status values; individual account/payee/note data remain unchanged.
+- Expanded fixed English text in import, reports, recurring rules, administrative settings and explanatory messages.
+- No changes to financial records, posting/import logic, database schemas, accounts, 2FA, Caddy or Docker networking.
+- This ZIP is a local test build; not yet published on GitHub.
+
 ## 1.9.43 — Complete English authentication text and compact dashboard actions (2026-11-16)
 - Fixed the mixed-language 2FA verification paragraph while keeping the actual username intact.
 - Completed English text for authenticator setup, QR-code guidance, recovery codes and password changes.

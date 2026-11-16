@@ -55,7 +55,7 @@
  {% for pie,title in [(expense_pie,'Ausgaben nach Kategorie'),(income_pie,'Einnahmen nach Kategorie')] %}
  <section class="panel history-pie-card"><h2>{{ title }}</h2>{% if pie.rows %}
  <div class="history-pie-layout"><div class="history-pie" role="img" aria-label="{{ title }}" style="background: {{ pie.gradient }}"><div class="history-pie-hole"></div></div>
- <div class="history-pie-legend">{% for item in pie.rows %}<div class="history-pie-legend-row"><span class="history-pie-color" style="background:{{ item.color }}"></span><span>{{ item.name }}</span><strong>{{ (item.value/divisor)|money(decimals) }} {{ symbol }} <small>({{ item.percent }} %)</small></strong></div>{% endfor %}</div></div>
+ <div class="history-pie-legend">{% for item in pie.rows %}<div class="history-pie-legend-row"><span class="history-pie-color" style="background:{{ item.color }}"></span><span data-no-i18n>{{ item.name }}</span><strong>{{ (item.value/divisor)|money(decimals) }} {{ symbol }} <small>({{ item.percent }} %)</small></strong></div>{% endfor %}</div></div>
  {% else %}<p class="muted">Keine Buchungen in diesem Zeitraum.</p>{% endif %}
  </section>
  {% endfor %}

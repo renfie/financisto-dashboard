@@ -1,4 +1,5 @@
 from __future__ import annotations
+import calendar
 import hashlib
 import notifications
 import webpush
@@ -83,6 +84,25 @@ APP_BRANDING = {
     'app_version': (BASE / 'VERSION').read_text(encoding='utf-8').strip(),
 }
 
+
+# English footer can be independently configured without changing an existing
+# APP_FOOTER value. Do not machine-translate arbitrary user-defined branding.
+def footer_for_language():
+    german = APP_BRANDING['app_footer']
+    if interface_language() != 'en':
+        return german
+    english = brand_env('APP_FOOTER_EN', '', 240)
+    if english:
+        return english
+    # Built-in defaults and a formerly used project slogan may be translated
+    # without touching custom text in .env. Anything else is shown as supplied.
+    known = {
+        'Privates Finanz-Dashboard · Daten bleiben auf deinem Server':
+            'Private finance dashboard · Your data stays on your server',
+        'Alles im Blick. Bis auf den letzten Cent.':
+            'Your finances at a glance. Down to the last cent.',
+    }
+    return known.get(german, german)
 
 
 def get_db():
@@ -289,7 +309,7 @@ def current_user():
 
 @app.context_processor
 def inject_user():
-    return {'viewer': current_user(), 'ui_language': interface_language(), **APP_BRANDING}
+    return {'viewer': current_user(), 'ui_language': interface_language(), **APP_BRANDING, 'app_footer': footer_for_language()}
 
 
 @app.post('/language')
@@ -2480,6 +2500,69 @@ def recurring_post(rule_id):
     return redirect(url_for('recurring_list'))
 
 
+# 1.9.45: Booking-list presets are independent from shared two-month reports.
+# No persisted settings or financial data are touched when switching periods.
+BOOKING_PERIODS = ('custom', '1w', '1m', '3m', '6m')
+
+
+def booking_period_dates(today, selected, first_month, last_month):
+    if selected == '1w':
+        return today - timedelta(days=6), today
+    if selected == '1m':
+        return today.replace(day=1), today
+    if selected in ('3m', '6m'):
+        months = int(selected[0])
+        index = today.year * 12 + (today.month - 1) - (months - 1)
+        return date(index // 12, index % 12 + 1, 1), today
+    return date.fromisoformat(first_month + '-01'), date.fromisoformat(last_month + '-01').replace(
+        day=calendar.monthrange(*map(int, last_month.split('-')))[1])
+
+
+def cashflow_period_buckets(start, end, selected):
+    """Calendar-aligned buckets for chart; date intervals are inclusive."""
+    if selected == '1w':
+        return [(start + timedelta(days=offset), start + timedelta(days=offset),
+                 (start + timedelta(days=offset)).strftime('%d.%m.'))
+                for offset in range((end-start).days+1)]
+    if selected == '1m':
+        result = []
+        cursor = start
+        while cursor <= end:
+            last = min(end, cursor + timedelta(days=6))
+            result.append((cursor,last,f'{cursor.day:02d}.–{last.day:02d}.'))
+            cursor = last + timedelta(days=1)
+        return result
+    month_start = date(start.year, start.month, 1)
+    result = []
+    while month_start <= end and len(result) < 36:
+        next_month = date(month_start.year + (month_start.month == 12), month_start.month % 12 + 1, 1)
+        begin, last = max(month_start,start), min(next_month-timedelta(days=1),end)
+        result.append((begin,last,month_start.strftime('%m/%Y')))
+        month_start = next_month
+    return result
+
+
+def build_cashflow(entries, start, end, selected, divisor):
+    """Net cash flow, excluding transfers, pass-through money and balance adjustments."""
+    buckets = cashflow_period_buckets(start,end,selected)
+    result = []
+    for begin,last,label in buckets:
+        members = (t for t in entries if begin.isoformat() <= t['day'] <= last.isoformat()
+                   and not t.get('to_account_id') and not t.get('pass_through')
+                   and not t.get('adjustment'))
+        income,expenses=0,0
+        for t in members:
+            amount = int(t['amount'])
+            if amount > 0: income += amount
+            elif amount < 0: expenses -= amount
+        result.append(dict(label=label,income=income,expenses=expenses,net=income-expenses))
+    peak=max((max(r['income'],r['expenses']) for r in result),default=0) or 1
+    for row in result:
+        row['income_height'] = round(row['income']/peak*100,1)
+        row['expenses_height'] = round(row['expenses']/peak*100,1)
+    return result
+
+
 SORTS = {'date','account','category','payee','amount','note','type'}
 
 SHARED_FILTER_KEYS = ('a', 'b', 'currency', 'account', 'category', 'q')
@@ -2563,6 +2646,11 @@ def dashboard():
         month_a = ym(filters.get('a',''), current)
         month_b = ym(filters.get('b',''), prev_month(current))
         range_start, range_end = sorted((month_a, month_b))
+        selected_period = request.args.get('period','custom')
+        if selected_period not in BOOKING_PERIODS:
+            selected_period = 'custom'
+        today_period = datetime.now(MONTH_TZ).date()
+        booking_start,booking_end = booking_period_dates(today_period,selected_period,range_start,range_end)
         currs=db.execute('SELECT * FROM currencies ORDER BY code').fetchall()
         if not currs:
             currs=[dict(id=0,code='EUR',symbol='€',decimals=2)]
@@ -2685,8 +2773,8 @@ def dashboard():
         # second query: the income/expense charts above must remain unaffected.
         # A transfer is a single transaction with a source and a destination,
         # not an expense followed by a separate income.
-        ledger_where=['substr(t.day,1,7) BETWEEN ? AND ?', 'a.currency_id=?', 't.is_template=0']
-        ledger_params=[range_start,range_end,currency]
+        ledger_where=['t.day BETWEEN ? AND ?', 'a.currency_id=?', 't.is_template=0']
+        ledger_params=[booking_start.isoformat(),booking_end.isoformat(),currency]
         if account:
             # A transfer must also be visible while viewing its destination account.
             ledger_where.append('(t.account_id=? OR t.to_account_id=?)')
@@ -2708,6 +2796,18 @@ def dashboard():
         ledger_transactions=[dict(r)|{'pass_through':r['category_id'] in neutral_ids,
                                       'adjustment':r['category_id'] in adjustment_ids}
                              for r in db.execute(ledger_sql,ledger_params)]
+
+        # Independent cashflow chart uses exactly this ledger period and filters,
+        # but never counts internal transfers or own-account balance adjustments.
+        # Only already-dated transactions enter the chart: future notices remain
+        # visibly marked in the ledger without being shown as realised cashflow.
+        cashflow_rows = build_cashflow(ledger_transactions,booking_start,min(booking_end,today_period),
+                                       selected_period,divisor)
+        cashflow_income = sum(r['income'] for r in cashflow_rows)
+        cashflow_expenses = sum(r['expenses'] for r in cashflow_rows)
+        cashflow_net = cashflow_income - cashflow_expenses
+
+        cashflow_net_abs = max((abs(r['net']) for r in cashflow_rows),default=0) or 1
 
         # This quick filter affects the bookings table only, not cards or diagrams.
         quick=request.args.get('quick','').strip()[:100]
@@ -2751,7 +2851,7 @@ def dashboard():
         for entry in tx:
             entry['balance_after'] = running.get(entry['id'])
         fields={'a':month_a,'b':month_b,'currency':currency,'account':account,
-                'category':category,'q':search,'quick':quick,'sort':sort,'dir':direction}
+                'category':category,'q':search,'quick':quick,'sort':sort,'dir':direction,'period':selected_period}
         def link(**changes):
             return url_for('dashboard')+'?'+urlencode({**fields,**changes})+'#buchungen'
         last_import=db.execute("SELECT value FROM meta WHERE key='last_import'").fetchone()
@@ -2767,6 +2867,10 @@ def dashboard():
             can_reconcile=can_reconcile,reconcile_accounts=reconcile_accounts,
             categories=categories,category=category,cat_names=cat_names,q=search,
             quick=quick,count_unfiltered=count_unfiltered,rows=rows,totals=totals,divisor=divisor,
+            period=selected_period,booking_start=booking_start.isoformat(),booking_end=booking_end.isoformat(),
+            cashflow_rows=cashflow_rows,cashflow_income=cashflow_income,
+            cashflow_expenses=cashflow_expenses,cashflow_net=cashflow_net,
+            cashflow_net_abs=cashflow_net_abs,
             decimals=decimals,symbol=symbol,tx=tx,count=count,page=page,
             page_count=page_count,page_size=page_size,range_start=range_start,range_end=range_end,sort=sort,direction=direction,link=link,
             last_import=last_import['value'] if last_import else 'Noch kein Import',

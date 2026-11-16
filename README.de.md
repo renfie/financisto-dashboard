@@ -2,6 +2,8 @@
 
 **Sprache / Language:** [English (default)](README.md) | **Deutsch**
 
+**v1.9.49 – aktuelles öffentliches Release (16.11.2026).** Sammelrelease aller seit GitHub-v1.9.43 lokal getesteten Änderungen: weiter vervollständigte Englischübersetzungen, Cashflow, Schnellfilter, Seitennummern, verbesserte Dashboard-Reihenfolge und Klappbereiche, kompakte Aktionsbuttons, getrennte Fußzeilentexte sowie der letzte Übersetzungsfehler beim Wechsel zurück zu Financisto. [Alle Änderungen](package/CHANGELOG.md).
+
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">
 </p>
@@ -13,8 +15,14 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.43 · 16. November 2026 (aktualisierte zweisprachige Einführung für neue Benutzer).
+**Aktuelles öffentliches Release:** v1.9.49 · 16. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.49).
 
+
+### Version 1.9.46 – Cashflow, Zeitraumfilter und kompakte Buchungsaktionen
+
+[Cashflow und Zeitraumfilter (Deutsch)](package/docs/CASHFLOW.de.md) · [English](package/docs/CASHFLOW.en.md).
+
+Der neue Cashflow enthält Einnahmen, Ausgaben und den Saldo. Die Buchungsliste erhält 1W / 1M / 3M / 6M als Schnellfilter, der vorhandene Vergleich und die detaillierten Filter bleiben erhalten. Die Aktionsbuttons stehen am Desktop kompakt nebeneinander. Die englische Oberfläche wurde weiter vervollständigt.
 
 ### Version 1.9.43 – Anmeldeübersetzungen und Dashboard-Aktionen
 
@@ -127,3 +135,8 @@ Das ursprüngliche Android-Projekt Financisto steht ebenfalls unter GPL v2. Die 
 **Automatische Veröffentlichung:** Der Workflow [Release erstellen](.github/workflows/release.yml) erstellt beim ersten Durchlauf sowie bei neuen Versionsständen in `package/VERSION` einen vollständigen Release-ZIP-Download mit SHA256-Prüfsumme. Bereits veröffentlichte Versionen bleiben unverändert. Alternativ kann der Workflow unter **Actions → Build and publish Financisto Dashboard release → Run workflow** manuell gestartet werden.
 
 Alle fertigen Versionen stehen öffentlich unter [GitHub Releases](https://github.com/renfie/financisto-dashboard/releases). Das Repository ist öffentlich; Bearbeitungsrechte erhält dadurch niemand automatisch.
+
+
+### Local test v1.9.48 / Lokaler Teststand
+
+Footer: APP_FOOTER="Deutscher Text" and APP_FOOTER_EN="English text" in the existing .env. If APP_FOOTER_EN is empty, known built-in slogans are translated; other custom strings are retained as entered.

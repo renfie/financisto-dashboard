@@ -166,6 +166,7 @@ branding_defaults = {
     'APP_TITLE': '"Financisto"',
     'APP_SUBTITLE': '"Dashboard"',
     'APP_FOOTER': '"Privates Finanz-Dashboard · Daten bleiben auf deinem Server"',
+    'APP_FOOTER_EN': '""',
 }
 for key, default in branding_defaults.items():
     if key not in values:

@@ -59,7 +59,7 @@
   </summary>
   <div class="disclosure-body balances-body">
    {% if not balance_snapshot_known %}<p class="hint balance-notice">Für ältere Importe sind die Kontostände eventuell noch nicht gespeichert. Sie erscheinen nach dem nächsten gültigen Financisto-Import oder nach dem Abgleich mit einer passenden Archiv-Sicherung. Unbekannte Beträge werden nicht als 0 € ausgegeben.</p>{% endif %}
-   <p class="hint balance-sort-hint">Sortierung: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €.</p>
+   <p class="hint balance-sort-hint">{{ 'Sort order: active accounts with balances first (alphabetically), followed by inactive accounts, accounts with unknown balances, and finally zero-balance accounts.' if ui_language == 'en' else 'Sortierung: aktive Konten mit Saldo alphabetisch, danach inaktive Konten, unbekannte Salden und zuletzt Konten mit 0 €.' }}</p>
    <div class="account-balances" style="--balance-rows: {{ ((balance_accounts|length + 1) // 2) if balance_accounts else 1 }}">
     {% for x in balance_accounts %}
     <div class="account-balance {{ 'balance-excluded' if x.include_in_totals == 0 else '' }}">
@@ -85,31 +85,28 @@
   </div>
  </details>
 </section>
-<section class="panel chart-panel" id="ausgabenkategorien" aria-label="Ausgaben nach Kategorien">
- <details class="dashboard-disclosure chart-disclosure" id="dashboard-charts">
-  <summary class="disclosure-summary">
-   <span class="disclosure-title"><span class="disclosure-label">Ausgaben nach Kategorien</span><span class="disclosure-meta">{{ month_a_short }} / {{ month_b_short }} · {{ rows|length }} Kategorien · Monatsvergleich</span></span>
+<section class="panel ledger-panel" id="buchungen" aria-label="Buchungsliste">
+ <details class="dashboard-disclosure ledger-disclosure" id="dashboard-ledger" open>
+  <summary class="disclosure-summary" aria-label="Buchungsliste ein- oder ausklappen">
+   <span class="disclosure-title"><span class="disclosure-label">Buchungen</span>
+    <span class="disclosure-meta">{{ count }}{% if quick %} von {{ count_unfiltered }}{% endif %} Buchungen von {{ booking_start }} bis {{ booking_end }} · {{ page_size }} pro Seite</span>
+   </span>
    <span class="disclosure-state" aria-hidden="true">Einblenden</span><span class="disclosure-chevron" aria-hidden="true"></span>
   </summary>
-  <div class="disclosure-body chart-disclosure-body">
- <div class="section-head"><div><p class="muted">Die Farben entsprechen den Monatskarten oben.</p></div><div class="legend" aria-label="Legende zum Monatsvergleich"><span class="legend-entry first"><i class="dot first"></i>Monat 1 · {{ month_a_label }}</span><span class="legend-entry second"><i class="dot second"></i>Monat 2 · {{ month_b_label }}</span></div></div>
- {% if rows %}
- <div class="bar-chart" role="img" aria-label="Balkendiagramm zum Ausgabenvergleich der Monate {{ a }} und {{ b }}">
- {% for r in rows %}
-  <div class="bar-group"><div class="bar-title" title="{{ r.category }}">{{ r.category }}</div><div class="bar-pair">
-   <div class="bar-line first"><span class="bar-month-label">{{ month_a_short }}</span><div class="bar-bg"><div class="bar first" style="width: {{ r.first_width }}%"></div></div><span class="bar-value">{{ r.first|money(decimals) }} {{ symbol }}</span></div>
-   <div class="bar-line second"><span class="bar-month-label">{{ month_b_short }}</span><div class="bar-bg"><div class="bar second" style="width: {{ r.second_width }}%"></div></div><span class="bar-value">{{ r.second|money(decimals) }} {{ symbol }}</span></div>
-  </div></div>
- {% endfor %}
- </div>
- {% else %}<p class="muted no-results">Für die gewählten Monate und Filter sind keine Ausgaben vorhanden.</p>{% endif %}
-  </div>
- </details>
-</section>
-<section class="panel" id="buchungen">
- <div class="section-head"><div><h2>Buchungen</h2><p class="muted">{{ count }}{% if quick %} von {{ count_unfiltered }}{% endif %} Buchungen von {{ range_start }} bis {{ range_end }} · {{ page_size }} pro Seite · Sortierung nach Datum, Betrag, Empfänger, Kategorie oder Konto</p></div><a class="button secondary" href="#filter-form">Filter bearbeiten ↑</a></div>
- <form method="get" id="quick-filter-form" action="{{ url_for('dashboard') }}#buchungen" role="search" class="quick-filter-form">
-  {% for name, value in [('a',a),('b',b),('currency',currency),('account',account),('category',category),('q',q),('sort',sort),('dir',direction)] %}
+  <div class="disclosure-body ledger-disclosure-body">
+   <p class="hint ledger-sort-hint">Sortierbar nach Datum, Betrag, Empfänger, Kategorie oder Konto.</p>
+ <div class="ledger-toolbar" aria-label="Zeitraum und Buchungsfilter">
+  <nav class="ledger-periods" aria-label="Zeitraum der Buchungsliste">
+   {% for value,label in [('1w','1W'),('1m','1M'),('3m','3M'),('6m','6M')] %}
+   <a class="ledger-period-button{{ ' is-active' if period == value else '' }}" href="{{ link(period=value,page=1,quick='') }}" {% if period==value %}aria-current="true"{% endif %}>{{ label }}</a>
+   {% endfor %}
+   <a class="ledger-period-custom{{ ' is-active' if period=='custom' else '' }}" href="{{ link(period='custom',page=1,quick='') }}" {% if period=='custom' %}aria-current="true"{% endif %}>Monatsauswahl</a>
+  </nav>
+  <details class="ledger-filter-toggle" id="ledger-filter-toggle" {% if quick %}open{% endif %}>
+   <summary aria-label="Buchungsfilter öffnen">⚲ Filter{% if quick %} · <span>aktiv</span>{% endif %}</summary>
+   <div class="ledger-filter-panel">
+    <form method="get" id="quick-filter-form" action="{{ url_for('dashboard') }}#buchungen" role="search" class="quick-filter-form">
+  {% for name, value in [('a',a),('b',b),('currency',currency),('account',account),('category',category),('q',q),('sort',sort),('dir',direction),('period',period)] %}
   <input type="hidden" name="{{ name }}" value="{{ value }}">
   {% endfor %}
   <label for="quick-filter">Schnellfilter (alle Buchungen zwischen den gewählten Monaten)</label>
@@ -119,7 +116,11 @@
    {% if quick %}<a class="button secondary" href="{{ link(quick='',page=1) }}">Zurücksetzen</a>{% endif %}
   </div>
   <p class="hint">Filtert nach kurzer Eingabepause automatisch über sämtliche Treffer, nicht nur die aktuelle Tabellenseite. Monats-Summen und Diagramme bleiben unverändert.</p>
- </form>
+    </form>
+    <a class="ledger-advanced-link" href="#filter-form">Erweiterte Monats-, Konto- und Kategoriefilter</a>
+   </div>
+  </details>
+ </div>
  <details class="mobile-sort-menu"><summary>Sortierung ändern</summary><div class="mobile-sort-links">
   {% for key,label in [('date','Datum'),('amount','Betrag'),('payee','Empfänger'),('category','Kategorie'),('account','Konto')] %}
    <a href="{{ link(sort=key,dir='desc',page=1) }}" {% if sort==key and direction=='desc' %}aria-current="true"{% endif %}>{{ label }} ↓</a>
@@ -176,9 +177,79 @@
  {% else %}<tr class="mobile-booking-empty"><td colspan="{{ 8 if can_modify else 7 }}" class="no-results">Keine Buchungen vorhanden.</td></tr>{% endfor %}
  </tbody></table></div>
  {% if page_count>1 %}
- <div class="pagination"><span>Seite {{ page }} von {{ page_count }} · {{ page_size }} je Seite</span><div>{% if page>1 %}<a class="button secondary" href="{{ link(page=page-1) }}">Zurück</a>{% endif %}{% if page<page_count %}<a class="button secondary" href="{{ link(page=page+1) }}">Weiter</a>{% endif %}</div></div>
+ <div class="pagination"><span>Seite {{ page }} von {{ page_count }} · {{ page_size }} je Seite</span>
+  <nav class="pagination-pages" aria-label="Buchungsseiten">
+   {% if page>1 %}<a class="button secondary pagination-direction" href="{{ link(page=page-1) }}" rel="prev">Zurück</a>{% endif %}
+   {% set navigation = namespace(last=0) %}
+   {% for n in ([1,2,page-2,page-1,page,page+1,page+2,page_count-1,page_count] | unique | sort) %}
+    {% if n>=1 and n<=page_count %}
+     {% if navigation.last and n>navigation.last+1 %}<span class="pagination-ellipsis" aria-hidden="true">…</span>{% endif %}
+     {% if n==page %}<span class="pagination-number is-current" aria-current="page" aria-label="Seite {{ n }}">{{ n }}</span>
+     {% else %}<a class="pagination-number" href="{{ link(page=n) }}" aria-label="Seite {{ n }}">{{ n }}</a>{% endif %}
+     {% set navigation.last=n %}
+    {% endif %}
+   {% endfor %}
+   {% if page<page_count %}<a class="button secondary pagination-direction" href="{{ link(page=page+1) }}" rel="next">Weiter</a>{% endif %}
+  </nav>
+ </div>
  {% endif %}
+  </div>
+ </details>
 </section>
+<section class="panel chart-panel" id="ausgabenkategorien" aria-label="Ausgaben nach Kategorien">
+ <details class="dashboard-disclosure chart-disclosure" id="dashboard-charts">
+  <summary class="disclosure-summary">
+   <span class="disclosure-title"><span class="disclosure-label">Ausgaben nach Kategorien</span><span class="disclosure-meta">{{ month_a_short }} / {{ month_b_short }} · {{ rows|length }} Kategorien · Monatsvergleich</span></span>
+   <span class="disclosure-state" aria-hidden="true">Einblenden</span><span class="disclosure-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="disclosure-body chart-disclosure-body">
+ <div class="section-head"><div><p class="muted">Die Farben entsprechen den Monatskarten oben.</p></div><div class="legend" aria-label="Legende zum Monatsvergleich"><span class="legend-entry first"><i class="dot first"></i>Monat 1 · {{ month_a_label }}</span><span class="legend-entry second"><i class="dot second"></i>Monat 2 · {{ month_b_label }}</span></div></div>
+ {% if rows %}
+ <div class="bar-chart" role="img" aria-label="Balkendiagramm zum Ausgabenvergleich der Monate {{ a }} und {{ b }}">
+ {% for r in rows %}
+  <div class="bar-group"><div class="bar-title" title="{{ r.category }}">{{ r.category }}</div><div class="bar-pair">
+   <div class="bar-line first"><span class="bar-month-label">{{ month_a_short }}</span><div class="bar-bg"><div class="bar first" style="width: {{ r.first_width }}%"></div></div><span class="bar-value">{{ r.first|money(decimals) }} {{ symbol }}</span></div>
+   <div class="bar-line second"><span class="bar-month-label">{{ month_b_short }}</span><div class="bar-bg"><div class="bar second" style="width: {{ r.second_width }}%"></div></div><span class="bar-value">{{ r.second|money(decimals) }} {{ symbol }}</span></div>
+  </div></div>
+ {% endfor %}
+ </div>
+ {% else %}<p class="muted no-results">Für die gewählten Monate und Filter sind keine Ausgaben vorhanden.</p>{% endif %}
+  </div>
+ </details>
+</section>
+<section class="panel cashflow-panel" id="cashflow" aria-labelledby="cashflow-title">
+ <details class="dashboard-disclosure cashflow-disclosure" id="dashboard-cashflow">
+  <summary class="disclosure-summary" aria-label="Cashflow ein- oder ausklappen">
+   <span class="disclosure-title"><span class="disclosure-label" id="cashflow-title">Cashflow · Einnahmen, Ausgaben und Saldo</span>
+    <span class="disclosure-meta">{{ booking_start }} bis {{ booking_end }} · {{ selected_currency.code }} · {{ cashflow_rows|length }} Zeiträume</span></span>
+   <span class="disclosure-state" aria-hidden="true">Einblenden</span><span class="disclosure-chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="disclosure-body cashflow-disclosure-body">
+ <div class="section-head cashflow-title"><div><h3>Cashflow-Auswertung</h3>
+ <p class="muted">{{ booking_start }} bis {{ booking_end }} · {{ selected_currency.code }} · Ohne Umbuchungen und durchlaufende Posten · Zukünftige Buchungen nicht enthalten</p></div>
+ <div class="cashflow-totals" aria-label="Cashflow-Summen"><span>Einnahmen <b class="income">{{ (cashflow_income/divisor)|money(decimals) }} {{ symbol }}</b></span><span>Ausgaben <b class="expense">{{ (cashflow_expenses/divisor)|money(decimals) }} {{ symbol }}</b></span><span>Netto <b class="{{ 'expense' if cashflow_net < 0 else 'income' }}">{{ (cashflow_net/divisor)|money(decimals) }} {{ symbol }}</b></span></div></div>
+ <div class="cashflow-legend"><span><i class="cashflow-key income-key"></i>Einnahmen</span><span><i class="cashflow-key expenses-key"></i>Ausgaben</span><span><i class="cashflow-key net-key"></i>Gestrichelte Linie: Netto = Einnahmen − Ausgaben</span></div>
+ <div class="cashflow-scroll" role="region" aria-label="Cashflow-Diagramm" tabindex="0"><div class="cashflow-chart" style="--cashflow-count: {{ cashflow_rows|length }}" role="img" aria-label="Cashflow-Balkendiagramm mit Einnahmen, Ausgaben und Netto je Zeitraum">
+ {% if cashflow_rows|length > 1 and cashflow_rows|length <= 12 %}
+ <svg class="cashflow-net-line" viewBox="0 0 1000 146" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+  <line class="cashflow-zero-line" x1="0" y1="73" x2="1000" y2="73"/>
+  <polyline points="{% for item in cashflow_rows %}{{ ((loop.index0 + 0.5) / (cashflow_rows|length) * 1000)|round(2) }},{{ (73 - item.net / cashflow_net_abs * 44)|round(2) }} {% endfor %}" />
+ </svg>
+ {% endif %}
+ {% for item in cashflow_rows %}
+ <div class="cashflow-column" title="{{ item.label }} · Einnahmen: {{ (item.income/divisor)|money(decimals) }} {{ symbol }} · Ausgaben: {{ (item.expenses/divisor)|money(decimals) }} {{ symbol }} · Netto: {{ (item.net/divisor)|money(decimals) }} {{ symbol }}">
+  <div class="cashflow-bars"><div class="cashflow-bar cashflow-income-bar" style="height:{{ item.income_height }}%"></div><div class="cashflow-bar cashflow-expenses-bar" style="height:{{ item.expenses_height }}%"></div></div>
+  <span class="cashflow-period-label">{{ item.label }}</span>
+  <strong class="cashflow-net {{ 'expense' if item.net < 0 else 'income' }}">{{ (item.net/divisor)|money(decimals) }} {{ symbol }}</strong>
+ </div>
+ {% endfor %}
+ </div></div>
+ <p class="hint cashflow-line-help">Die gestrichelte Linie zeigt den Netto-Saldo je Zeitraum: oberhalb der Mittellinie ein Überschuss, darunter ein Fehlbetrag. Sie hat eine eigene Skala um null und stellt keinen Kontostand dar.</p>
+ <p class="hint cashflow-hint">Der Cashflow zeigt Buchungen bis heute; zukünftige Buchungen bleiben in der Liste sichtbar. Konto- und Kategoriefilter gelten auch hier, der Schnell-Suchtext nur für die Buchungsliste. Kontostände werden nicht neu berechnet.</p>
+  </div>
+ </details>
+</section>
+
 <p class="muted disclaimer">Durchlaufende Posten („Durchlaufender Posten (Eingang/Ausgabe)“ einschließlich Unterkategorien) stehen weiterhin in der Buchungsliste und verändern den Kontostand, werden aber aus Einnahmen, Ausgaben und den Diagrammen des Dashboards herausgerechnet. In Financisto selbst gelten weiterhin dessen eigene Statistikregeln.</p>
 <p class="muted disclaimer">Der Buchungs-Kontostand wird aus dem aktuell gespeicherten Kontostand rückwärts berechnet und berücksichtigt Umbuchungen innerhalb derselben Währung. Bei Fremdwährungsumbuchungen ist der Verlauf nicht vollständig rekonstruierbar. Monatssaldo = Einnahmen − Ausgaben im gewählten Zeitraum; kein Kontostand. Umbuchungen erscheinen in der Buchungsliste, werden aber in den Einnahmen-/Ausgabensummen und Diagrammen nicht mitgezählt. Andere Währungen werden nicht mit EUR verrechnet.</p>
 {% endblock %}

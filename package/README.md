@@ -1,3 +1,30 @@
+## Neu: v1.9.49 – öffentliches Sammelrelease (16.11.2026)
+
+Alle Änderungen der lokalen Testversionen v1.9.44 bis v1.9.48 sowie die letzte vollständig englische Warnung zum Rückwechsel zu Financisto sind in v1.9.49 enthalten. [Deutsches Changelog](CHANGELOG.md) · [English changelog](CHANGELOG.en.md).
+
+## v1.9.48 – Lokale Testversion (16.11.2026)
+Englische Texte in Konten/Import/A5-Berichten ergänzt. Die vorhandene `.env` bleibt erhalten. Für die zweisprachige Fußzeile:
+```dotenv
+APP_FOOTER="Alles im Blick. Bis auf den letzten Cent."
+APP_FOOTER_EN="Your finances at a glance. Down to the last cent."
+```
+`APP_FOOTER_EN` ist optional; bei bestehender Konfiguration kann der Wert ergänzt werden. Nach Änderung der `.env`: `docker compose up -d --no-deps --force-recreate dashboard`.
+
+**v1.9.47 (lokale Testversion, NICHT auf GitHub):** Buchungen standardmäßig aufgeklappt; Cashflow standardmäßig zugeklappt. Weitere Englischübersetzungen insbesondere für Einstellungen und Systemstatus.
+
+**v1.9.46 (lokale Testversion, nicht auf GitHub):** Klappbare Buchungsliste direkt unter den Kontoständen mit anklickbaren Seitenzahlen; darunter Kategorien und Cashflow mit angepassten Farben, ausgerichteter und erklärter Netto-Linie.
+
+## Neu in v1.9.46 – lokale Testversion (noch nicht auf GitHub)
+- Schnellfilter **1 Woche, 1 Monat, 3 Monate und 6 Monate** für die Buchungsliste, separat von der bisherigen Monatsauswertung; die Monatsauswahl bleibt als fünfte Option.
+- Suchfeld hinter dem eigenen **Filter**-Bereich, weiterführende Konto-/Kategorie-/Monatsfilter per Verweis erreichbar.
+- **Cashflow-Balkendiagramm** mit Einnahmen, Ausgaben und Saldo für den gewählten Zeitraum, ohne Umbuchungen, durchlaufende Posten, Kontostandskorrekturen oder zukünftige Buchungsdaten. Die Cashflow-Anzeige ändert keine Buchung und keinen Kontostand.
+- **Klonen / Bearbeiten / Löschen** am Desktop kompakt nebeneinander; mobile Karten unverändert.
+- Verbesserte englische dynamische Texte bei historischen Auswertungen, Import und Haushaltsberichten; Dateiauswahl mit eigener übersetzbarer Schaltfläche.
+- Keine Änderungen an Datenbankstruktur, Benutzern, Sicherungen, Caddy, Importen und wiederkehrenden Regeln.
+
+## Neu in v1.9.46 – Englischübersetzungen vervollständigt
+Die englische Oberfläche übersetzt nun auch dynamische Dashboard-Texte (Importdaten, Monatsvergleich, Buchungszahlen, Sortierhinweise und Schnellfilter). Weitere Texte in Einstellungen und Berichten sind ergänzt. Kontonamen, Empfänger und Notizen bleiben unverändert. Finanzlogik und gespeicherte Daten werden nicht verändert.
+
 ## Neu in v1.9.43
 
 Die 2FA-Bestätigung, Authenticator-Einrichtung, Wiederherstellungscodes und Passwortänderung werden auf Englisch vollständig übersetzt. Die Dashboard-Aktionsbuttons stehen bei PC und Tablet wieder nebeneinander; auf Smartphones bleibt die Darstellung unverändert. Finanzdaten und Sicherheitskonfiguration werden nicht verändert.

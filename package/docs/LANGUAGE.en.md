@@ -40,3 +40,6 @@ This affects future/new browser sessions, but not sessions that explicitly chose
 ## Translation maintenance
 
 The German application text is the original. English strings are an explicit static dictionary loaded locally; when adding new user-visible UI labels, add a corresponding entry to `static/i18n.js` and test both languages. Keep strings containing user-defined financial data unmodified. Prefer server-side localization for newly introduced dynamic error messages.
+
+## Update 1.9.47
+Further local translations cover transactions, recurring schedules, system status, public access, Telegram, Gotify, notifications, Financisto export and financial master data. Confirmation tokens and user data remain unchanged.

@@ -10,38 +10,38 @@
 {% else %}
 <article class="compact-sheet">
   <header class="compact-header">
-    <div><div class="compact-eyebrow">PRIVATER HAUSHALTSZETTEL</div><h1>Haushalt · {{ month[5:7] }}/{{ month[:4] }}</h1></div>
-    <span>{{ symbol }} · {{ transaction_count }} Buchungen</span>
+    <div><div class="compact-eyebrow">{{ "PRIVATE HOUSEHOLD LEDGER" if ui_language == "en" else "PRIVATER HAUSHALTSZETTEL" }}</div><h1>{{ "Household" if ui_language == "en" else "Haushalt" }} · {{ month[5:7] }}/{{ month[:4] }}</h1></div>
+    <span>{{ symbol }} · {{ transaction_count }} {{ "transactions" if ui_language == "en" else "Buchungen" }}</span>
   </header>
   <div class="compact-totals">
-    <div><span>Einnahmen</span><b>{{ income_total|money(decimals) }} {{ symbol }}</b></div>
-    <div><span>Ausgaben</span><b>{{ expense_total|money(decimals) }} {{ symbol }}</b></div>
-    <div><span>Saldo{% if hidden %} (Auswahl){% endif %}</span><b>{{ balance|money(decimals) }} {{ symbol }}</b></div>
+    <div><span>{{ "Income" if ui_language == "en" else "Einnahmen" }}</span><b>{{ income_total|money(decimals) }} {{ symbol }}</b></div>
+    <div><span>{{ "Expenses" if ui_language == "en" else "Ausgaben" }}</span><b>{{ expense_total|money(decimals) }} {{ symbol }}</b></div>
+    <div><span>{{ "Net" if ui_language == "en" else "Saldo" }}{% if hidden %} {{ "(selection)" if ui_language == "en" else "(Auswahl)" }}{% endif %}</span><b>{{ balance|money(decimals) }} {{ symbol }}</b></div>
   </div>
   {% if hidden %}<p class="compact-note">{{ hidden|length }} Kategorie(n) ausgeblendet. Summen beziehen sich nur auf sichtbare Buchungen.</p>{% endif %}
   <div class="compact-columns">
     {% if incomes %}
     <section class="compact-category income-list">
-      <h2><span>Einnahmen</span><b>{{ income_total|money(decimals) }}</b></h2>
+      <h2><span>{{ "Income" if ui_language == "en" else "Einnahmen" }}</span><b>{{ income_total|money(decimals) }}</b></h2>
       <div class="compact-rows">
       {% for t in incomes %}
-      <div class="compact-row"><span title="{{ t.note }}">{{ t.payee if t.payee!='–' else t.category_path }}</span><b>{{ t.amount|money(decimals) }}</b></div>
+      <div class="compact-row"><span data-no-i18n title="{{ t.note }}">{{ t.payee if t.payee!='–' else t.category_path }}</span><b>{{ t.amount|money(decimals) }}</b></div>
       {% endfor %}
       </div>
     </section>
     {% endif %}
     {% for group in groups %}
     <section class="compact-category">
-      <h2><span>{{ group.name }}</span><b>{{ group.amount|money(decimals) }}</b></h2>
+      <h2><span data-no-i18n>{{ group.name }}</span><b>{{ group.amount|money(decimals) }}</b></h2>
       <div class="compact-rows">
       {% for t in group['items'] %}
-      <div class="compact-row"><span title="{{ t.note }}">{{ t.payee if t.payee!='–' else (t.note[:35] if t.note else t.day[8:10]+'.'+t.day[5:7]+'.') }}</span><b>{{ t.amount|money(decimals) }}</b></div>
+      <div class="compact-row"><span data-no-i18n title="{{ t.note }}">{{ t.payee if t.payee!='–' else (t.note[:35] if t.note else t.day[8:10]+'.'+t.day[5:7]+'.') }}</span><b>{{ t.amount|money(decimals) }}</b></div>
       {% endfor %}
       </div>
     </section>
     {% endfor %}
   </div>
-  <footer class="compact-footer">Quelle: Financisto · Keine Umbuchungen · Saldo ≠ Kontostand · {{ generated_at }}</footer>
+  <footer class="compact-footer">{{ "Source: Financisto · No transfers · Net ≠ account balance" if ui_language == "en" else "Quelle: Financisto · Keine Umbuchungen · Saldo ≠ Kontostand" }} · {{ generated_at }}</footer>
 </article>
 {% endif %}
 {% endblock %}

@@ -60,7 +60,7 @@
       {% endfor %}
       </div>
     </div>
-    <div class="sidebar-bottom">{{ app_footer }}</div>
+    <div class="sidebar-bottom" data-no-i18n>{{ app_footer }}</div>
   </aside>
 {% endif %}
   <div class="app-main-column">
@@ -99,7 +99,7 @@
       {% endwith %}
       {% block content %}{% endblock %}
     </main>
-    <footer class="footer">{{ app_footer }}</footer>
+    <footer class="footer" data-no-i18n>{{ app_footer }}</footer>
   </div>
 </div>
 </body>

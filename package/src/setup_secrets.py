@@ -269,7 +269,7 @@ def install():
         owner_path(path,uid,gid)
     owner_path(SECRETS,uid,gid)
     ENV.write_text(
-        f'SITE_HOST={host}\nSITE_ADDRESSES=https://{host}\nTRUSTED_PROXY_IPS=127.0.0.1/32\nHTTPS_PORT={port}\nHTTPS_BIND_IP=0.0.0.0\nAPP_UID={uid}\nAPP_GID={gid}\nAPP_TITLE="Financisto"\nAPP_SUBTITLE="Dashboard"\nAPP_FOOTER="Privates Finanz-Dashboard · Daten bleiben auf deinem Server"\nDEFAULT_LANGUAGE={INSTALL_LANGUAGE}\n',
+        f'SITE_HOST={host}\nSITE_ADDRESSES=https://{host}\nTRUSTED_PROXY_IPS=127.0.0.1/32\nHTTPS_PORT={port}\nHTTPS_BIND_IP=0.0.0.0\nAPP_UID={uid}\nAPP_GID={gid}\nAPP_TITLE="Financisto"\nAPP_SUBTITLE="Dashboard"\nAPP_FOOTER="Privates Finanz-Dashboard · Daten bleiben auf deinem Server"\nAPP_FOOTER_EN=""\nDEFAULT_LANGUAGE={INSTALL_LANGUAGE}\n',
         encoding='utf-8',
     )
     ENV.chmod(0o600)

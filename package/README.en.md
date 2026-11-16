@@ -1,3 +1,32 @@
+## v1.9.49 — public cumulative release (2026-11-16)
+
+Includes all locally tested v1.9.44–v1.9.48 improvements and the final English translation of the switch-back-to-Financisto warning. [English changelog](CHANGELOG.en.md) · [Deutsche Versionshistorie](CHANGELOG.md).
+
+## v1.9.48 — Local test build (2026-11-16)
+Improved English account/import/A5 report text and added optional `APP_FOOTER_EN` (keeps existing `APP_FOOTER` unchanged).
+
+Example configuration:
+```dotenv
+APP_FOOTER="Alles im Blick. Bis auf den letzten Cent."
+APP_FOOTER_EN="Your finances at a glance. Down to the last cent."
+```
+To apply edits to `.env`, restart only the dashboard container using `docker compose up -d --no-deps --force-recreate dashboard`.
+
+**v1.9.47 (local test build, NOT published to GitHub):** Transaction list opens by default, cash flow starts collapsed, and offline translations for settings, notifications and export are improved.
+
+**v1.9.46 (local test build, not published on GitHub):** Transactions have a collapsible panel below account balances, direct numbered pagination and an aligned, consistent-color cash-flow chart with an explanation of the dashed net line.
+
+## v1.9.46 — Local test build (not published on GitHub)
+- Independent **1-week, 1-month, 3-month, and 6-month** quick periods for the transaction list; the original report months remain available.
+- Separate collapsible full-text Filter, plus access to advanced account, category and month filters.
+- Offline cash-flow bars for income, expenses and net amounts; excludes transfers, pass-through payments, balance adjustments and future-dated entries. Financial data and balances are not changed.
+- Compact side-by-side Clone/Edit/Delete action buttons on desktop; mobile touch targets are unchanged.
+- Further English text fixes for analysis, importing and reports, with a locally translated file picker.
+- No changes to accounting data, account permissions, security, Caddy, backups or recurring rules.
+
+## v1.9.46 — More complete English interface
+Dashboard labels containing imported dates, month comparisons and transaction totals now translate properly, together with additional explanatory text in settings and reports. Bank account names, payees and personal notes are left unchanged. No finance logic or stored data changes.
+
 ## v1.9.43 — Authentication and responsive dashboard
 
 English text is now complete on the 2FA verification, authenticator setup, recovery-code and password change screens. The dashboard quick actions are horizontal on desktop/tablet and remain mobile friendly. Accounting data and security configuration are unchanged.

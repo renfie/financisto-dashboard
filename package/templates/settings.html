@@ -293,10 +293,14 @@
  <p class="hint"><strong>Web-Finanzverwaltung ist führend.</strong> Der manuelle .backup-Import bleibt als sichere Prüfung erhalten; er überschreibt keine Web-Buchungen. Es wurden bisher {{ web_writes }} Web-Änderungen registriert.</p>
  <details class="settings-create"><summary>Financisto wieder als führendes System festlegen</summary>
    {% if web_writes or web_transaction_count %}<p class="notice"><strong>Warnung: {{ web_writes }} Web-Änderungen und {{ web_transaction_count }} Web-Buchungen.</strong> Die Rückschaltung selbst löscht nichts, aber ein späterer erneuter Import kann alle über die Webseite geänderten Finanzdaten ersetzen. Eine SQLite-Sicherung wird vorher erstellt.</p>{% else %}<p>Vorher wird eine SQLite-Sicherung angelegt. Auto-Import bleibt zunächst aus.</p>{% endif %}
+   {% if ui_language == 'en' %}
+   <p class="muted small"><strong>Important for recurring transactions:</strong> Switching back pauses recurring web rules. Simply changing the accounting mode does not transfer recurring web transactions to Financisto. <strong>Before switching</strong>, create and verify a .backup file using “Export back to Financisto” with the recurring-transactions option enabled. Restore that backup deliberately in the Android app. Web recurring rules are paused when changing modes.</p>
+   {% else %}
    <p class="muted small"><strong>Wichtig bei Dauerbuchungen:</strong> Bei der Rückschaltung werden wiederkehrende Web-Regeln pausiert. Web-Dauerbuchungen werden nicht allein durch das Umschalten übertragen. Erstelle <strong>vorher</strong> unter „Rückexport nach Financisto“ eine geprüfte .backup-Datei mit aktivierter Wiederholungsoption und spiele diese bewusst in Android ein. Beim Umschalten werden die Web-Regeln pausiert.</p>
+   {% endif %}
    <form method="post" action="{{ url_for('settings_switch_to_import') }}" class="formstack">
     <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-    <label>FINANCISTO eingeben<input name="confirm" pattern="FINANCISTO" placeholder="FINANCISTO" required></label>
+    <label>{{ "Enter FINANCISTO to confirm" if ui_language == "en" else "FINANCISTO eingeben" }}<input name="confirm" pattern="FINANCISTO" placeholder="FINANCISTO" required></label>
     {% if web_writes or web_transaction_count %}<label class="checkline"><input type="checkbox" name="risk_ack" value="1" required>Ich akzeptiere den möglichen Verlust der Web-Änderungen beim späteren Import und habe die Warnung verstanden.</label>
     <label>Zur ausdrücklichen Bestätigung DATENVERLUST eingeben<input name="loss_confirm" pattern="DATENVERLUST" required placeholder="DATENVERLUST"></label>{% endif %}
     <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" autocomplete="current-password" required></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
@@ -432,7 +436,7 @@
  </div>
  <p class="finance-master-empty muted" data-master-empty hidden>Keine passenden Kategorien gefunden.</p></details>
  {% if viewer.role == 'admin' %}
- <details class="settings-list" name="finance-master-group" data-master-section="accounts"><summary>Konten ({{ accounts|length }})</summary>
+ <details class="settings-list" name="finance-master-group" data-master-section="accounts"><summary>{{ 'Accounts' if ui_language == 'en' else 'Konten' }} ({{ accounts|length }})</summary>
  {% if finance_mode == 'web' %}
  <form class="finance-inline-form" method="post" action="{{ url_for('settings_save_account') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><label>Neuer Kontoname<input name="title" maxlength="100" required></label><label>Währung<select name="currency_id">{% for curr in currencies %}<option value="{{ curr.id }}" {% if curr.code==preferred_currency %}selected{% endif %}>{{ curr.code }}</option>{% endfor %}</select></label><label>Startsaldo<input name="opening_balance" value="0,00" required></label><button class="primary" type="submit">Konto anlegen</button></form>
  {% endif %}

@@ -2,6 +2,8 @@
 
 **Language / Sprache:** **English** | [Deutsch](README.de.md)
 
+**v1.9.49 — latest public release (2026-11-16).** This cumulative release includes all locally tested changes since public v1.9.43: improved English translations, a cash-flow chart, quick transaction-period filters, numbered pagination, improved dashboard ordering and collapsible panels, compact desktop row actions, configurable German/English footers, and the final switch-back-to-Financisto translation fix. [Full release history](package/CHANGELOG.en.md).
+
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves dashboard logo" width="260">
 </p>
@@ -12,8 +14,14 @@
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Current release:** [v1.9.43](https://github.com/renfie/financisto-dashboard/releases) · November 16, 2026. This release updates the first-login introduction in English and German, without changing stored financial data or accounting logic.
+**Latest public release:** v1.9.49 · November 16, 2026. [Download ZIP and checksum](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.49).
 
+
+### Version 1.9.46 — Cash flow, period presets and compact controls
+
+[Cash flow and quick periods (English)](package/docs/CASHFLOW.en.md) · [Deutsch](package/docs/CASHFLOW.de.md).
+
+Version 1.9.46 adds independent 1W / 1M / 3M / 6M transaction-list presets, a local cash-flow chart, a collapsible text filter, compact transaction actions and additional English text fixes. Transfers and internal balance adjustments are not counted in cash flow.
 
 ### Version 1.9.43 — Login translations and dashboard controls
 
@@ -125,3 +133,8 @@ Own dashboard components are distributed under the **GNU General Public License 
 A GitHub Actions [release workflow](.github/workflows/release.yml) creates a new versioned release when `package/VERSION` changes on `main`. Publishing is **not automatic when we discuss or edit code in ChatGPT**; source changes first need to be committed to GitHub and the version needs to be updated. Release notes are available in both English and German.
 
 The repository and downloadable releases are public. Only authorized collaborators can modify the official repository.
+
+
+### Local test v1.9.48 / Lokaler Teststand
+
+Footer: APP_FOOTER="Deutscher Text" and APP_FOOTER_EN="English text" in the existing .env. If APP_FOOTER_EN is empty, known built-in slogans are translated; other custom strings are retained as entered.

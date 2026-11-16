@@ -40,3 +40,6 @@ Eigene Konten, Buchungen, Benutzer, 2FA, Finanz-Import und Caddy-Zertifikate wer
 ## Übersetzungen pflegen
 
 Deutsche Templates bilden den unveränderten Originaltext. Das offline arbeitende Übersetzungswörterbuch liegt in `static/i18n.js`. Neue Oberflächentexte sollten dort ebenso ergänzt und in beiden Sprachen geprüft werden. Kontonamen, Empfänger, Kategorien und Buchungsnotizen dürfen nicht automatisch verändert werden.
+
+## Aktualisierung 1.9.47
+Zahlreiche feste und dynamische Beschriftungen in Buchungen, wiederkehrenden Buchungen, Systemstatus, öffentlichem Zugriff, Telegram, Gotify, Benachrichtigungen, Financisto-Export und Stammdaten werden nun in Englisch ausgegeben. Bestätigungswörter sowie Benutzerdaten bleiben unverändert.
