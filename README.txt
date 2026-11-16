@@ -1,17 +1,18 @@
-Financisto-Dashboard v1.9.41 – Buchungsformular für PC und Tablet korrigiert.
+Financisto-Dashboard v1.9.42 – zweisprachige, aktualisierte Einführung.
 
-Empfänger links und Kategorie rechts stehen auf größeren Bildschirmen jetzt
-wieder nebeneinander. Auf dem Smartphone bleibt die Darstellung wie bisher.
-Umbuchungen: Zielkonto und Empfänger werden am Desktop ebenfalls nebeneinander dargestellt.
+Upgrade ab v1.9.35 oder neuer ohne Zwischenversion:
+  unzip -o financisto-dashboard-v1.9.42.zip
+  ./financisto-release-1.9.42/update.sh /home/pi/docker-files/financisto-dashboard
 
-Direktes Update von 1.9.35, 1.9.39 oder 1.9.40 möglich, ohne Zwischenversion:
-  cd /home/pi/docker-files
-  unzip -o financisto-dashboard-v1.9.41.zip
-  ./financisto-release-1.9.41/update.sh /home/pi/docker-files/financisto-dashboard
+Upgrade bitte als Eigentümer der Installation ohne sudo ausführen.
+Vor der Aktualisierung legt update.sh eine Sicherung der SQLite-Datenbank
+und der vorherigen Programmversion an. .env, Secrets, Finanzdaten, die
+vorhandene Caddy-CA und vorhandene Benutzerrechte bleiben erhalten.
 
-Als Eigentümer der Installation ausführen, ohne sudo.
-Die bestehenden Finanzdaten, .env, Secrets, Backups und die lokale Caddy-CA
-bleiben erhalten; das Update erstellt vorab Programm- und SQLite-Sicherungen.
+Geändert wurde nur der Einführungsrundgang (tour.js) und die Dokumentation.
+DE und EN für Administratoren, Bearbeiter und Leseberechtigte. Manuell jederzeit
+über „Hilfe / Einführung“ erneut aufrufbar. Bestandskonten werden nicht erneut
+automatisch durch die Einführung geführt.
 
-English: This maintenance release fixes desktop/tablet transaction form layout.
-Payee and Category now share a row. Mobile layout and stored data remain unchanged.
+Englisch: README.md und package/docs/ONBOARDING.en.md
+Deutsch: README.de.md und package/docs/ONBOARDING.de.md

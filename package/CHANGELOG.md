@@ -1,3 +1,11 @@
+## 1.9.42 – Aktualisierte zweisprachige Einführung (16.11.2026)
+- Einführungsrundgang auf den Funktionsstand 1.9.41 gebracht, vollständig auf Deutsch und Englisch mit lokaler Sprachauswahl.
+- Erläutert jetzt Kontostände, zukünftige Buchungen (gelb und sofort saldo-wirksam), Empfänger/Kategorie, Wiederholungen mit Enddatum oder maximaler Ausführungszahl, Import-/Datenführungsmodus sowie DE/EN-Umschaltung.
+- Rechteabhängige Hinweise für Administratoren, Bearbeiter und Benutzer mit Leserechten; keine unberechtigten Funktionen versprochen.
+- Erstmalige automatische Einführung nur für neue Benutzer, deren Einführung noch nicht abgeschlossen ist; bestehende Nutzer werden nicht erneut gestört.
+- Hilfe / Einführung bleibt jederzeit manuell aufrufbar, inklusive Zurück, Weiter, Überspringen und Abschluss.
+- Keine Änderungen an Finanzdaten, Datenbank, Buchungs-/Importlogik, Secrets oder Caddy-Zertifikaten.
+
 ## 1.9.41 – Formularraster auf Desktop und Tablet korrigiert (15.11.2026)
 - Buchungserfassung: Empfänger und Kategorie stehen auf PC und Tablets wieder in derselben Zeile (Empfänger links, Kategorie rechts), passend zur bereits korrekten Reihenfolge der Felder.
 - Bei Umbuchungen bleiben Zielkonto und Empfänger auf großen Bildschirmen nebeneinander; die Smartphone-Darstellung bleibt unverändert untereinander.

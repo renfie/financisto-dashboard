@@ -1,21 +1,65 @@
-/* 1.9.12: local, role-aware first-login tour. No external libraries or analytics. */
+/* 1.9.42: up-to-date, bilingual, role-aware first-login tour. Fully offline. */
 (() => {
   'use strict';
   const body = document.body;
   if (!body || !body.dataset.tourUser) return;
   const role = body.dataset.tourRole;
   const desktop = () => window.matchMedia('(min-width:1081px)').matches;
+  // All copy is shipped with the application; no external translation service.
+  // Keep UI strings separate from financial records and editable account data.
+  const language = document.documentElement.lang === 'en' ? 'en' : 'de';
+  const copy = {
+    de: {
+      overview: ['Dein Finanzüberblick', 'Vergleiche die Einnahmen, Ausgaben und den Saldo zweier Monate. Der Monatssaldo ist nicht mit dem aktuellen Kontostand gleichzusetzen.'],
+      filters: ['Zeitraum und Filter', 'Wähle die beiden Vergleichsmonate, Konten, Kategorien und die Währung. Über die Suche kannst du Buchungen gezielt eingrenzen.'],
+      balances: ['Kontostände ausklappen', 'Hier siehst du den Gesamtstand und auf Wunsch die einzelnen Kontostände. Die Kontostände sind unabhängig vom eingestellten Berichtszeitraum.'],
+      transactions: ['Buchungen prüfen', 'Die Buchungsliste lässt sich durchsuchen und sortieren. Auf kleineren Bildschirmen zeigt ein Fingertipp weitere Details. Gelb gekennzeichnete Buchungen liegen in der Zukunft, beeinflussen den gespeicherten Kontostand aber schon jetzt.'],
+      history: ['Historische Auswertung', 'Untersuche Entwicklungen über längere Zeiträume, Durchschnittswerte und die wichtigsten Ausgabenkategorien.'],
+      monthly: ['Monatsberichte drucken', 'Die Monatsauswertung bietet druckbare Berichte im A5- oder A4-Format.'],
+      booking: ['Neue Buchungen erfassen', 'Erfasse Ausgaben, Einnahmen und Umbuchungen. Der Empfänger steht vor der Kategorie. Du kannst Buchungen bearbeiten oder klonen und auch zukünftige Buchungstage eintragen. Dafür muss die Web-Finanzverwaltung führend sein.'],
+      recurring: ['Wiederkehrende Buchungen', 'Vorlagen können pausiert oder manuell ausgeführt werden; Administratoren können auch die Automatik freigeben. Begrenze Regeln bei Bedarf auf eine Anzahl von Ausführungen oder mit einem Enddatum. Das erzeugt Web-Buchungen, keinen Bank-Dauerauftrag.'],
+      recurringViewer: ['Wiederkehrende Buchungen ansehen', 'Hier siehst du wiederkehrende Vorlagen, ihre Termine und Grenzen. Neue Buchungen und die automatische Ausführung hängen von Berechtigung und führender Datenquelle ab.'],
+      imports: ['Financisto-Import und Datenführung', 'Verwalte manuelle .backup-Importe und den optionalen automatischen SFTP-Import. Die Wahl des führenden Systems entscheidet, wo Buchungen bearbeitet werden; Änderungen sind bewusst geschützt.'],
+      settingsAdmin: ['Einstellungen und Sicherheit', 'Hier verwaltest du Benutzer, Rechte, die Finanz-Stammdaten und System- sowie Benachrichtigungseinstellungen. Sicherheitsrelevante Änderungen erfordern eine Bestätigung.'],
+      settingsEditor: ['Einstellungen für Bearbeiter', 'Hier kannst du die für deine Rolle freigegebenen Finanz-Stammdaten verwalten. Benutzer, System-Sicherheit und die Datenführung werden vom Administrator gesteuert.'],
+      language: ['Deutsch und Englisch', 'Mit DE / EN kannst du die Oberfläche jederzeit umstellen. Die Auswahl gilt für deine aktuelle Browser-Sitzung; Buchungen und persönliche Daten bleiben unverändert.'],
+      help: ['Einführung erneut öffnen', 'Über „Hilfe / Einführung“ startest du diesen Rundgang jederzeit wieder. Mit „Überspringen“ kannst du ihn schon jetzt beenden.']
+    },
+    en: {
+      overview: ['Your financial overview', 'Compare income, expenses and the balance of two months. The monthly balance is not the same as your current account balance.'],
+      filters: ['Dates and filters', 'Choose the two comparison months, accounts, categories and currency. Use search to narrow down the transactions.'],
+      balances: ['Expand account balances', 'See the total and, if needed, individual account balances. Account balances are independent of the selected reporting period.'],
+      transactions: ['Review transactions', 'Search and sort the transaction list. On smaller screens, tap an entry for more details. Yellow-highlighted transactions have a future date but already affect the stored account balance.'],
+      history: ['Historical analysis', 'Explore longer-term trends, averages and the most important expense categories.'],
+      monthly: ['Print monthly reports', 'The monthly report offers printable summaries in A5 or A4 format.'],
+      booking: ['Enter transactions', 'Record expenses, income and transfers. Payee comes before category. You can edit or clone transactions and enter future transaction dates. The web dashboard must be the authoritative finance system to make changes.'],
+      recurring: ['Recurring transactions', 'Rules can be paused or run manually; administrators may also enable automatic posting. Set an end date or a maximum number of executions. This creates web transactions, not bank standing orders.'],
+      recurringViewer: ['View recurring transactions', 'Review recurring rules, scheduled dates and limits. Creating transactions and automatic posting depend on permissions and the authoritative data source.'],
+      imports: ['Financisto imports and data ownership', 'Manage manual .backup imports and optional automatic SFTP imports. The authoritative data-source setting determines where transactions can be edited; changes have explicit safeguards.'],
+      settingsAdmin: ['Settings and security', 'Manage users, access rights, financial master data, system options and notifications. Sensitive changes require confirmation.'],
+      settingsEditor: ['Editor settings', 'Manage the financial master data available to your role. Users, system security and the authoritative data source are controlled by an administrator.'],
+      language: ['German and English', 'Use DE / EN to switch the interface at any time. Your choice applies to the current browser session; transactions and personal data do not change.'],
+      help: ['Restart this introduction', 'Open “Help / introduction” to replay this tour at any time. You can also choose “Skip” to stop it now.']
+    }
+  };
+  const labels = language === 'en'
+    ? {skip:'Skip', back:'Back', next:'Next', done:'Finish', step:(current,total)=>`Step ${current} of ${total}`,
+       closeMenu:'Close menu', openMenu:'Open menu', saveError:'Could not save the introduction status. Please reload the page later.'}
+    : {skip:'Überspringen', back:'Zurück', next:'Weiter', done:'Fertig', step:(current,total)=>`Schritt ${current} von ${total}`,
+       closeMenu:'Menü schließen', openMenu:'Menü öffnen', saveError:'Einführungsstatus konnte nicht gespeichert werden. Bitte Seite später neu laden.'};
   const steps = [
-    {id:'overview', target:'.month-comparison', title:'Dein Finanzüberblick', text:'Hier siehst du Einnahmen, Ausgaben und den Saldo der beiden gewählten Monate. Die Karten lassen sich direkt vergleichen.'},
-    {id:'filters', target:'#dashboard-filters > summary', title:'Monate und Filter auswählen', text:'Hier wählst du zwei Monate, Konten, Kategorien und Währung. Die Buchungsliste berücksichtigt auch alle Monate dazwischen.'},
-    {id:'transactions', target:'#buchungen .section-head', fallback:'#buchungen', title:'Buchungen im Blick', text:'Hier findest du alle Buchungen im gewählten Zeitraum mit Suchfeld, Sortierung, Seitenwechsel und dem Kontostand nach jeder Buchung.'},
-    {id:'history', nav:'history', title:'Historische Auswertung', text:'Dieser Menüpunkt zeigt den gesamten Zeitraum zwischen den gewählten Monaten: Trends, Durchschnittswerte und die größten Kategorien.'},
-    {id:'booking', nav:'bookings-entry', title:'Neue Buchungen erfassen', text:'Hier trägst du Ausgaben, Einnahmen und Umbuchungen ein und kannst bereits erfasste Web-Buchungen bearbeiten.', roles:['admin','editor']},
-    {id:'recurring', nav:'recurring', title:'Wiederkehrende Buchungen', text:'Plane regelmäßige Zahlungen. Jede Regel ist pausiert, manuell oder automatisch. Automatisch bedeutet nur eine Eintragung im Haushaltsbuch.'},
-    {id:'monthly', nav:'monthly', title:'Monatsauswertung drucken', text:'Diesen Bericht kannst du für die ausgewählten Monate als übersichtliche A4- oder A5-Auswertung ausdrucken.', roles:['viewer']},
-    {id:'imports', nav:'import', title:'Import und Synchronisation', text:'Hier prüfst du die Android-Sicherung und steuerst den manuellen sowie den automatischen Import. Deine bisherigen Daten bleiben geschützt.', roles:['admin']},
-    {id:'settings', nav:'settings', title:'Einstellungen und Hilfe', text:'Unter Einstellungen verwaltest du unter anderem Stammdaten und persönliche Vorgaben. Über „Hilfe / Einführung“ kannst du diesen Rundgang jederzeit erneut starten.', roles:['admin','editor']},
-    {id:'viewer-help', nav:'help', title:'Einführung erneut starten', text:'Über diesen Menüpunkt kannst du den Rundgang jederzeit wiederholen.', roles:['viewer']}
+    {id:'overview', target:'.month-comparison'},
+    {id:'filters', target:'#dashboard-filters > summary'},
+    {id:'balances', target:'#dashboard-balances > summary'},
+    {id:'transactions', target:'#buchungen .section-head', fallback:'#buchungen'},
+    {id:'history', nav:'history'},
+    {id:'monthly', nav:'monthly'},
+    {id:'booking', nav:'bookings-entry', roles:['admin','editor']},
+    {id:role === 'viewer' ? 'recurringViewer' : 'recurring', nav:'recurring'},
+    {id:'imports', nav:'import', roles:['admin']},
+    {id:role === 'admin' ? 'settingsAdmin' : 'settingsEditor', nav:'settings', roles:['admin','editor']},
+    {id:'language', languageTarget:true},
+    {id:'help', nav:'help'}
   ].filter(step => !step.roles || step.roles.includes(role));
   const token = document.querySelector('meta[name="tour-csrf"]')?.content;
   let index = 0, running = false, lastFocused = null, raf = 0, shade, halo, card, title, message, count, prev, next, menuWasOpen = false;
@@ -26,9 +70,13 @@
     if (!nav || !toggle) return;
     nav.hidden = !open;
     toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? 'Menü schließen' : 'Menü öffnen');
+    toggle.setAttribute('aria-label', open ? labels.closeMenu : labels.openMenu);
   }
   function locate(step) {
+    if (step.languageTarget) {
+      if (!desktop()) menu(false);
+      return document.querySelector(desktop() ? '.sidebar-language .locale-toggle' : '.topbar .locale-toggle');
+    }
     if (step.nav) {
       if (!desktop()) menu(true);
       const selector = step.nav === 'help' ? '[data-tour-start]' : `[data-tour-link="${step.nav}"]`;
@@ -67,11 +115,12 @@
       if (index < steps.length-1) {index++; display(); return;}
       void finish('finished'); return;
     }
-    title.textContent = step.title;
-    message.textContent = step.text;
-    count.textContent = `Schritt ${index+1} von ${steps.length}`;
+    const [heading,description] = copy[language][step.id];
+    title.textContent = heading;
+    message.textContent = description;
+    count.textContent = labels.step(index+1, steps.length);
     prev.disabled = index === 0;
-    next.textContent = index === steps.length-1 ? 'Fertig' : 'Weiter';
+    next.textContent = index === steps.length-1 ? labels.done : labels.next;
     target.scrollIntoView({block:'center', behavior:'instant'});
     next.focus({preventScroll:true});
     schedule();
@@ -99,7 +148,7 @@
       document.body.dataset.tourAuto='0';
     } catch (_) {
       // Do not silently claim server persistence; a fresh visit can offer the tour again.
-      console.warn('Einführungsstatus konnte nicht gespeichert werden. Bitte Seite später neu laden.');
+      console.warn(labels.saveError);
     }
   }
   function start() {
@@ -111,13 +160,13 @@
     root.innerHTML = `
       <div class="tour-shade" aria-hidden="true"></div>
       <div class="tour-halo" aria-hidden="true"></div>
-      <section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-text">
+      <section class="tour-card" data-no-i18n role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-text">
         <div class="tour-counter" aria-live="polite"></div>
         <h2 id="tour-title"></h2><p id="tour-text"></p>
         <div class="tour-actions">
-          <button type="button" class="tour-skip">Überspringen</button>
-          <button type="button" class="tour-prev">Zurück</button>
-          <button type="button" class="tour-next">Weiter</button>
+          <button type="button" class="tour-skip"></button>
+          <button type="button" class="tour-prev"></button>
+          <button type="button" class="tour-next"></button>
         </div>
       </section>`;
     shade=root.children[0]; halo=root.children[1]; card=root.children[2];
@@ -125,6 +174,9 @@
     title=card.querySelector('#tour-title'); message=card.querySelector('#tour-text');
     count=card.querySelector('.tour-counter'); prev=card.querySelector('.tour-prev');
     next=card.querySelector('.tour-next');
+    card.querySelector('.tour-skip').textContent = labels.skip;
+    prev.textContent = labels.back;
+    next.textContent = labels.next;
     card.querySelector('.tour-skip').addEventListener('click', () => void finish('skipped'));
     prev.addEventListener('click', () => {if(index>0){index--;display();}});
     next.addEventListener('click', () => {

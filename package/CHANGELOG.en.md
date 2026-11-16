@@ -1,3 +1,11 @@
+## 1.9.42 — Updated bilingual onboarding (2026-11-16)
+- Refreshed the first-login tour for functionality through v1.9.41, with complete offline German and English copy.
+- Covers current account balances, yellow future-dated transactions (already included in stored balances), payee/category entry, recurring end dates and execution caps, import/data-source modes and DE/EN language switching.
+- Role-aware explanations for administrators, editors and read-only users; the tour does not claim unauthorized controls are available.
+- Automatic first-login onboarding remains limited to new users who have not completed it; existing users are not prompted again.
+- Replay through Help / introduction at any time, with Back, Next, Skip and Finish controls.
+- No changes to financial data, database schema, accounting/import logic, secrets or Caddy certificates.
+
 ## 1.9.41 — Fix booking-form grid on desktop and tablets (2026-11-15)
 - Payee and Category now appear side by side in one row on desktops and tablets, with Payee on the left and Category on the right, matching the existing keyboard/mobile field order.
 - For transfers, the destination account and Payee share a row at desktop widths; smartphone layout remains stacked.

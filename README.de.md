@@ -13,7 +13,7 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.41 · 15. November 2026 (Korrektur des Buchungsformulars am PC und Tablet; Empfänger links und Kategorie rechts in einer Zeile).
+**Aktueller Quellstand:** v1.9.42 · 16. November 2026 (aktualisierte zweisprachige Einführung für neue Benutzer).
 
 ## Funktionen
 
@@ -25,6 +25,10 @@
 - Zukünftig datierte Buchungen werden bis zum Buchungsdatum gelb hervorgehoben (nur Anzeige, kein Aufschub der Kontostandsänderung)
 - Responsive Oberfläche für PC, Tablet und Smartphone mit installierbarer PWA
 - Docker Compose, lokale HTTPS-Konfiguration und Backup-/Update-Skripte; persistente Daten in Bind-Mounts
+
+## Interaktive Einführung für neue Benutzer
+
+Neue Benutzer erhalten nach der Kontoeinrichtung eine **rollenabhängige Einführung auf Deutsch oder Englisch**. Erklärt werden aktuelle Funktionen einschließlich zukünftiger Buchungen, Wiederholungslimits, Datenführung und Sprachwechsel. Bestehende Benutzer werden nicht erneut automatisch durch den Rundgang geführt. Über **Hilfe / Einführung** kann jeder ihn jederzeit neu starten. [Anleitung auf Deutsch](package/docs/ONBOARDING.de.md) · [English](package/docs/ONBOARDING.en.md).
 
 ## Ursprung und Abgrenzung
 

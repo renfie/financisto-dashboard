@@ -12,7 +12,7 @@
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Current release:** [v1.9.41](https://github.com/renfie/financisto-dashboard/releases) · November 15, 2026. This maintenance release fixes the desktop/tablet booking form layout (Payee and Category on the same row). No changes to saved financial data or transaction logic.
+**Current release:** [v1.9.42](https://github.com/renfie/financisto-dashboard/releases) · November 16, 2026. This release updates the first-login introduction in English and German, without changing stored financial data or accounting logic.
 
 ## Features
 
@@ -24,6 +24,10 @@
 - Future-dated transactions appear in yellow until their date is reached (display only; posting and balance calculations remain unchanged)
 - Responsive layouts for desktop, tablet and smartphone, plus an installable Progressive Web App (PWA)
 - Docker Compose deployment, local HTTPS, backup/update scripts, and persistent bind-mounted data
+
+## Guided introduction
+
+New users receive a **role-aware, bilingual introduction** after setting up their account. The tour explains reports, filters, balances, future-dated transactions, bookings, recurring limits, imports and the language selector. Existing users are not forced to repeat it; anyone can restart it from **Help / introduction**. See [English](package/docs/ONBOARDING.en.md) or [Deutsch](package/docs/ONBOARDING.de.md).
 
 ## Relationship to Financisto
 

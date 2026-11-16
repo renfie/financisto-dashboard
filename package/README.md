@@ -1,5 +1,10 @@
 **Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
 
+## Neu in v1.9.42 – Einführung aktualisiert
+- Einführungsrundgang vollständig deutsch/englisch und auf den Funktionsstand 1.9.41 aktualisiert.
+- Behandelt neue Wiederholungsbegrenzungen, zukünftige Buchungen, Benutzerrechte und Sprachumschaltung.
+- Neue Benutzer einmalig; bestehende Konten behalten ihren Status. Über [Hilfe / Einführung](docs/ONBOARDING.de.md) ist der Rundgang jederzeit erneut aufrufbar.
+
 ## Neu in v1.9.41
 - Buchungsformular auf PC und Tablet: Empfänger und Kategorie stehen wieder nebeneinander (Empfänger links, Kategorie rechts). Smartphone-Layout unverändert.
 - Keine Änderungen an Finanzdaten, Buchungslogik und Wiederholungsregeln.

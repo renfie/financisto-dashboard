@@ -1,5 +1,10 @@
 # Financisto Dashboard — Installation and Operations (English)
 
+## New in v1.9.42 — Updated onboarding
+- First-login tour updated for the v1.9.41 feature set in both English and German.
+- Covers recurring limits, future-dated entries, roles and the language switch.
+- Automatic tour remains limited to new users; existing users can replay it using [Help / introduction](docs/ONBOARDING.en.md).
+
 ## New in v1.9.41
 - Fixed Payee and Category layout in the desktop/tablet transaction form. They are now in one row, Payee on the left and Category on the right. Smartphone layout is unchanged.
 - No changes to transaction data, accounting logic or recurring rules.
