@@ -1,3 +1,9 @@
+## 1.9.53 – Empfängervorschläge direkt beim Antippen (16.11.2026)
+- Beim Antippen oder Fokussieren des Empfängerfelds werden bekannte Empfänger nun sofort alphabetisch angezeigt, auch ohne Suchtext – analog zur Kategorieauswahl.
+- Während der Eingabe wird weiterhin nach passenden Empfängern gefiltert; durch erneutes Antippen kann die vollständige Vorschlagsliste wieder geöffnet werden.
+- Die gemeinsame Admin-Einstellung für die maximale Anzahl von Empfänger- und Kategorienvorschlägen (1–100, Standard 20) bleibt erhalten. Die Liste ist mobil kompakt und scrollbar.
+- Frei eingegebene neue Empfänger, bestehende Buchungen, Finanzdaten, Import/Export, Datenbankschema und Benutzerrechte bleiben unverändert.
+
 ## 1.9.52 – Admin-Einstellung für Vorschlagsanzahl (16.11.2026)
 - Empfänger- und Kategorienvorschläge sind auf maximal 20 statt 8 Einträge voreingestellt.
 - Administratoren können unter **Einstellungen → Buchungsliste** die Höchstanzahl gemeinsam für beide Listen auf 1–100 einstellen; ohne Deployment oder Neustart. Gilt für alle Benutzer.
