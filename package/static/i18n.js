@@ -4,6 +4,10 @@
   'use strict';
   const language = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'de';
   const catalog = {
+  "Maximale Vorschläge (Empfänger und Kategorien)": "Maximum suggestions (payees and categories)",
+  "Vorschlagsanzahl speichern": "Save suggestion limit",
+  "Gilt für alle Benutzer und beide Suchfelder. Standard: 20, einstellbar von 1 bis 100. Die Vorschlagsliste bleibt auf Smartphones kompakt und ist scrollbar. Änderungen gelten ab dem nächsten Öffnen des Buchungsformulars; kein Neustart erforderlich.": "Applies to all users and both search fields. Default: 20, adjustable from 1 to 100. The suggestions remain compact and scrollable on phones. Changes take effect the next time the booking form is opened; no restart required.",
+  "Vorschläge für Empfänger und Kategorien: maximal": "Suggestions for payees and categories: maximum",
   "Kategorie suchen …": "Search categories …",
   "Kategorie suchen": "Search categories",
   "In der Web-Verwaltung:": "In web accounting:",

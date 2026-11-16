@@ -1,3 +1,7 @@
+## Neu in v1.9.52
+
+Unter **Einstellungen → Buchungsliste** kann der Administrator die maximale Vorschlagsanzahl für Empfänger und Kategorien zentral konfigurieren (1–100, Standard 20). Der Wert bleibt nach Updates erhalten; beim Ändern ist kein Neustart nötig.
+
 ## Neu in v1.9.51
 - Android: Empfänger-Autovervollständigung ohne natives datalist-Overlay; maximal acht Vorschläge, passend zur verfügbaren Bildschirmhöhe.
 - Neue Empfänger bleiben frei eingebbar, keine Änderung an Buchungsdaten oder Datenbank.

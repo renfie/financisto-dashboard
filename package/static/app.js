@@ -413,6 +413,7 @@
   if (!input || !source || !input.closest('#booking-form')) return;
 
   // Existing known payees come only from escaped <option value="..."> fields.
+  const suggestionLimit = Math.max(1, Math.min(100, Number.parseInt(input.closest('#booking-form').dataset.suggestionLimit || '20', 10) || 20));
   const payees = [...new Set(Array.from(source.querySelectorAll('option'))
     .map(option => option.value.trim()).filter(Boolean))];
   if (!payees.length) return;
@@ -488,7 +489,7 @@
         const aStart = normalize(a).startsWith(query);
         const bStart = normalize(b).startsWith(query);
         return aStart === bStart ? a.localeCompare(b, lang) : aStart ? -1 : 1;
-      }).slice(0, 8);
+      }).slice(0, suggestionLimit);
     if (!matches.length) { close(); return; }
     highlighted = -1;
     list.replaceChildren();
@@ -544,6 +545,7 @@
   const input = document.getElementById('booking-category-search');
   const form = document.getElementById('booking-form');
   if (!select || !input || !form) return;
+  const suggestionLimit = Math.max(1, Math.min(100, Number.parseInt(form.dataset.suggestionLimit || '20', 10) || 20));
   const lang = document.documentElement.lang === 'en' ? 'en' : 'de';
   const zeroLabel = select.options[0]?.textContent?.trim() || (lang === 'en' ? 'No category' : 'Ohne Kategorie');
   const normalize = value => String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
@@ -624,7 +626,7 @@
           if (as !== bs) return as ? -1 : 1;
         }
         return a.name.localeCompare(b.name,lang);
-      }).slice(0,8);
+      }).slice(0,suggestionLimit);
     if (!matches.length) {close(); return;}
     selected = -1;
     list.replaceChildren();

@@ -371,6 +371,14 @@
   </select></label>
   <button type="submit" class="primary">Seitengröße speichern</button>
  </form>
+ <form method="post" action="{{ url_for('settings_booking_suggestions') }}" class="finance-inline-form" id="booking-suggestion-settings">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label>Maximale Vorschläge (Empfänger und Kategorien)
+   <input type="number" name="booking_suggestion_limit" min="1" max="100" step="1" value="{{ booking_suggestions }}" required inputmode="numeric">
+  </label>
+  <button type="submit" class="secondary">Vorschlagsanzahl speichern</button>
+ </form>
+ <p class="hint">Gilt für alle Benutzer und beide Suchfelder. Standard: 20, einstellbar von 1 bis 100. Die Vorschlagsliste bleibt auf Smartphones kompakt und ist scrollbar. Änderungen gelten ab dem nächsten Öffnen des Buchungsformulars; kein Neustart erforderlich.</p>
 </section>
 <section class="panel" id="standardkonto">
  <div class="section-head"><div><h2>Standardkonto für neue Buchungen</h2><p class="muted">Das Konto gilt für neue Web-Buchungen; die Standardkategorie gilt gemeinsam für neue Ausgaben im Dashboard und über Telegram. Bereits gespeicherte Buchungen bleiben unverändert.</p></div></div>

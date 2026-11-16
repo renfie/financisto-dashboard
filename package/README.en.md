@@ -1,3 +1,7 @@
+## New in v1.9.52
+
+Administrators can set the shared maximum number of payee and category suggestions (1–100, default 20) under **Settings → Transaction list**. Changes persist and require no container restart.
+
 ## New in v1.9.51
 - Android: Payee suggestions now use an app-controlled, compact list instead of the browser-native datalist popup, positioned to avoid the on-screen keyboard.
 - Free text and existing booking data remain unchanged.

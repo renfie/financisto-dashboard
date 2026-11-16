@@ -1,3 +1,9 @@
+## 1.9.52 — Admin-managed autocomplete suggestion limit (2026-11-16)
+- Payee and category suggestions default to 20 matches instead of 8.
+- Administrators can set the shared per-list maximum to 1–100 under **Settings → Transaction list**, without redeploying or restarting containers. The setting applies to all users.
+- The selected limit persists in the existing SQLite metadata table across restarts and upgrades. Transactions, account data and category IDs are unchanged.
+- Mobile lists remain compact (maximum 236 px tall) and scrollable. Touch and keyboard selection are preserved.
+
 ## 1.9.51 — Searchable category picker and five-second search pause (2026-11-16)
 - This public release includes the previously local-only v1.9.50 payee autocomplete improvements.
 - Replaced Android's large native category picker in the transaction form with a compact, searchable suggestion list matching the payee UI; up to eight category matches are displayed at once.

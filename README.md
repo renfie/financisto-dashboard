@@ -1,3 +1,7 @@
+## New in v1.9.52
+
+Set the number of payee/category suggestions in the administrator settings (default 20, allowed 1–100). No new release or restart is needed to change the limit.
+
 # Financisto Dashboard (FieLanzen)
 
 ## New in v1.9.51
@@ -21,7 +25,7 @@ The transaction form now offers a mobile-safe, searchable category picker matchi
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Latest public release:** v1.9.49 · November 16, 2026. [Download ZIP and checksum](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.49).
+**Latest public release:** v1.9.52 · November 16, 2026. [Download ZIP and checksum](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.49).
 
 
 ### Version 1.9.46 — Cash flow, period presets and compact controls

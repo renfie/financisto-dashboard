@@ -816,6 +816,7 @@ def settings():
                 key=lambda item: item[1].casefold())
             daily_backup_enabled = finance_setting(db, 'daily_backup_enabled', '1') == '1'
             booking_page_size = finance_setting(db, 'booking_page_size', '30')
+            booking_suggestions = booking_suggestion_limit(db)
             wanted_source = finance_setting(db, 'last_import_sha256', '')
             export_source_ready = bool(wanted_source and db.execute(
                 'SELECT 1 FROM financisto_export_source WHERE sha256=?',(wanted_source,)).fetchone())
@@ -841,6 +842,7 @@ def settings():
             expense_category_choices = ()
             daily_backup_enabled = False
             booking_page_size = '30'
+            booking_suggestions = 20
             export_source_ready = False
             recurring_export_summary = dict(total=0,automatic=0,manual=0,paused=0,removed=0,unsupported=0)
             background_status = None
@@ -860,6 +862,7 @@ def settings():
                            pending_overwrite=pending_overwrite, approved_overwrite=approved_overwrite,
                            daily_backup_enabled=daily_backup_enabled,
                            booking_page_size=booking_page_size,
+                           booking_suggestions=booking_suggestions,
                            export_source_ready=export_source_ready, recurring_export_summary=recurring_export_summary,
                            daily_backup_status=scheduled_backup_status(Path(DATABASE)) if is_admin else {},
                            background_status=background_status,
@@ -1360,6 +1363,15 @@ def finance_setting(db, key, default=''):
     return row['value'] if row else default
 
 
+def booking_suggestion_limit(db):
+    """Admin-controlled maximum items for both booking autocomplete menus."""
+    try:
+        count = int(finance_setting(db, 'booking_suggestion_limit', '20'))
+    except (ValueError, TypeError):
+        return 20
+    return max(1, min(100, count))
+
+
 def shared_default_expense_category(db):
     """Unified expense default. Ignore stale IDs and non-expense categories."""
     raw = finance_setting(db, 'default_expense_category_id', '')
@@ -1468,6 +1480,24 @@ def settings_booking_page_size():
         db.execute("INSERT OR REPLACE INTO meta(key,value) VALUES('booking_page_size',?)", (size,))
         audit(db, 'booking_page_size_changed', size)
     flash('Buchungen pro Seite: ' + size, 'success')
+    return redirect(url_for('settings') + '#buchungseinstellungen')
+
+
+@app.post('/settings/booking-suggestions')
+@admin_required
+def settings_booking_suggestions():
+    if not csrf_ok():
+        abort(400)
+    raw = request.form.get('booking_suggestion_limit', '').strip()
+    if not raw.isascii() or not raw.isdecimal():
+        abort(400)
+    count = int(raw)
+    if not 1 <= count <= 100:
+        abort(400)
+    with get_db() as db:
+        db.execute("INSERT OR REPLACE INTO meta(key,value) VALUES ('booking_suggestion_limit',?)", (str(count),))
+        audit(db, 'booking_suggestions_changed', str(count))
+    flash(f'Vorschläge für Empfänger und Kategorien: maximal {count}', 'success')
     return redirect(url_for('settings') + '#buchungseinstellungen')
 
 
@@ -2117,6 +2147,7 @@ def booking_list():
                           WHERE t.origin IN ('web','financisto_edited') ORDER BY t.day DESC,t.id DESC LIMIT 100''').fetchall()
         configured_default_account = finance_setting(db, 'default_account_id', '')
         default_expense_category_id = shared_default_expense_category(db)
+        suggestion_limit = booking_suggestion_limit(db)
         valid_account_ids = {str(a['id']) for a in accounts if a['balance_minor'] is not None}
         default_account_id = (configured_default_account if configured_default_account in valid_account_ids else '')
         edit_value = request.args.get('edit','')
@@ -2146,6 +2177,7 @@ def booking_list():
                            form_row=form_row,neutral_ids=neutral_ids,
                            default_account_id=default_account_id,
                            default_expense_category_id=default_expense_category_id,
+                           booking_suggestion_limit=suggestion_limit,
                            today=datetime.now(MONTH_TZ).date().isoformat(),
                            edit_amount=edit_amount)
 

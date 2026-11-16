@@ -6,7 +6,7 @@
 <section class="panel narrow"><h2>Noch ist Financisto führend</h2><p>Damit der automatische Import keine Web-Buchungen überschreibt, ist die Buchungserfassung noch gesperrt. Der Administrator kann unter <a href="{{ url_for('settings') }}#datenfuehrung">Einstellungen → Datenführung</a> bewusst auf die Web-Finanzverwaltung umstellen. Dabei wird vorher eine vollständige SQLite-Sicherung erstellt.</p></section>
 {% else %}
 <section class="panel booking-entry-panel" id="buchungseingabe"><h2>{{ 'Web-Buchung bearbeiten' if edit_row else ('Buchung klonen' if clone_row else 'Neue Buchung') }}</h2>
-<form class="formstack booking-compact-form" method="post" action="{{ url_for('booking_add') }}" id="booking-form" data-new-booking="{{ 'false' if form_row else 'true' }}">
+<form class="formstack booking-compact-form" method="post" action="{{ url_for('booking_add') }}" id="booking-form" data-suggestion-limit="{{ booking_suggestion_limit }}" data-new-booking="{{ 'false' if form_row else 'true' }}">
  <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="edit_id" value="{{ edit_row.id if edit_row else '' }}">
  {% set kind = ('transfer' if form_row.to_account_id else ('income' if form_row.amount>0 else 'expense')) if form_row else 'expense' %}
  {% if clone_row %}<p class="hint clone-hint">Vorlage aus Buchung vom {{ clone_row.day[8:10] }}.{{ clone_row.day[5:7] }}.{{ clone_row.day[:4] }} · Neues Datum ist heute, Betrag bleibt absichtlich leer. Es wird erst beim Speichern eine neue Buchung angelegt.</p>{% endif %}

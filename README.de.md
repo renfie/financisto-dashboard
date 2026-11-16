@@ -1,3 +1,7 @@
+## Neu in v1.9.52
+
+Die Anzahl der Vorschläge für Empfänger und Kategorien lässt sich in den Admin-Einstellungen auf 1–100 setzen (Standard: 20). Änderungen gelten ohne Neustart oder neues Release.
+
 # Financisto-Dashboard (FieLanzen)
 
 ## Neu in v1.9.51

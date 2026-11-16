@@ -1,3 +1,9 @@
+## 1.9.52 – Admin-Einstellung für Vorschlagsanzahl (16.11.2026)
+- Empfänger- und Kategorienvorschläge sind auf maximal 20 statt 8 Einträge voreingestellt.
+- Administratoren können unter **Einstellungen → Buchungsliste** die Höchstanzahl gemeinsam für beide Listen auf 1–100 einstellen; ohne Deployment oder Neustart. Gilt für alle Benutzer.
+- Einstellung wird persistent im vorhandenen SQLite-Metadatenspeicher gehalten und beim Update nicht überschrieben. Bestehende Buchungen, Kategorie-IDs, Empfänger und Zugangsdaten bleiben erhalten.
+- Smartphone-Listen bleiben maximal 236 px hoch und scrollbar; Bedienung per Tastatur/Touchscreen bleibt erhalten.
+
 ## 1.9.51 – Suchbare, mobile Kategorieauswahl und 5-Sekunden-Suchpause (16.11.2026)
 - Die Kategorieauswahl verwendet eine eigene, kompakte und durchsuchbare Liste statt des geräteabhängigen, bildschirmfüllenden Android-Select-Dialogs. Höchstens acht passende Kategorien werden angezeigt; Haupt- und Unterkategorien behalten ihre Bezeichnung.
 - Der bisherige Select-Wert und die originale Kategorie-ID bleiben das einzige gesendete Formularfeld. Neue Kategorien, Editieren/Klonen, Wechsel von Ausgabe zu Einnahme und Umbuchungen bleiben kompatibel. Ohne JavaScript steht weiterhin die native Auswahl zur Verfügung.
