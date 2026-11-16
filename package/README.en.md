@@ -1,3 +1,11 @@
+## New in v1.9.51
+- Android: Payee suggestions now use an app-controlled, compact list instead of the browser-native datalist popup, positioned to avoid the on-screen keyboard.
+- Free text and existing booking data remain unchanged.
+
+## New in v1.9.51
+
+The transaction form now offers a mobile-safe, searchable category picker matching the payee suggestions. Dashboard quick search waits five seconds after typing stops; pressing Search remains immediate. Existing category IDs and bookings are unaffected.
+
 ## v1.9.49 — public cumulative release (2026-11-16)
 
 Includes all locally tested v1.9.44–v1.9.48 improvements and the final English translation of the switch-back-to-Financisto warning. [English changelog](CHANGELOG.en.md) · [Deutsche Versionshistorie](CHANGELOG.md).

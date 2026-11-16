@@ -1,25 +1,13 @@
-Financisto-Dashboard v1.9.49 – öffentliches Sammelrelease (16.11.2026)
+FieLanzen v1.9.51 – Suchbare Kategorieauswahl und 5 Sekunden Filterverzögerung.
 
-Vollständiges Installations- und Update-Paket, kompatibel mit vorhandenem
-Financisto-Dashboard v1.9.43–v1.9.48 (auch frühere unterstützte Versionen).
+- Kategorie im Buchungsformular suchen statt Android-Select-Vollbilddialog.
+- Empfänger- und Kategorienvorschläge haben einheitliches Layout.
+- Dashboard-Schnellfilter: automatischer Abruf erst nach 5 Sekunden Tipp-Pause.
+- Manuelle Suche (Button/Enter) bleibt sofort möglich.
+- Keine Änderung am Datenbankschema oder an bestehenden Finanzdaten.
 
-Alle Änderungen seit dem zuletzt auf GitHub veröffentlichten v1.9.43:
-  * Zahlreiche deutsche/englische Übersetzungsfehler behoben, zuletzt beim
-    Rückwechsel zu Financisto (das Bestätigungswort bleibt FINANCISTO).
-  * Cashflow-Diagramm, 1W/1M/3M/6M-Schnellfilter, ausklappbare Suche.
-  * Kontostände, Buchungen, Ausgaben nach Kategorien, Cashflow in Reihenfolge.
-  * Buchungen standardmäßig offen, Cashflow standardmäßig geschlossen.
-  * Anklickbare Seitenzahlen, kompakte Desktop-Buchungsaktionen.
-  * Verbesserte A5-Berichts-/Importübersetzungen, optionales APP_FOOTER_EN.
+Upgrade als Eigentümer der Installation (ohne sudo):
+  unzip -o financisto-dashboard-v1.9.51.zip
+  ./financisto-release-1.9.51/update.sh /pfad/zur/financisto-dashboard-installation
 
 Details: package/CHANGELOG.md und package/CHANGELOG.en.md.
-
-Upgrade als Eigentümer der bestehenden Installation, OHNE sudo:
-  unzip -o financisto-dashboard-v1.9.49.zip
-  ./financisto-release-1.9.49/update.sh /pfad/zum/financisto-dashboard
-
-Vor dem Update legt das Skript eine SQLite-Sicherung und eine Sicherung des
-Programmcodes samt .env an. Produktive Daten, Benutzerkonten, Secrets und
-Caddy-Zertifikate werden bei der regulären Aktualisierung beibehalten.
-
-Neuinstallation: im entpackten package/ ./install.sh ausführen.

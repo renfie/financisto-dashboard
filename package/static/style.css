@@ -887,3 +887,47 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 @media screen and (max-width:760px){
  .app-authenticated .container .cashflow-panel:has(.cashflow-disclosure){padding:0!important}
 }
+
+
+/* 1.9.50: Browser-independent, compact payee suggestions above the Android keyboard. */
+.booking-payee-suggestions {
+  position: fixed;
+  z-index: 1100;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 3px;
+  background: #fff;
+  color: #293940;
+  border: 1px solid #bccbd0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(13, 35, 42, .22);
+  -webkit-overflow-scrolling: touch;
+}
+.booking-payee-suggestions[hidden] { display: none !important; }
+.booking-payee-option {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: start;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font: 500 16px/1.3 system-ui, -apple-system, Segoe UI, sans-serif;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.booking-payee-option:hover,
+.booking-payee-option:focus-visible,
+.booking-payee-option[aria-selected="true"] { background: #ebf4f5; color: #0b5965; }
+.booking-payee-option:focus-visible { outline: 2px solid #bc9e52; outline-offset: -2px; }
+
+
+/* v1.9.51: mirror the mobile-safe payee chooser for category IDs. */
+#booking-category-select.booking-category-native-hidden { display:none!important; }
+#booking-form .booking-category-search[hidden]{display:none!important}
+#booking-form .booking-category-search{width:100%;min-width:0;box-sizing:border-box}
+.booking-category-suggestions[hidden]{display:none!important}

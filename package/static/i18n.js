@@ -4,6 +4,8 @@
   'use strict';
   const language = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'de';
   const catalog = {
+  "Kategorie suchen …": "Search categories …",
+  "Kategorie suchen": "Search categories",
   "In der Web-Verwaltung:": "In web accounting:",
   "Bei aktivierter Option werden": "When enabled,",
   "nur automatisch freigegebene": "only automatically approved",

@@ -1,3 +1,11 @@
+## Neu in v1.9.51
+- Android: Empfänger-Autovervollständigung ohne natives datalist-Overlay; maximal acht Vorschläge, passend zur verfügbaren Bildschirmhöhe.
+- Neue Empfänger bleiben frei eingebbar, keine Änderung an Buchungsdaten oder Datenbank.
+
+## Neu in v1.9.51
+
+Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompakt und durchsuchbar. Die Dashboard-Schnellsuche startet fünf Sekunden nach der letzten Eingabe; per Suchen/Enter sofort. Vorhandene Kategorien und Buchungen bleiben unverändert.
+
 ## Neu: v1.9.49 – öffentliches Sammelrelease (16.11.2026)
 
 Alle Änderungen der lokalen Testversionen v1.9.44 bis v1.9.48 sowie die letzte vollständig englische Warnung zum Rückwechsel zu Financisto sind in v1.9.49 enthalten. [Deutsches Changelog](CHANGELOG.md) · [English changelog](CHANGELOG.en.md).

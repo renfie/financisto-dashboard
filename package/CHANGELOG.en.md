@@ -1,3 +1,16 @@
+## 1.9.51 — Searchable category picker and five-second search pause (2026-11-16)
+- This public release includes the previously local-only v1.9.50 payee autocomplete improvements.
+- Replaced Android's large native category picker in the transaction form with a compact, searchable suggestion list matching the payee UI; up to eight category matches are displayed at once.
+- Preserved original category IDs, the form field name, existing transactions and the category creation/edit workflow, including graceful fallback when JavaScript is disabled.
+- Dashboard quick search now submits automatically five seconds after the last keystroke (previously 650 ms); the explicit Search action remains immediate.
+- No database, finance, import/export or security changes.
+
+## 1.9.50 — Reliable mobile payee suggestions (2026-11-16)
+- Replaced the native HTML datalist with a compact app-controlled autocomplete to avoid oversized translucent popups on some Android browsers.
+- Results remain anchored to the field, with up to eight matches and automatic placement above the on-screen keyboard when needed.
+- Arbitrary new payees are still accepted; booking behavior and stored data are unchanged.
+- Accessible keyboard controls (arrows, Enter, Escape); no network service is used.
+
 ## 1.9.49 — Consolidated release since public v1.9.43 (2026-11-16)
 - **English interface (v1.9.44–1.9.49):** More complete offline translation for dashboard summaries, history, accounts, imports, A5/A4 reports, settings, notifications, Web Push, system status, Telegram, Gotify and the experimental Financisto export. Dynamic labels with counts, dates, months and mixed formatted text have improved support. User-created account/category/payee names and notes remain unchanged.
 - **Final language fix (v1.9.49):** The recurring-rules warning in the switch-back-to-Financisto form is now fully English in EN mode. The confirmation label reads “Enter FINANCISTO to confirm”; the required technical confirmation token is still exactly `FINANCISTO`.

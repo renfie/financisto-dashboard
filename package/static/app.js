@@ -32,7 +32,7 @@
   }
   input.addEventListener('input', () => {
     clearTimeout(pending);
-    pending = setTimeout(submitQuick, 650);
+    pending = setTimeout(submitQuick, 5000); // Five seconds after the last keystroke; Search submits immediately.
   });
   quick.addEventListener('submit', () => {
     clearTimeout(pending);
@@ -156,6 +156,7 @@
         const candidate = kind.value === 'expense' ? select.dataset.defaultExpense : '';
         select.value = candidate && Array.from(select.options).some(option => option.value === candidate)
           ? candidate : '';
+        select.dispatchEvent(new Event('change', {bubbles: true}));
       }
     }
     update();
@@ -334,6 +335,7 @@
       parent.add(option);
       // Select the new category, preserving all other booking fields.
       category.value = String(data.id);
+      category.dispatchEvent(new Event('change', { bubbles: true }));
       dlg.close();
     } catch (error) {
       status.textContent = error.message || 'Anlegen fehlgeschlagen.';
@@ -398,4 +400,277 @@
   if(!file||!label)return;
   file.addEventListener('change',()=>{const name=file.files?.[0]?.name;label.textContent=name||window.FinancistoI18n?.translate(label.dataset.emptyLabel)||label.dataset.emptyLabel;});
  }
+})();
+
+
+/* 1.9.50: mobile-safe payee autocomplete. Avoid native <datalist> popups,
+ * which may cover the entire Android form when the soft keyboard opens.
+ * The free-text input and the submitted payee_title field are unchanged.
+ */
+(function () {
+  const input = document.getElementById('booking-payee-input');
+  const source = document.getElementById('known-payees');
+  if (!input || !source || !input.closest('#booking-form')) return;
+
+  // Existing known payees come only from escaped <option value="..."> fields.
+  const payees = [...new Set(Array.from(source.querySelectorAll('option'))
+    .map(option => option.value.trim()).filter(Boolean))];
+  if (!payees.length) return;
+
+  const normalize = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'de';
+  const list = document.createElement('div');
+  list.id = 'booking-payee-suggestions';
+  list.className = 'booking-payee-suggestions';
+  list.setAttribute('role', 'listbox');
+  list.setAttribute('aria-label', lang === 'en' ? 'Known payees' : 'Bekannte Empfänger');
+  list.setAttribute('data-no-i18n', '');
+  list.hidden = true;
+  document.body.appendChild(list);
+  let matches = [];
+  let highlighted = -1;
+
+  function close() {
+    list.hidden = true;
+    list.replaceChildren();
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    matches = [];
+    highlighted = -1;
+  }
+
+  function choose(value) {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    close();
+    input.focus({ preventScroll: true });
+  }
+
+  function position() {
+    if (list.hidden) return;
+    const rect = input.getBoundingClientRect();
+    const vv = window.visualViewport;
+    const visibleTop = vv ? vv.offsetTop : 0;
+    const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+    const below = Math.max(0, visibleBottom - rect.bottom - 8);
+    const above = Math.max(0, rect.top - visibleTop - 8);
+    const openAbove = below < 160 && above > below;
+    const available = openAbove ? above : below;
+    if (available < 45) { list.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+    const maxHeight = Math.min(236, Math.floor(available));
+    const desired = Math.min(maxHeight, matches.length * 45 + 6);
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8));
+    list.style.left = `${left}px`;
+    list.style.width = `${Math.min(rect.width, window.innerWidth - left - 8)}px`;
+    list.style.top = `${openAbove ? rect.top - desired - 4 : rect.bottom + 4}px`;
+    list.style.maxHeight = `${maxHeight}px`;
+    list.dataset.position = openAbove ? 'above' : 'below';
+  }
+
+  function highlight(index) {
+    highlighted = index;
+    Array.from(list.children).forEach((node, i) => {
+      node.setAttribute('aria-selected', i === highlighted ? 'true' : 'false');
+      if (i === highlighted) {
+        input.setAttribute('aria-activedescendant', node.id);
+        node.scrollIntoView({ block: 'nearest' });
+      }
+    });
+    if (highlighted === -1) input.removeAttribute('aria-activedescendant');
+  }
+
+  function render() {
+    const query = normalize(input.value.trim());
+    if (!query || document.activeElement !== input) { close(); return; }
+    matches = payees.filter(name => normalize(name).includes(query))
+      .sort((a, b) => {
+        const aStart = normalize(a).startsWith(query);
+        const bStart = normalize(b).startsWith(query);
+        return aStart === bStart ? a.localeCompare(b, lang) : aStart ? -1 : 1;
+      }).slice(0, 8);
+    if (!matches.length) { close(); return; }
+    highlighted = -1;
+    list.replaceChildren();
+    matches.forEach((name, index) => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.id = `booking-payee-option-${index}`;
+      option.className = 'booking-payee-option';
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+      option.textContent = name;
+      option.addEventListener('pointerdown', event => event.preventDefault());
+      option.addEventListener('click', () => choose(name));
+      list.appendChild(option);
+    });
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    position();
+  }
+
+  input.addEventListener('input', render);
+  input.addEventListener('focus', render);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !list.hidden) { event.preventDefault(); close(); return; }
+    if (list.hidden) return;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const diff = event.key === 'ArrowDown' ? 1 : -1;
+      highlight((highlighted + diff + matches.length) % matches.length);
+    } else if (event.key === 'Enter' && highlighted >= 0) {
+      event.preventDefault();
+      choose(matches[highlighted]);
+    } else if (event.key === 'Tab') close();
+  });
+  input.addEventListener('blur', () => window.setTimeout(close, 150));
+  document.addEventListener('pointerdown', event => {
+    if (!list.hidden && event.target !== input && !list.contains(event.target)) close();
+  });
+  window.addEventListener('resize', position, { passive: true });
+  window.addEventListener('scroll', position, { passive: true, capture: true });
+  window.visualViewport?.addEventListener('resize', position, { passive: true });
+  window.visualViewport?.addEventListener('scroll', position, { passive: true });
+  input.closest('form')?.addEventListener('submit', close);
+})();
+
+
+/* v1.9.51: Consistent, mobile-safe category picker. Keep the original <select>
+ * as the submitted category_id so account logic, editing and the AJAX category
+ * creation endpoint continue working. It remains visible without JavaScript.
+ */
+(function () {
+  const select = document.getElementById('booking-category-select');
+  const input = document.getElementById('booking-category-search');
+  const form = document.getElementById('booking-form');
+  if (!select || !input || !form) return;
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'de';
+  const zeroLabel = select.options[0]?.textContent?.trim() || (lang === 'en' ? 'No category' : 'Ohne Kategorie');
+  const normalize = value => String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
+  const list = document.createElement('div');
+  list.id = 'booking-category-suggestions';
+  list.className = 'booking-payee-suggestions booking-category-suggestions';
+  list.setAttribute('role', 'listbox');
+  list.setAttribute('aria-label', lang === 'en' ? 'Available categories' : 'Verfügbare Kategorien');
+  list.setAttribute('data-no-i18n', '');
+  list.hidden = true;
+  document.body.appendChild(list);
+  // The native select is retained as the only submitted field.
+  select.classList.add('booking-category-native-hidden');
+  input.hidden = false;
+  const items = () => Array.from(select.options).filter(option => !option.disabled)
+    .map(option => ({id: option.value, name: option.textContent.trim()}));
+  let matches = [], selected = -1;
+  function sync() {
+    const option = select.selectedOptions[0];
+    input.value = option ? option.textContent.trim() : zeroLabel;
+  }
+  function close() {
+    list.hidden = true;
+    list.replaceChildren();
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    matches = [];
+    selected = -1;
+  }
+  function position() {
+    if (list.hidden) return;
+    const rect = input.getBoundingClientRect();
+    const vv = window.visualViewport;
+    const top = vv ? vv.offsetTop : 0;
+    const bottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+    const below = Math.max(0, bottom - rect.bottom - 8);
+    const above = Math.max(0, rect.top - top - 8);
+    const openAbove = below < 160 && above > below;
+    const available = openAbove ? above : below;
+    if (available < 45) { close(); return; }
+    const height = Math.min(236, Math.floor(available));
+    const wanted = Math.min(height, matches.length * 45 + 6);
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8));
+    list.style.left = `${left}px`;
+    list.style.width = `${Math.min(rect.width, window.innerWidth - left - 8)}px`;
+    list.style.top = `${openAbove ? rect.top - wanted - 4 : rect.bottom + 4}px`;
+    list.style.maxHeight = `${height}px`;
+    list.dataset.position = openAbove ? 'above' : 'below';
+  }
+  function choose(option) {
+    select.value = option.id;
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    close();
+    input.focus({preventScroll: true});
+  }
+  function highlight(idx) {
+    selected = idx;
+    Array.from(list.children).forEach((element,i) => {
+      element.setAttribute('aria-selected', String(i === idx));
+      if (i === idx) {
+        input.setAttribute('aria-activedescendant', element.id);
+        element.scrollIntoView({block:'nearest'});
+      }
+    });
+    if (idx < 0) input.removeAttribute('aria-activedescendant');
+  }
+  function render(showAll = false) {
+    if (document.activeElement !== input || select.disabled) {close(); return;}
+    const query = normalize(input.value.trim());
+    // Opening the existing selection shows nearby categories; typing filters all names.
+    const selectedOption = select.selectedOptions[0];
+    const currentName = selectedOption?.textContent?.trim() || zeroLabel;
+    const filterText = showAll && input.value === currentName ? '' : query;
+    matches = items().filter(option => normalize(option.name).includes(filterText))
+      .sort((a,b) => {
+        if (filterText) {
+          const as = normalize(a.name).startsWith(filterText), bs = normalize(b.name).startsWith(filterText);
+          if (as !== bs) return as ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name,lang);
+      }).slice(0,8);
+    if (!matches.length) {close(); return;}
+    selected = -1;
+    list.replaceChildren();
+    matches.forEach((option,i) => {
+      const element = document.createElement('button');
+      element.type = 'button';
+      element.id = `booking-category-option-${i}`;
+      element.className = 'booking-payee-option booking-category-option';
+      element.setAttribute('role','option');
+      element.setAttribute('aria-selected','false');
+      element.textContent = option.name;
+      element.addEventListener('pointerdown',event => event.preventDefault());
+      element.addEventListener('click',() => choose(option));
+      list.appendChild(element);
+    });
+    list.hidden = false;
+    input.setAttribute('aria-expanded','true');
+    position();
+  }
+  select.addEventListener('change', () => {sync(); close();});
+  input.addEventListener('focus',() => render(true));
+  input.addEventListener('click',() => render(true));
+  input.addEventListener('input',() => render());
+  input.addEventListener('keydown',event => {
+    if (event.key === 'Escape') {event.preventDefault(); sync(); close(); return;}
+    if (list.hidden) { if (event.key === 'Enter') {event.preventDefault();sync();} return; }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const offset = event.key === 'ArrowDown' ? 1 : -1;
+      highlight((selected + offset + matches.length) % matches.length);
+    } else if (event.key === 'Enter') {
+      // Never submit an entire transaction while typing a category search.
+      event.preventDefault();
+      if (selected >= 0) choose(matches[selected]);
+      else if (matches.length) choose(matches[0]);
+      else { sync(); close(); }
+    } else if (event.key === 'Tab') { sync(); close(); }
+  });
+  input.addEventListener('blur',() => window.setTimeout(() => {sync();close();},150));
+  document.addEventListener('pointerdown', event => {
+    if (!list.hidden && event.target !== input && !list.contains(event.target)) {sync();close();}
+  });
+  window.addEventListener('resize',position,{passive:true});
+  window.addEventListener('scroll',position,{passive:true,capture:true});
+  window.visualViewport?.addEventListener('resize',position,{passive:true});
+  window.visualViewport?.addEventListener('scroll',position,{passive:true});
+  form.addEventListener('submit', () => {sync();close();});
+  sync();
 })();

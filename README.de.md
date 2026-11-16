@@ -1,8 +1,15 @@
 # Financisto-Dashboard (FieLanzen)
 
+## Neu in v1.9.51
+
+Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompakt und durchsuchbar. Die Dashboard-Schnellsuche startet fünf Sekunden nach der letzten Eingabe; per Suchen/Enter sofort. Vorhandene Kategorien und Buchungen bleiben unverändert.
+
+**v1.9.51:** Suchbare Kategorieauswahl wie bei den Empfängern; das Suchformular sendet fünf Sekunden nach Ende der Eingabe ab. Die Empfängerauswahl aus 1.9.50 ist eingeschlossen.
+
+
 **Sprache / Language:** [English (default)](README.md) | **Deutsch**
 
-**v1.9.49 – aktuelles öffentliches Release (16.11.2026).** Sammelrelease aller seit GitHub-v1.9.43 lokal getesteten Änderungen: weiter vervollständigte Englischübersetzungen, Cashflow, Schnellfilter, Seitennummern, verbesserte Dashboard-Reihenfolge und Klappbereiche, kompakte Aktionsbuttons, getrennte Fußzeilentexte sowie der letzte Übersetzungsfehler beim Wechsel zurück zu Financisto. [Alle Änderungen](package/CHANGELOG.md).
+**Vorgänger v1.9.49 (16.11.2026).** Sammelrelease aller seit GitHub-v1.9.43 lokal getesteten Änderungen: weiter vervollständigte Englischübersetzungen, Cashflow, Schnellfilter, Seitennummern, verbesserte Dashboard-Reihenfolge und Klappbereiche, kompakte Aktionsbuttons, getrennte Fußzeilentexte sowie der letzte Übersetzungsfehler beim Wechsel zurück zu Financisto. [Alle Änderungen](package/CHANGELOG.md).
 
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">

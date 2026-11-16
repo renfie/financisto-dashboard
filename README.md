@@ -1,8 +1,15 @@
 # Financisto Dashboard (FieLanzen)
 
+## New in v1.9.51
+
+The transaction form now offers a mobile-safe, searchable category picker matching the payee suggestions. Dashboard quick search waits five seconds after typing stops; pressing Search remains immediate. Existing category IDs and bookings are unaffected.
+
+**v1.9.51:** Android-safe, searchable category picker and five-second dashboard quick search. All stored category IDs and finance data remain unchanged.
+
+
 **Language / Sprache:** **English** | [Deutsch](README.de.md)
 
-**v1.9.49 — latest public release (2026-11-16).** This cumulative release includes all locally tested changes since public v1.9.43: improved English translations, a cash-flow chart, quick transaction-period filters, numbered pagination, improved dashboard ordering and collapsible panels, compact desktop row actions, configurable German/English footers, and the final switch-back-to-Financisto translation fix. [Full release history](package/CHANGELOG.en.md).
+**v1.9.51 — current release (2026-11-16).** This cumulative release includes all locally tested changes since public v1.9.43: improved English translations, a cash-flow chart, quick transaction-period filters, numbered pagination, improved dashboard ordering and collapsible panels, compact desktop row actions, configurable German/English footers, and the final switch-back-to-Financisto translation fix. [Full release history](package/CHANGELOG.en.md).
 
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves dashboard logo" width="260">

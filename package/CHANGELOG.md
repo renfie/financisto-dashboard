@@ -1,3 +1,15 @@
+## 1.9.51 – Suchbare, mobile Kategorieauswahl und 5-Sekunden-Suchpause (16.11.2026)
+- Die Kategorieauswahl verwendet eine eigene, kompakte und durchsuchbare Liste statt des geräteabhängigen, bildschirmfüllenden Android-Select-Dialogs. Höchstens acht passende Kategorien werden angezeigt; Haupt- und Unterkategorien behalten ihre Bezeichnung.
+- Der bisherige Select-Wert und die originale Kategorie-ID bleiben das einzige gesendete Formularfeld. Neue Kategorien, Editieren/Klonen, Wechsel von Ausgabe zu Einnahme und Umbuchungen bleiben kompatibel. Ohne JavaScript steht weiterhin die native Auswahl zur Verfügung.
+- Der automatische Dashboard-Schnellfilter wird erst fünf Sekunden nach der letzten Eingabe ausgelöst (zuvor 650 Millisekunden); manuelles Suchen oder Enter löst die Suche unverzüglich aus.
+- Keine Änderung an Finanzdaten, Datenbankschema, Import/Export oder Serverzugriff. GitHub-Veröffentlichung mit Freigabe des Auftraggebers.
+
+## 1.9.50 – Mobile Empfängervorschläge ohne Browser-Popup (16.11.2026)
+- Die native HTML-datalist für bekannte Empfänger wurde durch eine eigene, kompakte Vorschlagsliste ersetzt, um übergroße und durchscheinende Auswahlfenster auf Android-Geräten zu vermeiden.
+- Vorschläge bleiben an das Eingabefeld gebunden, zeigen maximal acht Treffer und öffnen sich bei wenig Platz oberhalb der Bildschirmtastatur.
+- Beliebige neue Empfänger können weiterhin frei eingetragen werden; bestehende Formulardaten und Buchungslogik bleiben unverändert.
+- Tastaturbedienung über Pfeiltasten, Enter, Escape; keine externen Dienste.
+
 ## 1.9.49 – Sammelrelease seit dem letzten GitHub-Release v1.9.43 (16.11.2026)
 - **Englischübersetzung (v1.9.44–1.9.49):** Viele bisher gemischte Beschriftungen und erklärende Texte in Dashboard, historischer Auswertung, Kontenverwaltung, Import, A5-/A4-Berichten, Einstellungen, Benachrichtigungen, Web Push, Systemstatus, Telegram, Gotify und Financisto-Rückexport korrigiert. Zahlen, Monate und zusammengesetzte Sätze werden lokal übersetzt. Eigene Kategorien, Konten, Empfänger und Notizen bleiben unverändert.
 - **Letzte Übersetzungskorrektur (v1.9.49):** Die Warnung über wiederkehrende Web-Regeln beim Wechsel zurück zu Financisto wird im englischen Modus vollständig englisch ausgegeben. Das Bestätigungsfeld heißt „Enter FINANCISTO to confirm“; das erforderliche Bestätigungswort bleibt technisch weiterhin exakt `FINANCISTO`.
