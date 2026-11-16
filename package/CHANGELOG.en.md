@@ -1,3 +1,9 @@
+## 1.9.53 — Show payee suggestions immediately on focus (2026-11-16)
+- Tapping or focusing the payee field now immediately shows known payees in alphabetical order even with an empty query, matching the category picker.
+- Typing continues to narrow suggestions, while tapping the field again reopens the full list.
+- The shared administrator-configured payee/category suggestion limit (1–100, default 20), compact mobile layout and scrollability are preserved.
+- Free-text payees and existing financial records, imports, database schema and access controls remain unchanged.
+
 ## 1.9.52 — Admin-managed autocomplete suggestion limit (2026-11-16)
 - Payee and category suggestions default to 20 matches instead of 8.
 - Administrators can set the shared per-list maximum to 1–100 under **Settings → Transaction list**, without redeploying or restarting containers. The setting applies to all users.
