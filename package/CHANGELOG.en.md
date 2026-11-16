@@ -1,3 +1,9 @@
+## 1.9.43 — Complete English authentication text and compact dashboard actions (2026-11-16)
+- Fixed the mixed-language 2FA verification paragraph while keeping the actual username intact.
+- Completed English text for authenticator setup, QR-code guidance, recovery codes and password changes.
+- On desktop and tablet, the three dashboard quick actions are arranged side-by-side, with the import timestamp underneath; the smartphone layout is unchanged.
+- No changes to financial records, authentication data, databases, import jobs or Caddy certificates.
+
 ## 1.9.42 — Updated bilingual onboarding (2026-11-16)
 - Refreshed the first-login tour for functionality through v1.9.41, with complete offline German and English copy.
 - Covers current account balances, yellow future-dated transactions (already included in stored balances), payee/category entry, recurring end dates and execution caps, import/data-source modes and DE/EN language switching.

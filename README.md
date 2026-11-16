@@ -12,7 +12,12 @@
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Current release:** [v1.9.42](https://github.com/renfie/financisto-dashboard/releases) · November 16, 2026. This release updates the first-login introduction in English and German, without changing stored financial data or accounting logic.
+**Current release:** [v1.9.43](https://github.com/renfie/financisto-dashboard/releases) · November 16, 2026. This release updates the first-login introduction in English and German, without changing stored financial data or accounting logic.
+
+
+### Version 1.9.43 — Login translations and dashboard controls
+
+The 2FA verification and setup texts, recovery-code page and password-change page now appear fully in English when EN is selected. Dashboard quick-action buttons return to a horizontal arrangement on desktop and tablet, while the mobile layout is unchanged. Existing private data and settings are preserved during upgrades.
 
 ## Features
 

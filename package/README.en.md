@@ -1,3 +1,7 @@
+## v1.9.43 — Authentication and responsive dashboard
+
+English text is now complete on the 2FA verification, authenticator setup, recovery-code and password change screens. The dashboard quick actions are horizontal on desktop/tablet and remain mobile friendly. Accounting data and security configuration are unchanged.
+
 # Financisto Dashboard — Installation and Operations (English)
 
 ## New in v1.9.42 — Updated onboarding

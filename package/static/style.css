@@ -756,3 +756,22 @@
 @media screen and (max-width:760px){
  .mobile-web-booking-list tr.mobile-booking-card.future-booking{background:#fff3cd!important;border-color:#d9b857!important}
 }
+
+/* 1.9.43 — dashboard actions share a horizontal row on desktop/tablet.
+   Scope to the dashboard only: other heading-actions and mobile cards are unchanged. */
+@media screen and (min-width:761px) {
+  .dashboard-heading { flex-wrap:wrap; align-items:center; }
+  .dashboard-heading > div:first-child { min-width:0; flex:1 1 380px; }
+  .dashboard-heading > .heading-actions {
+    display:flex; flex-flow:row wrap; justify-content:flex-end; align-items:center;
+    gap:8px 10px; flex:0 1 600px; width:600px; max-width:100%;
+  }
+  .dashboard-heading > .heading-actions .button { white-space:nowrap; }
+  .dashboard-heading > .heading-actions .importnote {
+    flex:1 1 100%; text-align:right; white-space:normal;
+  }
+}
+@media screen and (min-width:761px) and (max-width:1250px) {
+  .dashboard-heading > .heading-actions { flex:1 1 100%; justify-content:flex-start; }
+  .dashboard-heading > .heading-actions .importnote { text-align:left; }
+}

@@ -13,7 +13,12 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktueller Quellstand:** v1.9.42 · 16. November 2026 (aktualisierte zweisprachige Einführung für neue Benutzer).
+**Aktueller Quellstand:** v1.9.43 · 16. November 2026 (aktualisierte zweisprachige Einführung für neue Benutzer).
+
+
+### Version 1.9.43 – Anmeldeübersetzungen und Dashboard-Aktionen
+
+Die 2FA-Bestätigung, die 2FA-Einrichtung, Wiederherstellungscodes und Passwortänderungen werden auf Englisch vollständig übersetzt. Auf PC und Tablet stehen die Dashboard-Aktionsbuttons wieder nebeneinander; die Smartphone-Darstellung bleibt unverändert. Bestehende Finanzdaten und Einstellungen werden beim Update beibehalten.
 
 ## Funktionen
 

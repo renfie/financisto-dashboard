@@ -4,7 +4,11 @@
 <section class="panel auth">
  <div class="eyebrow">Zweiter Anmeldeschritt</div>
  <h1>2FA bestätigen</h1>
+ {% if ui_language == 'en' %}
+ <p class="muted">Signing in as <strong>{{ username }}</strong>. Enter the current six-digit code from your authenticator app or a one-time recovery code.</p>
+ {% else %}
  <p class="muted">Anmeldung als <strong>{{ username }}</strong>. Gib den aktuellen sechsstelligen Code deiner Authenticator-App oder einen einmaligen Wiederherstellungscode ein.</p>
+ {% endif %}
  <form method="post" class="formstack">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
   <label>Authenticator- oder Wiederherstellungscode<input name="code" inputmode="text" autocomplete="one-time-code" maxlength="18" required autofocus></label>

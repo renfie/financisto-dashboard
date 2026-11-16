@@ -4,6 +4,19 @@
   'use strict';
   const language = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'de';
   const catalog = {
+  "In einer Authenticator-App ein neues Konto hinzufügen und den QR-Code scannen.": "Add a new account in your authenticator app and scan the QR code.",
+  "Falls der QR-Code nicht gelesen wird, den Schlüssel manuell hinterlegen.": "If you cannot scan the QR code, enter the secret key manually.",
+  "Den angezeigten sechsstelligen Code eingeben und bestätigen.": "Enter and confirm the six-digit code shown in your authenticator app.",
+  "QR-Code für die Authenticator-App": "QR code for the authenticator app",
+  "Den QR-Code und Schlüssel niemandem weitergeben. Bei einem neuen Gerät benötigst du den Schlüssel oder einen Wiederherstellungscode.": "Never share the QR code or secret key. When switching devices, you will need the key or a recovery code.",
+  "Mindestens 12 Zeichen. Nach der Änderung werden alle bisherigen Sitzungen abgemeldet.": "At least 12 characters. Changing your password signs out all existing sessions.",
+  "Administratorpasswort ändern": "Change administrator password",
+  "Bisheriges Passwort": "Current password",
+  "Financisto-Daten, Haushaltsbuch und PC-Freigaben bleiben unverändert.": "Financisto data, household records and allowed device IPs remain unchanged.",
+  "2FA-Bestätigung": "2FA confirmation",
+  "Zwei-Faktor-Einrichtung": "Two-factor setup",
+  "Bitte die Wiederherstellungscodes sicher verwahren.": "Please store the recovery codes securely.",
+
   "Dashboard": "Dashboard",
   "Buchungen erfassen": "Enter transactions",
   "Buchungen": "Transactions",

@@ -1,3 +1,9 @@
+## 1.9.43 – Englische Anmeldung vervollständigt und Dashboard-Aktionen kompakt (16.11.2026)
+- Auf der 2FA-Bestätigungsseite ist der Erklärungssatz nun vollständig englisch, ohne den Benutzernamen zu verändern.
+- Auch 2FA-Einrichtung, QR-Code-Anleitung, Wiederherstellungscodes und Passwortänderung sind auf Englisch ergänzt.
+- Die drei Dashboard-Aktionen rechts stehen auf Desktop und Tablet nebeneinander; die Importinformation steht kompakt darunter. Auf Smartphones bleibt das bisherige responsive Layout erhalten.
+- Keine Änderungen an Buchungen, Benutzerkonten, 2FA-Geheimnissen, Datenbank, Import oder Caddy-Zertifikaten.
+
 ## 1.9.42 – Aktualisierte zweisprachige Einführung (16.11.2026)
 - Einführungsrundgang auf den Funktionsstand 1.9.41 gebracht, vollständig auf Deutsch und Englisch mit lokaler Sprachauswahl.
 - Erläutert jetzt Kontostände, zukünftige Buchungen (gelb und sofort saldo-wirksam), Empfänger/Kategorie, Wiederholungen mit Enddatum oder maximaler Ausführungszahl, Import-/Datenführungsmodus sowie DE/EN-Umschaltung.

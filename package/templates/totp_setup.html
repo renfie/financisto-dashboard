@@ -4,7 +4,11 @@
 <section class="panel auth auth-wide">
  <div class="eyebrow">Sicherheit · Pflicht bei der ersten Anmeldung</div>
  <h1>Zwei-Faktor-Authentifizierung einrichten</h1>
+ {% if ui_language == 'en' %}
+ <p class="muted">An authenticator (TOTP) is required for <strong>{{ username }}</strong>. Complete setup before accessing the dashboard.</p>
+ {% else %}
  <p class="muted">Für <strong>{{ username }}</strong> ist ein Authenticator (TOTP) erforderlich. Die Einrichtung muss abgeschlossen sein, bevor das Dashboard geöffnet werden kann.</p>
+ {% endif %}
  <ol class="setup-instructions">
   <li>In einer Authenticator-App ein neues Konto hinzufügen und den QR-Code scannen.</li>
   <li>Falls der QR-Code nicht gelesen wird, den Schlüssel manuell hinterlegen.</li>

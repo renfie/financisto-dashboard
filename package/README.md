@@ -1,3 +1,7 @@
+## Neu in v1.9.43
+
+Die 2FA-Bestätigung, Authenticator-Einrichtung, Wiederherstellungscodes und Passwortänderung werden auf Englisch vollständig übersetzt. Die Dashboard-Aktionsbuttons stehen bei PC und Tablet wieder nebeneinander; auf Smartphones bleibt die Darstellung unverändert. Finanzdaten und Sicherheitskonfiguration werden nicht verändert.
+
 **Sprache / Language:** [English](README.en.md) | **Deutsch (ausführliche Dokumentation)**
 
 ## Neu in v1.9.42 – Einführung aktualisiert
