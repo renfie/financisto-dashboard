@@ -38,6 +38,15 @@ jobs:
           [[ -f package/src/app.py && -f package/install.sh && -f update.sh && -f LICENSE ]] || exit 1
           [[ -f package/docs/CADDY.en.md && -f package/docs/CADDY.de.md ]] || exit 1
           bash -n update.sh
+          # The package version and every built application image must agree.
+          VERSION_CHECK="$VERSION" python3 - <<'PYIMAGE'
+          import os, re
+          from pathlib import Path
+          compose = Path('package/compose.yaml').read_text(encoding='utf-8')
+          images = re.findall(r'^\s*image:\s*(financisto-dashboard:[^\s#]+)', compose, re.M)
+          expected = 'financisto-dashboard:' + os.environ['VERSION_CHECK']
+          assert len(images) == 3 and all(tag == expected for tag in images), (expected, images)
+          PYIMAGE
           bash -n package/install.sh
           node --check package/static/i18n.js
           python3 - <<'PYVERIFY'
