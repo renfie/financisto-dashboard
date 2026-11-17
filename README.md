@@ -1,3 +1,7 @@
+## New in v1.9.56
+
+Category text is now selected on tap for immediate replacement. All application Docker image tags match v1.9.56, and update/release checks prevent future version mismatches.
+
 ## Neu in v1.9.54
 
 Filter durchgehend sichtbar; 4 Sekunden Tipp-Pause; wiederkehrende Buchungen markiert; Empfänger in wiederkehrenden Regeln frei eingebbar.
@@ -21,7 +25,7 @@ The transaction form now offers a mobile-safe, searchable category picker matchi
 
 **Language / Sprache:** **English** | [Deutsch](README.de.md)
 
-**v1.9.54 — current release (2026-11-17).** This cumulative release includes all locally tested changes since public v1.9.43: improved English translations, a cash-flow chart, quick transaction-period filters, numbered pagination, improved dashboard ordering and collapsible panels, compact desktop row actions, configurable German/English footers, and the final switch-back-to-Financisto translation fix. [Full release history](package/CHANGELOG.en.md).
+**v1.9.56 — current release (2026-11-17).** This cumulative release includes all locally tested changes since public v1.9.43: improved English translations, a cash-flow chart, quick transaction-period filters, numbered pagination, improved dashboard ordering and collapsible panels, compact desktop row actions, configurable German/English footers, and the final switch-back-to-Financisto translation fix. [Full release history](package/CHANGELOG.en.md).
 
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves dashboard logo" width="260">
@@ -33,7 +37,7 @@ The transaction form now offers a mobile-safe, searchable category picker matchi
 
 **An independent, self-hosted personal-finance dashboard for Docker**, featuring transaction management, financial reporting, recurring transactions, an installable PWA, and import/export compatibility with [Financisto](https://github.com/dsolonenko/financisto) backups.
 
-**Latest public release:** v1.9.54 · November 17, 2026. [Download ZIP and checksum](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.54).
+**Latest public release:** v1.9.56 · November 17, 2026. [Download ZIP and checksum](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.56).
 
 
 ### Version 1.9.46 — Cash flow, period presets and compact controls
