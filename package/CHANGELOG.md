@@ -1,3 +1,9 @@
+## 1.9.56 – Kategoriefeld und Docker-Image-Version (17.11.2026)
+- Die vorausgewählte Kategorie wird beim Antippen/Fokussieren zum direkten Überschreiben markiert; Tipp-Eingaben hängen sich nicht mehr an den vorhandenen Text an.
+- Alle drei Anwendungsdienste verwenden wieder einen zur VERSION passenden Docker-Image-Tag (1.9.56).
+- Updates und GitHub-Release-Build prüfen die Übereinstimmung der Image-Tags vor dem Ausrollen.
+- Unveränderte Bind-Mounts, Finanzdaten, Secrets und Einstellungen; SQLite-Sicherung vor dem Update.
+
 ## 1.9.54 – Buchungsliste, Wiederholungen und Filter (17.11.2026)
 - Zukunftsmarkierung färbt jetzt die vollständige Tabellenzeile einschließlich der Aktionsspalte bündig ein.
 - Als wiederkehrend erkannte Buchungen werden in Dashboard und Buchungsliste zusätzlich gekennzeichnet. Die Kennzeichnung wird aus bestehenden `recurring_runs` abgeleitet; es werden keine Buchungen geändert.
