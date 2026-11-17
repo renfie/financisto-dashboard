@@ -21,6 +21,20 @@ SOURCE="$RELEASE_DIR/package"
 RELEASE_VERSION="$(tr -d '[:space:]' < "$SOURCE/VERSION")"
 [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Ungültige Releaseversion.' >&2; exit 1; }
 
+# Reject inconsistent packages before touching the installed project.
+# All application services must use the same image tag as package/VERSION.
+SOURCE_COMPOSE="$SOURCE/compose.yaml"
+[[ -f "$SOURCE_COMPOSE" ]] || { echo 'Compose-Datei fehlt.' >&2; exit 1; }
+EXPECTED_IMAGE="financisto-dashboard:$RELEASE_VERSION"
+SOURCE_COMPOSE="$SOURCE_COMPOSE" EXPECTED_IMAGE="$EXPECTED_IMAGE" python3 - <<'PYCHECK'
+import os, re
+from pathlib import Path
+compose = Path(os.environ['SOURCE_COMPOSE']).read_text(encoding='utf-8')
+images = re.findall(r'^\\s*image:\\s*(financisto-dashboard:[^\\s#]+)', compose, re.M)
+if len(images) != 3 or any(image != os.environ['EXPECTED_IMAGE'] for image in images):
+    raise SystemExit('FEHLER: Docker-Image-Tags stimmen nicht mit package/VERSION überein: ' + repr(images))
+PYCHECK
+
 error() { printf '\nFEHLER: %s\n' "$*" >&2; exit 1; }
 [[ $EUID -ne 0 ]] || error 'Update bitte als Projektbenutzer ohne sudo ausführen; als Root ist ein versehentlicher Besitzwechsel möglich.'
 for cmd in python3 docker id cp chmod tar stat; do command -v "$cmd" >/dev/null || error "Programm fehlt: $cmd"; done
