@@ -787,9 +787,16 @@
     input.setAttribute('aria-expanded','true');
     position();
   }
+  // When the preset category is still displayed, select its full label on
+  // focus/tap so typing replaces it instead of appending to the label.
+  // Keep an already typed search query and the submitted category ID intact.
+  function selectPresetLabel() {
+    const currentLabel = select.selectedOptions[0]?.textContent?.trim() || zeroLabel;
+    if (input.value === currentLabel) input.select();
+  }
   select.addEventListener('change', () => {sync(); close();});
-  input.addEventListener('focus',() => render(true));
-  input.addEventListener('click',() => render(true));
+  input.addEventListener('focus',() => {selectPresetLabel(); render(true);});
+  input.addEventListener('click',() => {selectPresetLabel(); render(true);});
   input.addEventListener('input',() => render());
   input.addEventListener('keydown',event => {
     if (event.key === 'Escape') {event.preventDefault(); sync(); close(); return;}
