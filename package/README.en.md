@@ -1,4 +1,8 @@
-## Neu in v1.9.54
+## New in v1.9.56
+
+The preselected category is selected on tap and replaced by typing. Dashboard, background, and notifications use `financisto-dashboard:1.9.56`. Release and update scripts verify image version consistency. [Changelog](CHANGELOG.en.md).
+
+## New in v1.9.54
 
 Always-visible quick filter, 4-second delay, recurring-booking labels and free-text payees in recurring rules.
 
