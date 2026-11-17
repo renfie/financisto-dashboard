@@ -30,7 +30,7 @@ SOURCE_COMPOSE="$SOURCE_COMPOSE" EXPECTED_IMAGE="$EXPECTED_IMAGE" python3 - <<'P
 import os, re
 from pathlib import Path
 compose = Path(os.environ['SOURCE_COMPOSE']).read_text(encoding='utf-8')
-images = re.findall(r'^\\s*image:\\s*(financisto-dashboard:[^\\s#]+)', compose, re.M)
+images = re.findall(r'^\s*image:\s*(financisto-dashboard:[^\s#]+)', compose, re.M)
 if len(images) != 3 or any(image != os.environ['EXPECTED_IMAGE'] for image in images):
     raise SystemExit('FEHLER: Docker-Image-Tags stimmen nicht mit package/VERSION überein: ' + repr(images))
 PYCHECK
