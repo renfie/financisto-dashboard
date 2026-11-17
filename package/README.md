@@ -1,3 +1,7 @@
+## Neu in v1.9.56
+
+Die vorausgewählte Kategorie wird beim Antippen vollständig markiert; neuer Text ersetzt die Vorgabe. Dashboard, Background und Notifications verwenden das Image `financisto-dashboard:1.9.56`. Updates und Releases prüfen die Versionskonsistenz. [Änderungen](CHANGELOG.md).
+
 ## Neu in v1.9.54
 
 Filter durchgehend sichtbar; 4 Sekunden Tipp-Pause; wiederkehrende Buchungen markiert; Empfänger in wiederkehrenden Regeln frei eingebbar.
