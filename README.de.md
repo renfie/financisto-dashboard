@@ -1,3 +1,7 @@
+## Neu in v1.9.56
+
+Die vorausgefüllte Kategorie wird beim Antippen vollständig markiert und beim Tippen ersetzt. Die Docker-Image-Tags stimmen jetzt mit v1.9.56 überein; Release und Updateskript prüfen dies künftig automatisch.
+
 ## Neu in v1.9.54
 
 Filter durchgehend sichtbar; 4 Sekunden Tipp-Pause; wiederkehrende Buchungen markiert; Empfänger in wiederkehrenden Regeln frei eingebbar.
@@ -21,7 +25,7 @@ Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompa
 
 **Sprache / Language:** [English (default)](README.md) | **Deutsch**
 
-**Vorgänger v1.9.49 (16.11.2026).** Sammelrelease aller seit GitHub-v1.9.43 lokal getesteten Änderungen: weiter vervollständigte Englischübersetzungen, Cashflow, Schnellfilter, Seitennummern, verbesserte Dashboard-Reihenfolge und Klappbereiche, kompakte Aktionsbuttons, getrennte Fußzeilentexte sowie der letzte Übersetzungsfehler beim Wechsel zurück zu Financisto. [Alle Änderungen](package/CHANGELOG.md).
+**Aktuelles Release v1.9.56 (17.11.2026).** Einschließlich aller bisherigen Änderungen seit v1.9.43. Sammelrelease aller seit GitHub-v1.9.43 lokal getesteten Änderungen: weiter vervollständigte Englischübersetzungen, Cashflow, Schnellfilter, Seitennummern, verbesserte Dashboard-Reihenfolge und Klappbereiche, kompakte Aktionsbuttons, getrennte Fußzeilentexte sowie der letzte Übersetzungsfehler beim Wechsel zurück zu Financisto. [Alle Änderungen](package/CHANGELOG.md).
 
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">
@@ -34,7 +38,7 @@ Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompa
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktuelles öffentliches Release:** v1.9.54 · 17. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.54).
+**Aktuelles öffentliches Release:** v1.9.56 · 17. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.56).
 
 
 ### Version 1.9.46 – Cashflow, Zeitraumfilter und kompakte Buchungsaktionen
