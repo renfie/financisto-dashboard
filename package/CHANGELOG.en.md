@@ -1,3 +1,11 @@
+## 1.9.54 – Ledger, recurring transactions and filters (2026-11-17)
+- Future-dated transaction highlighting now fills the full table row, including the action cell.
+- Transactions linked to recorded recurrence runs carry an additional "Recurring" label in the dashboard and bookings list. Existing records are not modified.
+- Quick search is always directly visible next to or below period shortcuts; "Advanced" still opens month/account/category controls.
+- Auto-search delay reduced from five to four seconds; Search/Enter submit immediately.
+- Recurring-rule editor accepts both existing and new payee names through the same compact mobile-safe autocomplete. New payees are created atomically when the rule is saved.
+- No changes to user finance data, import logic or certificates. The updater backs up SQLite before installation.
+
 ## 1.9.53 — Show payee suggestions immediately on focus (2026-11-16)
 - Tapping or focusing the payee field now immediately shows known payees in alphabetical order even with an empty query, matching the category picker.
 - Typing continues to narrow suggestions, while tapping the field again reopens the full list.

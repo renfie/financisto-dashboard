@@ -1,3 +1,11 @@
+## 1.9.54 – Buchungsliste, Wiederholungen und Filter (17.11.2026)
+- Zukunftsmarkierung färbt jetzt die vollständige Tabellenzeile einschließlich der Aktionsspalte bündig ein.
+- Als wiederkehrend erkannte Buchungen werden in Dashboard und Buchungsliste zusätzlich gekennzeichnet. Die Kennzeichnung wird aus bestehenden `recurring_runs` abgeleitet; es werden keine Buchungen geändert.
+- Schnellsuche in der Buchungsliste immer direkt sichtbar, kompakt neben bzw. unter den Zeitraum-Schaltflächen; „Erweitert“ öffnet weiterhin die vorhandenen Monats-, Konto- und Kategoriefilter.
+- Verzögerung der automatischen Schnellsuche von 5 auf 4 Sekunden gesenkt; Suchen/Enter bleiben unmittelbar.
+- Wiederkehrende Buchungsregeln: freie Eingabe neuer Empfänger mit der gleichen kompakten Smartphone-Vorschlagsliste; der Empfänger wird erst beim Speichern der Regel atomar angelegt. Bestehende Empfänger werden über ihren Namen wiederverwendet.
+- Keine Änderungen an bestehenden Finanzdaten, Buchungsalgorithmen, Imports oder Zertifikaten. Upgrade mit `update.sh` und vorheriger SQLite-Sicherung.
+
 ## 1.9.53 – Empfängervorschläge direkt beim Antippen (16.11.2026)
 - Beim Antippen oder Fokussieren des Empfängerfelds werden bekannte Empfänger nun sofort alphabetisch angezeigt, auch ohne Suchtext – analog zur Kategorieauswahl.
 - Während der Eingabe wird weiterhin nach passenden Empfängern gefiltert; durch erneutes Antippen kann die vollständige Vorschlagsliste wieder geöffnet werden.

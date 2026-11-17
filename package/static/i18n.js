@@ -4,6 +4,13 @@
   'use strict';
   const language = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'de';
   const catalog = {
+  "Schnellfilter (alle Buchungen im gewählten Zeitraum)": "Quick filter (all transactions in the selected period)",
+  "Buchungen durchsuchen": "Search transactions",
+  "Empfänger, Kategorie, Konto, Notiz …": "Payee, category, account, note …",
+  "Erweitert": "Advanced",
+  "Monats-, Konto- und Kategoriefilter": "Month, account and category filters",
+  "Empfänger suchen oder neu eingeben": "Search or enter a new payee",
+  "Bekannte Empfänger auswählen oder einen neuen Namen eingeben. Neue Empfänger werden beim Speichern der Regel angelegt.": "Select a known payee or enter a new name. New payees are created when you save the rule.",
   "Maximale Vorschläge (Empfänger und Kategorien)": "Maximum suggestions (payees and categories)",
   "Vorschlagsanzahl speichern": "Save suggestion limit",
   "Gilt für alle Benutzer und beide Suchfelder. Standard: 20, einstellbar von 1 bis 100. Die Vorschlagsliste bleibt auf Smartphones kompakt und ist scrollbar. Änderungen gelten ab dem nächsten Öffnen des Buchungsformulars; kein Neustart erforderlich.": "Applies to all users and both search fields. Default: 20, adjustable from 1 to 100. The suggestions remain compact and scrollable on phones. Changes take effect the next time the booking form is opened; no restart required.",

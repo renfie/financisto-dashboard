@@ -1,3 +1,7 @@
+## Neu in v1.9.54
+
+Always-visible quick filter, 4-second delay, recurring-booking labels and free-text payees in recurring rules.
+
 ## New in v1.9.52
 
 Administrators can set the shared maximum number of payee and category suggestions (1–100, default 20) under **Settings → Transaction list**. Changes persist and require no container restart.

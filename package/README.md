@@ -1,3 +1,7 @@
+## Neu in v1.9.54
+
+Filter durchgehend sichtbar; 4 Sekunden Tipp-Pause; wiederkehrende Buchungen markiert; Empfänger in wiederkehrenden Regeln frei eingebbar.
+
 ## Neu in v1.9.52
 
 Unter **Einstellungen → Buchungsliste** kann der Administrator die maximale Vorschlagsanzahl für Empfänger und Kategorien zentral konfigurieren (1–100, Standard 20). Der Wert bleibt nach Updates erhalten; beim Ändern ist kein Neustart nötig.

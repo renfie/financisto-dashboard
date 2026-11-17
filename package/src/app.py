@@ -2140,6 +2140,7 @@ def booking_list():
         category_records,category_names,_=category_tree(db)
         payees=db.execute('SELECT title FROM payees ORDER BY title COLLATE NOCASE').fetchall()
         rows=db.execute('''SELECT t.*,a.title account_title,c.code currency_code,
+                          EXISTS(SELECT 1 FROM recurring_runs rr WHERE rr.booking_id=t.id) AS is_recurring,
                           c.symbol,c.decimals,p.title payee_title
                           FROM transactions t JOIN accounts a ON a.id=t.account_id
                           JOIN currencies c ON c.id=a.currency_id
@@ -2318,16 +2319,19 @@ def recurring_list():
             ORDER BY a.title COLLATE NOCASE''').fetchall()
         categories=db.execute('SELECT id,title FROM categories ORDER BY title COLLATE NOCASE').fetchall()
         payees=db.execute('SELECT id,title FROM payees ORDER BY title COLLATE NOCASE').fetchall()
+        recurring_suggestion_limit=booking_suggestion_limit(db)
         mode=finance_setting(db,'finance_mode','import')
         editing=request.args.get('edit','')
-        edit=db.execute('SELECT * FROM recurring_rules WHERE id=? AND deleted_on IS NULL',(int(editing),)).fetchone() if editing.isdigit() else None
+        edit=db.execute('''SELECT r.*, p.title AS payee_title FROM recurring_rules r
+            LEFT JOIN payees p ON p.id=r.payee_id
+            WHERE r.id=? AND r.deleted_on IS NULL''',(int(editing),)).fetchone() if editing.isdigit() else None
     recurring_edit_amount = ''
     if edit:
         acc = next((a for a in accounts if a['id'] == edit['account_id']), None)
         decimals = int(acc['decimals']) if acc else 2
         recurring_edit_amount = money(abs(edit['amount_minor']) / (10 ** decimals),decimals)
     return render_template('recurring.html',rules=rules,accounts=accounts,categories=categories,
-        payees=payees,finance_mode=mode,edit_rule=edit,
+        payees=payees,booking_suggestion_limit=recurring_suggestion_limit,finance_mode=mode,edit_rule=edit,
         rules_data=[dict(r) for r in rules] if mode == 'web' and current_user()['role'] in ('admin','editor') else [],
         edit_amount=recurring_edit_amount,now=recurring_today().isoformat())
 
@@ -2400,7 +2404,10 @@ def recurring_form_payload(db, old=None):
     account=existing_account(db,source)
     amount=minor_amount(request.form.get('amount',''),int(account['decimals']))
     category=int(request.form.get('category_id','0')) if action!='transfer' else 0
-    payee=int(request.form.get('payee_id','0'))
+    # Match one-off bookings: reuse a payee by name or create it on save.
+    # The entire recurring rule and any new payee are committed atomically.
+    payee_title=request.form.get('payee_title')
+    payee=entry_payee(db,payee_title) if payee_title is not None else int(request.form.get('payee_id','0'))
     title=request.form.get('title','').strip()[:160]
     if not title: raise ValueError('Bezeichnung fehlt')
     note=request.form.get('note','').strip()[:1000]
@@ -2818,6 +2825,7 @@ def dashboard():
             ledger_where.append("(p.title LIKE ? ESCAPE '\\' OR t.note LIKE ? ESCAPE '\\' OR c.title LIKE ? ESCAPE '\\' OR a.title LIKE ? ESCAPE '\\' OR target.title LIKE ? ESCAPE '\\')")
             ledger_params.extend([match]*5)
         ledger_sql='''SELECT t.id,t.day,t.origin,t.to_account_id,t.category_id,t.amount,t.note,
+                         EXISTS(SELECT 1 FROM recurring_runs rr WHERE rr.booking_id=t.id) AS is_recurring,
                          a.title account_title,target.title target_account_title,
                          c.title category_title,p.title payee_title
                  FROM transactions t JOIN accounts a ON a.id=t.account_id
@@ -2852,6 +2860,7 @@ def dashboard():
                     t.get('account_title') or '',t.get('target_account_title') or '',
                     cat_names.get(t['category_id'],'Ohne Kategorie'),
                     t.get('payee_title') or '',t.get('note') or '',
+                    'Wiederkehrend' if t.get('is_recurring') else '',
                     'Umbuchung' if t['to_account_id'] else
                     (('Saldoabgleich' if t['category_id'] in adjustment_ids else 'Durchlaufend') if t['category_id'] in neutral_ids else ('Ausgabe' if t['amount'] < 0 else ('Einnahme' if t['amount'] > 0 else 'Ohne Betrag'))),
                     money(t['amount']/divisor,decimals),f'{t["amount"]/divisor:.{decimals}f}')).casefold()

@@ -32,7 +32,7 @@
   }
   input.addEventListener('input', () => {
     clearTimeout(pending);
-    pending = setTimeout(submitQuick, 5000); // Five seconds after the last keystroke; Search submits immediately.
+    pending = setTimeout(submitQuick, 4000); // Four seconds after the last keystroke; Search/Enter submits immediately.
   });
   quick.addEventListener('submit', () => {
     clearTimeout(pending);
@@ -245,7 +245,7 @@
     field('account_id', rule ? rule.account_id : '');
     field('to_account_id', rule ? rule.to_account_id : '0');
     field('category_id', rule ? rule.category_id : '0');
-    field('payee_id', rule ? rule.payee_id : '0');
+    field('payee_title', rule ? (rule.payee_title || '') : '');
     const rawDigits = rule && rule.decimals != null ? Number(rule.decimals) : 2;
     const digits = Number.isInteger(rawDigits) && rawDigits >= 0 && rawDigits <= 6 ? rawDigits : 2;
     const amount = rule ? (Math.abs(Number(rule.amount_minor)) / Math.pow(10, digits)).toFixed(digits).replace('.', ',') : '';
@@ -535,6 +535,145 @@
   window.visualViewport?.addEventListener('resize', position, { passive: true });
   window.visualViewport?.addEventListener('scroll', position, { passive: true });
   input.closest('form')?.addEventListener('submit', close);
+})();
+
+
+/* 1.9.54: mobile-safe free-text payee autocomplete in recurring editor. Avoid native <datalist> popups,
+ * which may cover the entire Android form when the soft keyboard opens.
+ * The free-text input and the submitted payee_title field are unchanged.
+ */
+(function () {
+  const input = document.getElementById('recurring-payee-input');
+  const source = document.getElementById('recurring-known-payees');
+  if (!input || !source || !input.closest('#recurring-form')) return;
+
+  // Existing known payees come only from escaped <option value="..."> fields.
+  const suggestionLimit = Math.max(1, Math.min(100, Number.parseInt(input.closest('#recurring-form').dataset.suggestionLimit || '20', 10) || 20));
+  const payees = [...new Set(Array.from(source.querySelectorAll('option'))
+    .map(option => option.value.trim()).filter(Boolean))];
+  if (!payees.length) return;
+
+  const normalize = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'de';
+  const list = document.createElement('div');
+  list.id = 'recurring-payee-suggestions';
+  list.className = 'booking-payee-suggestions recurring-payee-suggestions';
+  list.setAttribute('popover','manual');
+  list.setAttribute('role', 'listbox');
+  list.setAttribute('aria-label', lang === 'en' ? 'Known payees' : 'Bekannte Empfänger');
+  list.setAttribute('data-no-i18n', '');
+  list.hidden = true;
+  (input.closest('dialog') || document.body).appendChild(list);
+  let matches = [];
+  let highlighted = -1;
+
+  function close() {
+    if (list.matches(':popover-open')) list.hidePopover();
+    list.hidden = true;
+    list.replaceChildren();
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    matches = [];
+    highlighted = -1;
+  }
+
+  function choose(value) {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    close();
+    input.focus({ preventScroll: true });
+  }
+
+  function position() {
+    if (list.hidden) return;
+    const rect = input.getBoundingClientRect();
+    const vv = window.visualViewport;
+    const visibleTop = vv ? vv.offsetTop : 0;
+    const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+    const below = Math.max(0, visibleBottom - rect.bottom - 8);
+    const above = Math.max(0, rect.top - visibleTop - 8);
+    const openAbove = below < 160 && above > below;
+    const available = openAbove ? above : below;
+    if (available < 45) { close(); return; }
+    const maxHeight = Math.min(236, Math.floor(available));
+    const desired = Math.min(maxHeight, matches.length * 45 + 6);
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8));
+    list.style.left = `${left}px`;
+    list.style.width = `${Math.min(rect.width, window.innerWidth - left - 8)}px`;
+    list.style.top = `${openAbove ? rect.top - desired - 4 : rect.bottom + 4}px`;
+    list.style.maxHeight = `${maxHeight}px`;
+    list.dataset.position = openAbove ? 'above' : 'below';
+  }
+
+  function highlight(index) {
+    highlighted = index;
+    Array.from(list.children).forEach((node, i) => {
+      node.setAttribute('aria-selected', i === highlighted ? 'true' : 'false');
+      if (i === highlighted) {
+        input.setAttribute('aria-activedescendant', node.id);
+        node.scrollIntoView({ block: 'nearest' });
+      }
+    });
+    if (highlighted === -1) input.removeAttribute('aria-activedescendant');
+  }
+
+  function render(showAll = false) {
+    // Opening the field shows known payees immediately; typing filters the list.
+    const query = showAll ? '' : normalize(input.value.trim());
+    if (document.activeElement !== input) { close(); return; }
+    matches = payees.filter(name => normalize(name).includes(query))
+      .sort((a, b) => {
+        const aStart = normalize(a).startsWith(query);
+        const bStart = normalize(b).startsWith(query);
+        return aStart === bStart ? a.localeCompare(b, lang) : aStart ? -1 : 1;
+      }).slice(0, suggestionLimit);
+    if (!matches.length) { close(); return; }
+    highlighted = -1;
+    list.replaceChildren();
+    matches.forEach((name, index) => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.id = `recurring-payee-option-${index}`;
+      option.className = 'booking-payee-option';
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+      option.textContent = name;
+      option.addEventListener('pointerdown', event => event.preventDefault());
+      option.addEventListener('click', () => choose(name));
+      list.appendChild(option);
+    });
+    list.hidden = false;
+    if (typeof list.showPopover === 'function' && !list.matches(':popover-open')) list.showPopover();
+    input.setAttribute('aria-expanded', 'true');
+    position();
+  }
+
+  input.addEventListener('input', () => render());
+  input.addEventListener('focus', () => render(true));
+  input.addEventListener('click', () => render(true));
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !list.hidden) { event.preventDefault(); close(); return; }
+    if (list.hidden) return;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const diff = event.key === 'ArrowDown' ? 1 : -1;
+      highlight((highlighted + diff + matches.length) % matches.length);
+    } else if (event.key === 'Enter' && highlighted >= 0) {
+      event.preventDefault();
+      choose(matches[highlighted]);
+    } else if (event.key === 'Tab') close();
+  });
+  input.addEventListener('blur', () => window.setTimeout(close, 150));
+  document.addEventListener('pointerdown', event => {
+    if (!list.hidden && event.target !== input && !list.contains(event.target)) close();
+  });
+  window.addEventListener('resize', position, { passive: true });
+  window.addEventListener('scroll', position, { passive: true, capture: true });
+  window.visualViewport?.addEventListener('resize', position, { passive: true });
+  window.visualViewport?.addEventListener('scroll', position, { passive: true });
+  input.closest('form')?.addEventListener('submit', close);
+  document.querySelector('.recurring-form-dialog')?.addEventListener('close', close);
 })();
 
 

@@ -931,3 +931,35 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 #booking-form .booking-category-search[hidden]{display:none!important}
 #booking-form .booking-category-search{width:100%;min-width:0;box-sizing:border-box}
 .booking-category-suggestions[hidden]{display:none!important}
+
+/* v1.9.54: full-width future rows, including the actions table cell. */
+@media screen and (min-width:761px){
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions{
+   display:table-cell!important;vertical-align:middle;white-space:nowrap;width:1%;
+   min-width:0;padding:8px 6px;
+ }
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions .button,
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions button{vertical-align:middle;margin:0 2px;}
+ #buchungen .dashboard-desktop-ledger td.dashboard-row-actions form{display:inline-flex;vertical-align:middle;margin:0;}
+}
+/* An additional provenance label, not a replacement for expense/transfer type. */
+.recurring-booking-badge{display:inline-block;margin:3px 0 0 5px;padding:2px 7px;border:1px solid #a5cfd3;border-radius:5px;background:#e6f5f3;color:#17606b;font-size:.70rem;line-height:1.3;font-weight:750;vertical-align:middle;white-space:nowrap}
+.booking-kind .recurring-booking-badge{margin:3px 0 3px 4px}
+/* Search stays available without an expandable filter panel. */
+#buchungen .ledger-toolbar{align-items:center;gap:8px 12px}
+#buchungen .ledger-filter-inline{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex:1 1 410px;min-width:260px;max-width:100%}
+#buchungen .ledger-filter-inline .quick-filter-form{flex:1 1 auto;min-width:0;margin:0;padding:0;border:0;background:none;border-radius:0}
+#buchungen .ledger-filter-inline .quick-filter-row{display:flex;align-items:stretch;gap:6px;flex-wrap:nowrap}
+#buchungen .ledger-filter-inline .quick-filter-row input{min-width:0;flex:1 1 auto;min-height:43px}
+#buchungen .ledger-filter-inline .quick-filter-row button{min-height:43px;padding:8px 11px}
+#buchungen .ledger-filter-inline .ledger-advanced-link{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;margin:0;padding:7px 4px;font-size:.76rem;text-underline-offset:2px}
+#buchungen .ledger-filter-inline .quick-filter-row .button{min-height:43px}
+@media screen and (max-width:760px){
+ #buchungen .ledger-toolbar{display:flex;flex-direction:column;align-items:stretch}
+ #buchungen .ledger-periods{margin-bottom:0}
+ #buchungen .ledger-filter-inline{min-width:0;width:100%;flex:0 0 auto}
+ #buchungen .ledger-filter-inline .quick-filter-row input{font-size:16px}
+}
+.recurring-payee-hint{margin-top:-7px}
+/* Popover entries share the normal compact picker styling while floating over the dialog. */
+.recurring-payee-suggestions:popover-open{margin:0;inset:auto;position:fixed;z-index:2147483647;box-sizing:border-box}

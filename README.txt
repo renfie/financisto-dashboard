@@ -1,12 +1,14 @@
-FieLanzen v1.9.53 – Empfängerauswahl sofort beim Antippen (16.11.2026).
+FieLanzen v1.9.54 – Buchungsliste und Wiederkehrende Buchungen (17.11.2026).
 
-- Empfänger-Vorschlagsliste öffnet sich sofort bei Fokus/Klick, auch bei leerem Suchfeld.
-- Alphabetische Vorschläge werden während der Eingabe passend gefiltert; neue Empfänger bleiben frei eintragbar.
-- Admin-Limit für Empfänger und Kategorien: unverändert 1–100 (Standard 20).
-- Mobile Listen bleiben kompakt und scrollbar; keine Änderungen an Finanzdaten, Import, .env oder Caddy.
+- Gelbe Zukunftsmarkierungen bis zum rechten Rand einschließlich Aktionsspalte.
+- Wiederkehrende Buchungen zusätzlich als solche markiert.
+- Filter für die Buchungsliste immer sichtbar, mit weiterem Link „Erweitert“.
+- Automatische Schnellsuche nach 4 statt 5 Sekunden Tipp-Pause.
+- Neue Empfänger beim Anlegen/Bearbeiten von wiederkehrenden Regeln direkt erfassbar.
 
-Upgrade als Eigentümer der Installation (ohne sudo):
-  unzip -o financisto-dashboard-v1.9.53.zip
-  ./financisto-release-1.9.53/update.sh /pfad/zur/financisto-dashboard-installation
+Update als Projektbesitzer (ohne sudo):
+  unzip -o financisto-dashboard-v1.9.54.zip
+  ./financisto-release-1.9.54/update.sh /pfad/zur/financisto-dashboard-installation
 
+Datenbank, .env, Secrets und Caddy-Zertifikate bleiben bestehen.
 Details: package/CHANGELOG.md und package/CHANGELOG.en.md.
