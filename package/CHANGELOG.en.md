@@ -1,3 +1,9 @@
+## 1.9.56 – Category field and Docker image version (2026-11-17)
+- Selecting the prefilled category label on focus/tap lets typing replace the text rather than append to it.
+- All three application services now use a matching Docker image tag (1.9.56).
+- The updater and GitHub release build reject inconsistent image tags and package versions.
+- Bind mounts, finance data, secrets, and configuration remain unchanged; the updater backs up SQLite before deployment.
+
 ## 1.9.54 – Ledger, recurring transactions and filters (2026-11-17)
 - Future-dated transaction highlighting now fills the full table row, including the action cell.
 - Transactions linked to recorded recurrence runs carry an additional "Recurring" label in the dashboard and bookings list. Existing records are not modified.
