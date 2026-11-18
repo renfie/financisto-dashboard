@@ -2212,13 +2212,15 @@ def booking_list():
             sort_key = 'date'
         if sort_direction not in ('asc', 'desc'):
             sort_direction = 'desc'
+        sort_adjustment_ids = adjustment_category_ids(db) if sort_key == 'type' else set()
+        sort_neutral_ids = pass_through_category_ids(db) if sort_key == 'type' else set()
         def booking_sort_value(row):
             if sort_key == 'date':
                 return row['day']
             if sort_key == 'type':
                 return ('Umbuchung' if row['to_account_id'] else
-                        'Saldoabgleich' if row['category_id'] in adjustment_category_ids(db) else
-                        'Durchlaufend' if row['category_id'] in pass_through_category_ids(db) else
+                        'Saldoabgleich' if row['category_id'] in sort_adjustment_ids else
+                        'Durchlaufend' if row['category_id'] in sort_neutral_ids else
                         'Ausgabe' if row['amount'] < 0 else
                         'Einnahme' if row['amount'] > 0 else 'Ohne Betrag').casefold()
             if sort_key == 'account':
