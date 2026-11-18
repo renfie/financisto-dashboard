@@ -19,7 +19,7 @@ else
 fi
 SOURCE="$RELEASE_DIR/package"
 RELEASE_VERSION="$(tr -d '[:space:]' < "$SOURCE/VERSION")"
-[[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Ungültige Releaseversion.' >&2; exit 1; }
+[[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?$ ]] || { echo 'Ungültige Releaseversion.' >&2; exit 1; }
 
 # Reject inconsistent packages before touching the installed project.
 # All application services must use the same image tag as package/VERSION.
