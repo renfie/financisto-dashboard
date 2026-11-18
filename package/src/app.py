@@ -2179,7 +2179,10 @@ def booking_list():
         category_records,category_names,_=category_tree(db)
         payees=db.execute('SELECT title FROM payees ORDER BY title COLLATE NOCASE').fetchall()
         rows=db.execute('''SELECT t.*,a.title account_title,c.code currency_code,
-                          EXISTS(SELECT 1 FROM recurring_runs rr WHERE rr.booking_id=t.id) AS is_recurring,
+                          EXISTS(SELECT 1 FROM recurring_runs rr
+                              JOIN audit_events ev ON ev.event IN ('recurring_posted_auto','recurring_posted_manual')
+                                AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
+                              WHERE rr.booking_id=t.id) AS is_recurring,
                           c.symbol,c.decimals,p.title payee_title
                           FROM transactions t JOIN accounts a ON a.id=t.account_id
                           JOIN currencies c ON c.id=a.currency_id
@@ -2864,7 +2867,10 @@ def dashboard():
             ledger_where.append("(p.title LIKE ? ESCAPE '\\' OR t.note LIKE ? ESCAPE '\\' OR c.title LIKE ? ESCAPE '\\' OR a.title LIKE ? ESCAPE '\\' OR target.title LIKE ? ESCAPE '\\')")
             ledger_params.extend([match]*5)
         ledger_sql='''SELECT t.id,t.day,t.origin,t.to_account_id,t.category_id,t.amount,t.note,
-                         EXISTS(SELECT 1 FROM recurring_runs rr WHERE rr.booking_id=t.id) AS is_recurring,
+                         EXISTS(SELECT 1 FROM recurring_runs rr
+                              JOIN audit_events ev ON ev.event IN ('recurring_posted_auto','recurring_posted_manual')
+                                AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
+                              WHERE rr.booking_id=t.id) AS is_recurring,
                          a.title account_title,target.title target_account_title,
                          c.title category_title,p.title payee_title
                  FROM transactions t JOIN accounts a ON a.id=t.account_id
