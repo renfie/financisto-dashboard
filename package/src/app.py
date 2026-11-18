@@ -2911,10 +2911,13 @@ def dashboard():
                     'Ja' if entry['is_recurring'] else 'Nein',
                     amount_csv(balance) if balance is not None else ''])
             payload = ('\ufeff' + csv_text.getvalue()).encode('utf-8')
-            return send_file(BytesIO(payload), mimetype='text/csv; charset=utf-8',
-                             as_attachment=True,
-                             download_name=f'fielanzen-buchungen-{booking_start:%Y%m%d}-{booking_end:%Y%m%d}.csv',
-                             max_age=0)
+            response = send_file(BytesIO(payload), mimetype='text/csv; charset=utf-8',
+                                 as_attachment=True,
+                                 download_name=f'fielanzen-buchungen-{booking_start:%Y%m%d}-{booking_end:%Y%m%d}.csv',
+                                 max_age=0)
+            response.headers['Cache-Control'] = 'private, no-store'
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+            return response
         page_str=request.args.get('page','1')
         page=max(1,min(100000,int(page_str) if page_str.isdigit() else 1))
         count=len(ledger_transactions)
