@@ -1072,3 +1072,9 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
  display:table;
  margin:3px 0 0 5px;
 }
+
+/* dev.12: compact, accessible sortable web booking list with note column. */
+.mobile-web-booking-list th .booking-sort-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:inherit;white-space:nowrap}
+.mobile-web-booking-list th .booking-sort-link:hover{text-decoration:underline;text-underline-offset:3px}
+.mobile-web-booking-list th .booking-sort-link:focus-visible{outline:2px solid #0b6b79;outline-offset:3px;border-radius:3px}
+.mobile-web-booking-list td.note{max-width:230px;min-width:90px;overflow-wrap:anywhere;white-space:normal}
