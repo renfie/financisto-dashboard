@@ -1,3 +1,10 @@
+## 1.9.58-dev.1 – Dashboard ledger CSV export (development, 2026-11-18)
+- Export the entire filtered and sorted dashboard ledger, across all pages, as CSV.
+- Includes dates, transaction type, source/destination account, category, payee, note, amount, currency, recurring status and running balance.
+- Excel-friendly UTF-8 BOM, semicolons and comma decimals. User text is protected against spreadsheet formula injection.
+- Read-only export; no database, data mount or secret changes.
+- Development branch only: not an official release.
+
 ## 1.9.57 – Recurring schedules and streamlined documentation (2026-11-18)
 - New recurring rules initialize their day-of-month from the start date and track subsequent start-date changes until the day is manually customized.
 - Hide the irrelevant month-day field for daily and weekly schedules, while monthly, quarterly and yearly rules keep an independent editable month day.
