@@ -1,3 +1,9 @@
+## 1.9.58-dev.3 – Two current Financisto export snapshots (2026-11-18)
+- Alongside daily SQLite snapshots, create a validated `.backup` export from the current web ledger.
+- Keep the two newest successful exports in `data/financisto-backups/`, downloadable by administrators from Settings.
+- Reuse the existing exporter including recurring rules; unsupported rules and missing source templates fail safely without affecting SQLite backups.
+- Existing Android import archives, bind mounts, secrets and transactions remain unchanged.
+
 ## 1.9.58-dev.2 – Inline CSV export and English labels (2026-11-18)
 - CSV export button is positioned beside ledger pagination instead of on an extra row.
 - Add English translations for page count, CSV export and running balance labels.
