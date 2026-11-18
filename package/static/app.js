@@ -237,6 +237,27 @@
     const target = form.elements.namedItem(name);
     if (target) target.value = value == null ? '' : String(value);
   }
+  const startDateInput = form.elements.namedItem('start_on');
+  const monthDayInput = form.elements.namedItem('day_of_month');
+  const frequencyInput = form.elements.namedItem('frequency');
+  const monthDayRow = monthDayInput?.closest('.formgrid');
+  let monthDayOverridden = false;
+  const derivedMonthDay = () => {
+    const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(startDateInput?.value || '');
+    return match ? String(Number(match[3])) : '';
+  };
+  function updateMonthDayVisibility() {
+    if (!monthDayRow || !frequencyInput) return;
+    monthDayRow.hidden = frequencyInput.value === 'daily' || frequencyInput.value === 'weekly';
+  }
+  startDateInput?.addEventListener('change', () => {
+    if (!monthDayOverridden && monthDayInput) {
+      const day = derivedMonthDay();
+      if (day) monthDayInput.value = day;
+    }
+  });
+  monthDayInput?.addEventListener('input', () => { monthDayOverridden = true; });
+  frequencyInput?.addEventListener('change', updateMonthDayVisibility);
   function openEditor(rule, trigger) {
     form.reset();
     field('edit_id', rule ? rule.id : '');
@@ -254,7 +275,11 @@
     field('run_at', rule ? (rule.run_at || '00:00') : '00:00');
     field('frequency', rule && rule.frequency !== 'custom' ? rule.frequency : 'monthly');
     field('interval_count', rule ? rule.interval_count : 1);
-    field('day_of_month', rule ? rule.day_of_month : 1);
+    // Existing rules preserve their independently configured month day.
+    // For a new rule the date determines the default until the user edits it.
+    monthDayOverridden = Boolean(rule);
+    field('day_of_month', rule ? rule.day_of_month : (derivedMonthDay() || 1));
+    updateMonthDayVisibility();
     field('end_on', rule ? (rule.end_on || '') : '');
     field('max_occurrences', rule ? (rule.max_occurrences || '') : '');
     field('note', rule ? rule.note : '');
