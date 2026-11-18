@@ -828,6 +828,11 @@ def settings():
             background_status = dashboard_status(db, DATABASE)
             notify_config, notify_status, notify_last_sent = notifications.summary(db)
             telegram_book_config = telegram_bookings.config(db)
+            # Reconciliation form displays as-of-today account balances, not
+            # future-inclusive SQLite snapshots.
+            upcoming_for_reconcile = future_account_deltas(db, datetime.now(MONTH_TZ).date().isoformat())
+            reconcile_accounts = [dict(row) | {'balance_minor': int(row['balance_minor']) - upcoming_for_reconcile.get(row['id'], 0)}
+                                  for row in reconcile_accounts]
             default_account_choices = db.execute('''SELECT a.id,a.title,c.code
                   FROM accounts a JOIN account_snapshots s ON s.account_id=a.id
                   JOIN currencies c ON c.id=a.currency_id
@@ -1960,7 +1965,11 @@ def settings_reconcile_account():
             if not request.form.get('actual_balance', '').strip():
                 raise ValueError('Bitte den tatsächlichen Kontostand eingeben.')
             actual = opening_amount(request.form.get('actual_balance', ''), int(account['decimals']))
-            change = actual - int(account['balance_minor'])
+            # A current bank statement excludes future-dated ledger entries;
+            # compensate the projected SQLite snapshot when reconciling today.
+            ahead = future_account_deltas(db, datetime.now(MONTH_TZ).date().isoformat()).get(int(account_id), 0)
+            effective = int(account['balance_minor']) - ahead
+            change = actual - effective
             if not change:
                 flash('Kontostand bereits korrekt – keine Buchung angelegt.', 'success')
                 return redirect(destination)
@@ -1981,7 +1990,7 @@ def settings_reconcile_account():
             apply_balance_delta(db, row, +1)
             final = db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=?',
                                (int(account_id),)).fetchone()[0]
-            if final != actual: raise ValueError('Saldoabgleich konnte nicht verifiziert werden.')
+            if final != actual + ahead: raise ValueError('Saldoabgleich konnte nicht verifiziert werden.')
             mark_finance_edit(db, 'account_reconciled', f'{account_id}: {change:+d} {account["code"]}')
         flash('Saldoabgleich als eigene Buchung erfasst. Der Kontostand wurde auf den eingegebenen Wert gesetzt.', 'success')
     except (ValueError, sqlite3.Error) as exc:
@@ -2686,6 +2695,22 @@ def calendar_months(start, end):
             year, number = year + 1, 1
     return result
 
+def future_account_deltas(db, today):
+    """Already-stored ledger impact from transactions strictly after today.
+
+    The existing accounting snapshot includes these transactions. Subtract the
+    amounts for an as-of-today display, retaining that snapshot as the future
+    projection. Do not update SQLite or duplicate any booking.
+    """
+    rows = db.execute("""SELECT account_id,to_account_id,amount FROM transactions
+        WHERE is_template=0 AND day>?""", (today,)).fetchall()
+    deltas = defaultdict(int)
+    for entry in rows:
+        deltas[entry['account_id']] += int(entry['amount'])
+        if entry['to_account_id']:
+            deltas[entry['to_account_id']] -= int(entry['amount'])
+    return deltas
+
 
 def running_account_balances(db, currency_id):
     """Balance AFTER each transaction, from the last known account balance backwards.
@@ -2764,6 +2789,14 @@ def dashboard():
                         ON s.account_id=a.id
                       WHERE a.currency_id=? ORDER BY a.title COLLATE NOCASE''', (currency,)).fetchall()
         balance_accounts = [dict(r) for r in balance_rows]
+        # Financial snapshot is a forecast including posted future entries.
+        # Effective balances show only transactions dated up to today.
+        upcoming_deltas = future_account_deltas(db, today_period.isoformat())
+        for entry in balance_accounts:
+            entry['projected_balance_minor'] = entry['balance_minor']
+            entry['upcoming_delta_minor'] = upcoming_deltas.get(entry['id'], 0)
+            if entry['balance_minor'] is not None:
+                entry['balance_minor'] -= entry['upcoming_delta_minor']
         # Die Liste wird spaltenweise (oben nach unten) gelesen:
         # 1) aktive Konten mit bekanntem Saldo != 0, 2) inaktive mit
         #    Saldo != 0, 3) Konten mit unbekanntem Saldo, 4) alle Nullkonten.
@@ -2830,21 +2863,27 @@ def dashboard():
                       for r in db.execute(sql,params)]
         months={month_a,month_b}
         totals={m:{'expenses':0,'income':0,'balance':0} for m in months}
+        projected_totals={m:{'expenses':0,'income':0,'balance':0} for m in months}
         grouped=defaultdict(lambda:{m:0 for m in months})
         for t in transactions:
             month=t['day'][:7]
-            if t['category_id'] in neutral_ids:
-                continue  # All payments still affect balances and remain visible in the ledger.
-            if month not in totals:
-                continue  # Intermediate months belong to the table / history, not the two cards.
-            if t['amount']<0:
-                amount=-t['amount']
-                totals[month]['expenses']+=amount
-                grouped[t['group_key']][month]+=amount
+            if t['category_id'] in neutral_ids or month not in totals:
+                continue  # Transfers/pass-through excluded in both calculations.
+            forecast = projected_totals[month]
+            actual = totals[month] if t['day'] <= today_period.isoformat() else None
+            if t['amount'] < 0:
+                amount = -t['amount']
+                forecast['expenses'] += amount
+                if actual is not None:
+                    actual['expenses'] += amount
+                    grouped[t['group_key']][month] += amount
             else:
-                totals[month]['income']+=t['amount']
+                forecast['income'] += t['amount']
+                if actual is not None:
+                    actual['income'] += t['amount']
         for m in months:
-            totals[m]['balance']=totals[m]['income']-totals[m]['expenses']
+            totals[m]['balance'] = totals[m]['income'] - totals[m]['expenses']
+            projected_totals[m]['balance'] = (projected_totals[m]['income'] - projected_totals[m]['expenses'])
         rows=[]
         for key,values in grouped.items():
             name=cat_names.get(key,'Ohne Kategorie')
@@ -3001,10 +3040,12 @@ def dashboard():
             current_month=current,previous_month=prev_month(current),latest_date=newest,
             currencies=currs,currency=currency,selected_currency=selected_currency,accounts=accounts,account=account,
             balance_accounts=balance_accounts,balance_total_minor=balance_total_minor,
+            projected_balance_total_minor=(sum(a['projected_balance_minor'] for a in included_accounts)
+                                           if balance_total_ready else None),
             balance_snapshot_known=balance_snapshot_known,
             can_reconcile=can_reconcile,reconcile_accounts=reconcile_accounts,
             categories=categories,category=category,cat_names=cat_names,q=search,
-            quick=quick,count_unfiltered=count_unfiltered,rows=rows,totals=totals,divisor=divisor,
+            quick=quick,count_unfiltered=count_unfiltered,rows=rows,totals=totals,projected_totals=projected_totals,divisor=divisor,
             period=selected_period,booking_start=booking_start.isoformat(),booking_end=booking_end.isoformat(),
             cashflow_rows=cashflow_rows,cashflow_income=cashflow_income,
             cashflow_expenses=cashflow_expenses,cashflow_net=cashflow_net,
