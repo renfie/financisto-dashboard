@@ -1,3 +1,9 @@
+## 1.9.58-dev.3 – Zwei aktuelle Financisto-Rückexport-Sicherungen (18.11.2026)
+- Täglich zusätzlich zur SQLite-Sicherung ein validierter Export des aktuellen Web-Datenbestandes als `.backup`.
+- Es bleiben die letzten zwei erfolgreichen Exportversionen unter `data/financisto-backups/`; Download nur durch Administratoren unter Einstellungen.
+- Nutzt den bereits bestehenden Rückexport mit Wiederholungsregeln; bei fehlender Exportgrundlage oder nicht unterstützten Regeln wird nichts Falsches gespeichert, die SQLite-Sicherung läuft unabhängig weiter.
+- Keine Löschung von Buchungen, keine Änderungen an den bestehenden Android-Importarchiven, Bind-Mounts oder Secrets.
+
 ## 1.9.58-dev.2 – CSV-Export kompakt und englische Texte (18.11.2026)
 - CSV-Export-Schaltfläche direkt neben der Seitennavigation, ohne zusätzliche Zeile am Desktop.
 - Englische Übersetzungen für Seitenzählung, CSV-Export und Kontostand nach der Buchung ergänzt.
