@@ -1,3 +1,8 @@
+## 1.9.58-dev.8 – Distinguish posted recurring entries from matched existing transactions (2026-11-18)
+- “Recurring” identifies a transaction posted by a recurring rule, whereas “Rule matched” identifies an existing transaction assigned to a due occurrence without reposting it.
+- Labels appear beneath the date even for transfers. Truly recurring transfers stay purple; rule-matched transfers keep blue highlighting.
+- The dashboard, booking entry and CSV export distinguish both statuses. No ledger or account balance changes.
+
 ## 1.9.58-dev.7 – Mark only actually posted recurring transactions (2026-11-18)
 - Recurring labels now require an actual recurring-post event matching the run, rather than any recurring-run reference.
 - Pre-existing manual transactions merely matched to a recurring due date are no longer incorrectly labeled.
