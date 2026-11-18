@@ -1,12 +1,5 @@
 # Financisto-Dashboard (FieLanzen)
 
-## Neu in v1.9.51
-
-Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompakt und durchsuchbar. Die Dashboard-Schnellsuche startet fünf Sekunden nach der letzten Eingabe; per Suchen/Enter sofort. Vorhandene Kategorien und Buchungen bleiben unverändert.
-
-**v1.9.51:** Suchbare Kategorieauswahl wie bei den Empfängern; das Suchformular sendet fünf Sekunden nach Ende der Eingabe ab. Die Empfängerauswahl aus 1.9.50 ist eingeschlossen.
-
-
 **Sprache / Language:** [English](README.md) | **Deutsch**
 
 <p align="center">
