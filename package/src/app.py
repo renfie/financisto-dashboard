@@ -2256,7 +2256,8 @@ def booking_list():
         currency_row = next((a for a in accounts if a['id'] == edit_row['account_id']), None)
         if currency_row:
             precision = int(currency_row['decimals'])
-            edit_amount = money(abs(edit_row['amount']) / (10**precision), precision)
+            # Form parser accepts comma decimals, not grouped thousands (e.g. 1.715,13).
+            edit_amount = f"{Decimal(abs(edit_row['amount'])) / (10 ** precision):.{precision}f}".replace('.', ',')
     return render_template('bookings.html',finance_mode=mode,accounts=accounts,
                            categories=sorted(category_names.items(),key=lambda p:p[1].casefold()),
                            category_records=category_records,category_names=category_names,
