@@ -1,19 +1,3 @@
-## Neu in v1.9.56
-
-Die vorausgefüllte Kategorie wird beim Antippen vollständig markiert und beim Tippen ersetzt. Die Docker-Image-Tags stimmen jetzt mit v1.9.56 überein; Release und Updateskript prüfen dies künftig automatisch.
-
-## Neu in v1.9.54
-
-Filter durchgehend sichtbar; 4 Sekunden Tipp-Pause; wiederkehrende Buchungen markiert; Empfänger in wiederkehrenden Regeln frei eingebbar.
-
-## Neu in v1.9.53
-
-Beim Antippen des Empfängerfelds werden bekannte Empfänger jetzt sofort alphabetisch vorgeschlagen – auch ohne Suchtext. Beim Tippen wird gefiltert. Das gemeinsam für Empfänger und Kategorien einstellbare Admin-Limit (Standard 20) bleibt erhalten; neue Empfänger sind weiterhin frei eingebbar.
-
-## Neu in v1.9.52
-
-Die Anzahl der Vorschläge für Empfänger und Kategorien lässt sich in den Admin-Einstellungen auf 1–100 setzen (Standard: 20). Änderungen gelten ohne Neustart oder neues Release.
-
 # Financisto-Dashboard (FieLanzen)
 
 ## Neu in v1.9.51
@@ -23,9 +7,7 @@ Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompa
 **v1.9.51:** Suchbare Kategorieauswahl wie bei den Empfängern; das Suchformular sendet fünf Sekunden nach Ende der Eingabe ab. Die Empfängerauswahl aus 1.9.50 ist eingeschlossen.
 
 
-**Sprache / Language:** [English (default)](README.md) | **Deutsch**
-
-**Aktuelles Release v1.9.56 (17.11.2026).** Einschließlich aller bisherigen Änderungen seit v1.9.43. Sammelrelease aller seit GitHub-v1.9.43 lokal getesteten Änderungen: weiter vervollständigte Englischübersetzungen, Cashflow, Schnellfilter, Seitennummern, verbesserte Dashboard-Reihenfolge und Klappbereiche, kompakte Aktionsbuttons, getrennte Fußzeilentexte sowie der letzte Übersetzungsfehler beim Wechsel zurück zu Financisto. [Alle Änderungen](package/CHANGELOG.md).
+**Sprache / Language:** [English](README.md) | **Deutsch**
 
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">
@@ -40,16 +22,6 @@ Die Kategorieauswahl im Buchungsformular ist jetzt wie die Empfängersuche kompa
 
 **Aktuelles öffentliches Release:** v1.9.56 · 17. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.56).
 
-
-### Version 1.9.46 – Cashflow, Zeitraumfilter und kompakte Buchungsaktionen
-
-[Cashflow und Zeitraumfilter (Deutsch)](package/docs/CASHFLOW.de.md) · [English](package/docs/CASHFLOW.en.md).
-
-Der neue Cashflow enthält Einnahmen, Ausgaben und den Saldo. Die Buchungsliste erhält 1W / 1M / 3M / 6M als Schnellfilter, der vorhandene Vergleich und die detaillierten Filter bleiben erhalten. Die Aktionsbuttons stehen am Desktop kompakt nebeneinander. Die englische Oberfläche wurde weiter vervollständigt.
-
-### Version 1.9.43 – Anmeldeübersetzungen und Dashboard-Aktionen
-
-Die 2FA-Bestätigung, die 2FA-Einrichtung, Wiederherstellungscodes und Passwortänderungen werden auf Englisch vollständig übersetzt. Auf PC und Tablet stehen die Dashboard-Aktionsbuttons wieder nebeneinander; die Smartphone-Darstellung bleibt unverändert. Bestehende Finanzdaten und Einstellungen werden beim Update beibehalten.
 
 ## Funktionen
 
@@ -158,8 +130,3 @@ Das ursprüngliche Android-Projekt Financisto steht ebenfalls unter GPL v2. Die 
 **Automatische Veröffentlichung:** Der Workflow [Release erstellen](.github/workflows/release.yml) erstellt beim ersten Durchlauf sowie bei neuen Versionsständen in `package/VERSION` einen vollständigen Release-ZIP-Download mit SHA256-Prüfsumme. Bereits veröffentlichte Versionen bleiben unverändert. Alternativ kann der Workflow unter **Actions → Build and publish Financisto Dashboard release → Run workflow** manuell gestartet werden.
 
 Alle fertigen Versionen stehen öffentlich unter [GitHub Releases](https://github.com/renfie/financisto-dashboard/releases). Das Repository ist öffentlich; Bearbeitungsrechte erhält dadurch niemand automatisch.
-
-
-### Local test v1.9.48 / Lokaler Teststand
-
-Footer: APP_FOOTER="Deutscher Text" and APP_FOOTER_EN="English text" in the existing .env. If APP_FOOTER_EN is empty, known built-in slogans are translated; other custom strings are retained as entered.
