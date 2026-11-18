@@ -1,3 +1,8 @@
+## 1.9.58-dev.13 – Einnahmen bearbeiten und Empfänger in Wiederholungsregeln (18.11.2026)
+- Beim Bearbeiten vorhandener Buchungen wird der Betrag ohne Tausendertrennzeichen im Eingabefeld vorbelegt. Dadurch werden auch Einnahmen ab 1.000,00 € unverändert akzeptiert; die eigentliche Buchungs- und Kontostandslogik bleibt erhalten.
+- Bei neuen und bearbeiteten wiederkehrenden Buchungen wird der vorhandene Empfänger beim Fokussieren/Antippen zum direkten Überschreiben markiert, während die Vorschläge weiter nutzbar bleiben.
+- Kein Datenbankschemawechsel; vorhandene Buchungen, Regeln und Bind-Mounts bleiben erhalten.
+
 ## 1.9.58-dev.12 – Notiz und Sortierung bei Web-Buchungen (18.11.2026)
 - Unter „Buchung erfassen → Über die Webseite erfasste Buchungen“ ist die Notiz als eigene Spalte sichtbar.
 - Datum, Buchungstyp, Konto, Empfänger, Notiz und Betrag können per Klick auf die jeweilige Überschrift auf- oder absteigend sortiert werden.
