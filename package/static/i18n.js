@@ -32,6 +32,12 @@
   "Original-Financisto-Sicherung": "Original Financisto backup",
   "In Web-Datenführung:": "In web accounting:",
   "Automatische Datensicherung": "Automatic database backup",
+  "Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)": "Financisto backups from current web transactions (latest 2)",
+  "Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter": "In addition to the daily SQLite snapshot, a current Financisto export is created. The last two successful files are stored in",
+  "und können hier heruntergeladen werden. Bei fehlender Exportgrundlage oder nicht unterstützten Wiederholungsregeln bleibt die SQLite-Sicherung erhalten; der Fehler steht im Hintergrunddienst-Protokoll.": "and can be downloaded here. If the source template is missing or recurring rules are unsupported, SQLite backups remain unaffected; check the background worker logs.",
+  "Noch kein erfolgreicher aktueller Financisto-Rückexport vorhanden.": "No successful current Financisto export is available yet.",
+  "Neueste": "Latest",
+  "Vorherige": "Previous",
   "Letzte automatische Sicherung:": "Last automatic backup:",
   "Noch keine": "None yet",
   "Einmal pro Kalendertag (Europe/Berlin). Die letzten 14 automatischen Sicherungen bleiben unter": "Once per calendar day (Europe/Berlin). The last 14 automatic backups are kept in",
@@ -1188,6 +1194,8 @@
     // Captions with variable counts, dates or protected confirmation words.
     const cashflowSummary = value.match(/^(\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · ([A-Z]{3}) · (\d+) Zeiträume$/);
     if (cashflowSummary) return `${cashflowSummary[1]} to ${cashflowSummary[2]} · ${cashflowSummary[3]} · ${cashflowSummary[4]} periods`;
+    let archiveButton = value.match(/^Financisto-Backup (\d+) herunterladen \(\.backup\)$/);
+    if (archiveButton) return `Download Financisto backup ${archiveButton[1]} (.backup)`;
     let ledger = value.match(/^Seite (\d+) von (\d+) · (\d+) je Seite$/);
     if (ledger) return `Page ${ledger[1]} of ${ledger[2]} · ${ledger[3]} per page`;
     ledger = value.match(/^CSV exportieren \((\d+)\)$/);
