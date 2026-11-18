@@ -1,3 +1,8 @@
+## 1.9.58-dev.5 – Empfängerfeld bei neuen Buchungen (18.11.2026)
+- Vorhandener Empfänger wird beim Antippen/Fokussieren markiert und durch direkte Texteingabe ersetzt, wie bereits bei der Kategorie.
+- Bereits begonnene eigene Suchtexte bleiben während der Eingabe editierbar; die Empfänger-Vorschläge funktionieren weiterhin.
+- Keine Änderungen an Datenbank, gespeicherten Buchungen und Bind-Mounts.
+
 ## 1.9.58-dev.4 – Buchungszeilen, manuelle Doppel-Sicherung und ausführbares Updatepaket (18.11.2026)
 - „Jetzt Sicherung erstellen“ erstellt unabhängig voneinander eine manuelle SQLite-Sicherung und einen neuen Financisto-Export des aktuellen Web-Datenbestands und meldet die beiden Resultate einzeln.
 - Umbuchungen über die gesamte Tabellenzeile hellblau hervorgehoben.
