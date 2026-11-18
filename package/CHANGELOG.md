@@ -1,3 +1,11 @@
+## 1.9.58-dev.4 – Buchungszeilen und ausführbares Updatepaket (18.11.2026)
+- Umbuchungen über die gesamte Tabellenzeile hellblau hervorgehoben.
+- Wiederkehrende Buchungen über die gesamte Zeile mintgrün markiert; wiederkehrende Umbuchungen in einem eigenen Violettton.
+- Zukünftige Buchungen behalten ihre gelbe Markierung mit Vorrang vor anderen Kennzeichnungen.
+- Die Hervorhebung gilt auch für die kompakte Buchungsliste auf mobilen Geräten.
+- ZIP enthält `update.sh` mit ausführbaren Dateirechten, damit der gewohnte Update-Befehl funktioniert.
+- Keine Änderung an Buchungslogik, Kontoständen, Datenbank oder Bind-Mounts.
+
 ## 1.9.58-dev.3 – Zwei aktuelle Financisto-Rückexport-Sicherungen (18.11.2026)
 - Täglich zusätzlich zur SQLite-Sicherung ein validierter Export des aktuellen Web-Datenbestandes als `.backup`.
 - Es bleiben die letzten zwei erfolgreichen Exportversionen unter `data/financisto-backups/`; Download nur durch Administratoren unter Einstellungen.
