@@ -87,7 +87,7 @@
 <label>Ausführen ab (nur Automatik, Europe/Berlin)<input type="time" name="run_at" step="60" value="{{ edit_rule.run_at if edit_rule else '00:00' }}" required></label></div>
 <div class="formgrid"><label>Wiederholung<select name="frequency">{% for code,label in [('daily','Täglich'),('weekly','Wöchentlich'),('monthly','Monatlich'),('quarterly','Vierteljährlich'),('yearly','Jährlich')] %}<option value="{{code}}" {% if edit_rule and edit_rule.frequency==code or not edit_rule and code=='monthly' %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
 <label>Alle wie viele Intervalle?<input type="number" min="1" max="120" name="interval_count" value="{{ edit_rule.interval_count if edit_rule else 1 }}" required></label></div>
-<div class="formgrid"><label>Tag im Monat (1–31)<input type="number" min="1" max="31" name="day_of_month" value="{{ edit_rule.day_of_month if edit_rule else 1 }}" required></label></div>
+<div class="formgrid"><label>Tag im Monat (1–31)<input type="number" min="1" max="31" name="day_of_month" value="{{ edit_rule.day_of_month if edit_rule else now[-2:]|int }}" required></label></div>
 <div class="formgrid recurring-limits">
 <label>Enddatum (optional)<input type="date" name="end_on" value="{{ edit_rule.end_on or '' if edit_rule else '' }}"></label>
 <label>Maximal so oft ausführen (optional)<input type="number" name="max_occurrences" min="1" max="10000" value="{{ edit_rule.max_occurrences or '' if edit_rule else '' }}" placeholder="Unbegrenzt"></label>
