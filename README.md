@@ -1,12 +1,5 @@
 # Financisto Dashboard (FieLanzen)
 
-## New in v1.9.51
-
-The transaction form now offers a mobile-safe, searchable category picker matching the payee suggestions. Dashboard quick search waits five seconds after typing stops; pressing Search remains immediate. Existing category IDs and bookings are unaffected.
-
-**v1.9.51:** Android-safe, searchable category picker and five-second dashboard quick search. All stored category IDs and finance data remain unchanged.
-
-
 **Language / Sprache:** **English** | [Deutsch](README.de.md)
 
 <p align="center">
