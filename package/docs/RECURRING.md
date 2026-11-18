@@ -1,8 +1,10 @@
-# Wiederkehrende Buchungen (1.9.9)
+# Wiederkehrende Buchungen
 
 **Import:** Nur Financisto-Transaktionen mit `is_template=2` und `recurrence` werden als Vorlagen übernommen. Andere Buchungen sind nicht betroffen.
 
-**Wiederholungsregeln:** Gewöhnliche monatliche Regeln mit Datum und Monatsintervall werden verarbeitet. Das erweiterte vierteljährliche Sonderformat ist nicht automatisch eindeutig; die Regel bleibt deaktiviert und muss auf ein bestätigtes Standardintervall umgestellt werden. Für einen nicht vorhandenen Monatstag wird der letzte Tag verwendet. Uhrzeiten sind nicht Bestandteil der Web-Buchungslogik.
+**Wiederholungsregeln:** Gewöhnliche monatliche Regeln mit Datum und Monatsintervall werden verarbeitet. Das erweiterte vierteljährliche Sonderformat ist nicht automatisch eindeutig; die Regel bleibt deaktiviert und muss auf ein bestätigtes Standardintervall umgestellt werden. Für einen nicht vorhandenen Monatstag wird der letzte Tag verwendet. Der automatische Ausführungszeitpunkt kann über „Ausführen ab“ festgelegt werden.
+
+**Neue Regeln:** Der Tag im Monat wird aus dem Startdatum vorbelegt und bei dessen Änderung angepasst, solange kein eigener Monatstag eingestellt wurde. Bei täglich und wöchentlich wird das nicht relevante Monatstagsfeld ausgeblendet. Gespeicherte Regeln behalten ihre bisherigen Werte.
 
 **Erstaktivierung:** Termine werden ab dem Tag der Aktivierung berechnet, nicht rückwirkend seit den ursprünglichen Jahren. Die automatische Ausführung benötigt eine gesonderte Admin-Freigabe. Der `recurring`-Dienst benötigt keine Netzwerkverbindung.
 
