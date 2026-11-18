@@ -1,3 +1,10 @@
+## 1.9.57 – Recurring schedules and streamlined documentation (2026-11-18)
+- New recurring rules initialize their day-of-month from the start date and track subsequent start-date changes until the day is manually customized.
+- Hide the irrelevant month-day field for daily and weekly schedules, while monthly, quarterly and yearly rules keep an independent editable month day.
+- Previously stored rules, booking dates and transactions are unchanged.
+- Remove stale release blocks and the 1.9.48 local test note from the GitHub READMEs; release notes and changelogs retain version details.
+- Docker image tags and package version agree on 1.9.57; financial data and bind mounts remain preserved.
+
 ## 1.9.56 – Category field and Docker image version (2026-11-17)
 - Selecting the prefilled category label on focus/tap lets typing replace the text rather than append to it.
 - All three application services now use a matching Docker image tag (1.9.56).
