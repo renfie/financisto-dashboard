@@ -1,3 +1,8 @@
+## 1.9.58-dev.11 – Buchungstypen auch unter „Buchung erfassen“ wie auf dem Dashboard (18.11.2026)
+- In „Über die Webseite erfasste Buchungen“ werden Buchungsarten wie im Dashboard als farbige Kennzeichen angezeigt: Ausgabe rot mit Pfeil nach unten, Einnahme grün mit Pfeil nach oben, Umbuchung und Saldoabgleich neutral, durchlaufende Posten separat.
+- Bisherige durchgehende Zeilenfarben und Kennzeichnungen für zukünftige beziehungsweise wiederkehrende Buchungen bleiben erhalten.
+- Nur Darstellungsanpassung; Finanzdaten, Kontostände und Bind-Mounts bleiben unverändert.
+
 ## 1.9.58-dev.10 – Buchungsfarben auch unter „Buchung erfassen“ (18.11.2026)
 - Die Liste „Über die Webseite erfasste Buchungen“ verwendet dieselben vollständigen Zeilenfarben wie das Dashboard: Umbuchungen hellblau, wiederkehrende Buchungen mintgrün, wiederkehrende Umbuchungen violett und zukünftige Buchungen weiterhin gelb mit Vorrang.
 - „Wiederkehrend“ und „Regel zugeordnet“ stehen unter dem Buchungsdatum; die Regelzuordnung allein verursacht keine zusätzliche Zeilenfarbe.
