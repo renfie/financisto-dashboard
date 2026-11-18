@@ -1,3 +1,8 @@
+## 1.9.58-dev.5 – Prefilled payee input in new bookings (2026-11-18)
+- Focusing or tapping an existing payee selects its entire value so the next input replaces it, matching category selection.
+- User-entered search queries remain editable and suggestions still work.
+- No ledger, database, or bind mount changes.
+
 ## 1.9.58-dev.4 – Booking highlights, manual dual backup and executable updater (2026-11-18)
 - The manual backup action independently creates and reports SQLite and current-ledger Financisto export snapshots.
 - Blue full-row highlights for transfers and green highlights for recurring transactions; recurring transfers have a distinct lavender background.
