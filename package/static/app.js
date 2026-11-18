@@ -248,7 +248,9 @@
   };
   function updateMonthDayVisibility() {
     if (!monthDayRow || !frequencyInput) return;
-    monthDayRow.hidden = frequencyInput.value === 'daily' || frequencyInput.value === 'weekly';
+    const irrelevant = frequencyInput.value === 'daily' || frequencyInput.value === 'weekly';
+    monthDayRow.hidden = irrelevant;
+    monthDayRow.style.display = irrelevant ? 'none' : '';
   }
   startDateInput?.addEventListener('change', () => {
     if (!monthDayOverridden && monthDayInput) {
