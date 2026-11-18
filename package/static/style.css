@@ -1022,3 +1022,11 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 #buchungen .dashboard-desktop-ledger td[data-label="Datum"] .recurring-date-badge{
  border-color:#96c9c0;
 }
+
+/* v1.9.58-dev.8: a due date matched to an existing booking is NOT a newly
+   posted recurring transaction. Use a neutral label, retain transfer coloring. */
+.rule-matched-badge{display:inline-block;margin:3px 0 0 5px;padding:2px 7px;
+ border:1px solid #abb7bf;border-radius:5px;background:#f0f3f5;color:#425961;
+ font-size:.70rem;line-height:1.3;font-weight:750;vertical-align:middle;white-space:nowrap}
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .rule-matched-badge{
+ display:table;margin:3px 0 0 5px}
