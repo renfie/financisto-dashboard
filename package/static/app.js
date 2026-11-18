@@ -683,9 +683,16 @@
     position();
   }
 
-  input.addEventListener('input', () => render());
-  input.addEventListener('focus', () => render(true));
-  input.addEventListener('click', () => render(true));
+  // Select the existing payee name on entry so new typing replaces it.
+  // Do not reselect text once the user has begun editing the search query.
+  let recurringPayeeModified = false;
+  function selectRecurringPayee() {
+    if (!recurringPayeeModified && input.value) input.select();
+  }
+  input.addEventListener('input', () => { recurringPayeeModified = true; render(); });
+  input.addEventListener('focus', () => { recurringPayeeModified = false; selectRecurringPayee(); render(true); });
+  input.addEventListener('click', () => { selectRecurringPayee(); render(true); });
+  input.addEventListener('blur', () => { recurringPayeeModified = false; });
   input.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !list.hidden) { event.preventDefault(); close(); return; }
     if (list.hidden) return;
