@@ -34,7 +34,7 @@
   "Automatische Datensicherung": "Automatic database backup",
   "Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)": "Financisto backups from current web transactions (latest 2)",
   "Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter": "In addition to the daily SQLite snapshot, a current Financisto export is created. The last two successful files are stored in",
-  "und können hier heruntergeladen werden. Bei fehlender Exportgrundlage oder nicht unterstützten Wiederholungsregeln bleibt die SQLite-Sicherung erhalten; der Fehler steht im Hintergrunddienst-Protokoll.": "and can be downloaded here. If the source template is missing or recurring rules are unsupported, SQLite backups remain unaffected; check the background worker logs.",
+  "Die Sicherung nutzt den Standard-Rückexport aus dem aktuellen Web-Datenbestand. Wiederkehrende Web-Regeln werden dabei nicht automatisch übertragen. Bei fehlender Exportgrundlage bleibt die SQLite-Sicherung erhalten; der Fehler wird angezeigt bzw. protokolliert.": "This backup uses the standard return export of the current web ledger. Web recurring rules are not automatically transferred. If the source template is missing, the SQLite backup remains intact and the error is displayed or logged.",
   "Noch kein erfolgreicher aktueller Financisto-Rückexport vorhanden.": "No successful current Financisto export is available yet.",
   "Neueste": "Latest",
   "Vorherige": "Previous",
