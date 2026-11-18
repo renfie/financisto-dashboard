@@ -1,3 +1,8 @@
+## 1.9.58-dev.8 – Wiederholungsbuchung und Regelzuordnung getrennt (18.11.2026)
+- „Wiederkehrend“ steht für Buchungen, die tatsächlich durch die Regel erstellt wurden; „Regel zugeordnet“ kennzeichnet eine bereits bestehende Buchung, die einen fälligen Termin abgedeckt hat.
+- Beide Kennzeichnungen erscheinen links unter dem Datum, auch bei Umbuchungen. Die farbliche Kennzeichnung tatsächlich wiederkehrender Umbuchungen bleibt violett; einer Regel nur zugeordnete Umbuchungen bleiben blau.
+- Die Buchungsübersicht, Buchungserfassung und der CSV-Export unterscheiden die beiden Fälle. Keine Finanzbuchungen oder Kontostände verändert.
+
 ## 1.9.58-dev.7 – Wiederkehrend nur bei tatsächlich erzeugten Buchungen (18.11.2026)
 - „Wiederkehrend“ erscheint ausschließlich bei Buchungen, die eine Wiederholungsregel tatsächlich selbst erstellt hat.
 - Bereits manuell erfasste Buchungen, die zur Vermeidung von Doppelbuchungen einer Wiederholungsregel als erledigt zugeordnet wurden, werden nicht mehr fälschlich gekennzeichnet.
