@@ -1042,3 +1042,33 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 
 .account-balance-amount{display:flex;flex-direction:column;gap:3px;align-items:flex-end;min-width:0}
 .account-balance-amount .future-projection{text-align:right}
+
+/* 1.9.58-dev.10: same full-row status palette on "Buchungen erfassen"
+   as on the dashboard. Future dates always retain yellow precedence. */
+.mobile-web-booking-list tr.transfer-booking:not(.future-booking):not(.recurring-booking) > td{
+ background:#eaf4fb!important;
+}
+.mobile-web-booking-list tr.recurring-booking:not(.future-booking):not(.transfer-booking) > td{
+ background:#e6f6ef!important;
+}
+.mobile-web-booking-list tr.transfer-booking.recurring-booking:not(.future-booking) > td{
+ background:#f0ecfc!important;
+}
+.mobile-web-booking-list tr.future-booking > td{
+ background:#fff3c9!important;
+}
+.mobile-web-booking-list tr.transfer-booking:not(.future-booking):not(.recurring-booking){
+ box-shadow:inset 3px 0 #65a3cf;
+}
+.mobile-web-booking-list tr.recurring-booking:not(.future-booking):not(.transfer-booking){
+ box-shadow:inset 3px 0 #42a483;
+}
+.mobile-web-booking-list tr.transfer-booking.recurring-booking:not(.future-booking){
+ box-shadow:inset 3px 0 #9983c9;
+}
+.mobile-web-booking-list td[data-label="Datum"] .recurring-booking-badge,
+.mobile-web-booking-list td[data-label="Datum"] .rule-matched-badge,
+.mobile-web-booking-list td[data-label="Datum"] .future-booking-badge{
+ display:table;
+ margin:3px 0 0 5px;
+}
