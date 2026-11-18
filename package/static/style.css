@@ -1030,3 +1030,15 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
  font-size:.70rem;line-height:1.3;font-weight:750;vertical-align:middle;white-space:nowrap}
 #buchungen .dashboard-desktop-ledger td[data-label="Datum"] .rule-matched-badge{
  display:table;margin:3px 0 0 5px}
+
+/* dev.9: as-of-today balance and separate future projections, without new card rows. */
+.monthly-metrics .metric-value,.balance-summary-total,.account-balance-value{min-width:0}
+.monthly-metrics .metric-value{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.future-projection{display:block;color:#60777b!important;font-size:.70rem!important;font-weight:540!important;letter-spacing:normal;white-space:normal;text-align:right;line-height:1.35}
+.future-projection-help{padding:6px 23px 0;margin:0;color:#61777d;font-size:.74rem;line-height:1.3}
+.balance-summary-total .future-projection{max-width:280px}
+.account-balance .future-projection{max-width:250px}
+@media(max-width:760px){.monthly-metrics .metric-value{align-items:flex-start}.future-projection{text-align:left}.future-projection-help{padding:6px 15px 0}}
+
+.account-balance-amount{display:flex;flex-direction:column;gap:3px;align-items:flex-end;min-width:0}
+.account-balance-amount .future-projection{text-align:right}
