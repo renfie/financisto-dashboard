@@ -1,19 +1,3 @@
-## New in v1.9.56
-
-Category text is now selected on tap for immediate replacement. All application Docker image tags match v1.9.56, and update/release checks prevent future version mismatches.
-
-## Neu in v1.9.54
-
-Filter durchgehend sichtbar; 4 Sekunden Tipp-Pause; wiederkehrende Buchungen markiert; Empfänger in wiederkehrenden Regeln frei eingebbar.
-
-## New in v1.9.53
-
-Tapping or focusing the payee field now shows known payees immediately, even before typing. Suggestions are alphabetized and filtered as you type. The shared admin-configurable limit (default 20) and free-text payee entry remain unchanged.
-
-## New in v1.9.52
-
-Set the number of payee/category suggestions in the administrator settings (default 20, allowed 1–100). No new release or restart is needed to change the limit.
-
 # Financisto Dashboard (FieLanzen)
 
 ## New in v1.9.51
@@ -24,8 +8,6 @@ The transaction form now offers a mobile-safe, searchable category picker matchi
 
 
 **Language / Sprache:** **English** | [Deutsch](README.de.md)
-
-**v1.9.56 — current release (2026-11-17).** This cumulative release includes all locally tested changes since public v1.9.43: improved English translations, a cash-flow chart, quick transaction-period filters, numbered pagination, improved dashboard ordering and collapsible panels, compact desktop row actions, configurable German/English footers, and the final switch-back-to-Financisto translation fix. [Full release history](package/CHANGELOG.en.md).
 
 <p align="center">
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves dashboard logo" width="260">
@@ -39,16 +21,6 @@ The transaction form now offers a mobile-safe, searchable category picker matchi
 
 **Latest public release:** v1.9.56 · November 17, 2026. [Download ZIP and checksum](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.56).
 
-
-### Version 1.9.46 — Cash flow, period presets and compact controls
-
-[Cash flow and quick periods (English)](package/docs/CASHFLOW.en.md) · [Deutsch](package/docs/CASHFLOW.de.md).
-
-Version 1.9.46 adds independent 1W / 1M / 3M / 6M transaction-list presets, a local cash-flow chart, a collapsible text filter, compact transaction actions and additional English text fixes. Transfers and internal balance adjustments are not counted in cash flow.
-
-### Version 1.9.43 — Login translations and dashboard controls
-
-The 2FA verification and setup texts, recovery-code page and password-change page now appear fully in English when EN is selected. Dashboard quick-action buttons return to a horizontal arrangement on desktop and tablet, while the mobile layout is unchanged. Existing private data and settings are preserved during upgrades.
 
 ## Features
 
@@ -156,8 +128,3 @@ Own dashboard components are distributed under the **GNU General Public License 
 A GitHub Actions [release workflow](.github/workflows/release.yml) creates a new versioned release when `package/VERSION` changes on `main`. Publishing is **not automatic when we discuss or edit code in ChatGPT**; source changes first need to be committed to GitHub and the version needs to be updated. Release notes are available in both English and German.
 
 The repository and downloadable releases are public. Only authorized collaborators can modify the official repository.
-
-
-### Local test v1.9.48 / Lokaler Teststand
-
-Footer: APP_FOOTER="Deutscher Text" and APP_FOOTER_EN="English text" in the existing .env. If APP_FOOTER_EN is empty, known built-in slogans are translated; other custom strings are retained as entered.
