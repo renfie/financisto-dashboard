@@ -1,3 +1,8 @@
+## 1.9.58-dev.7 – Mark only actually posted recurring transactions (2026-11-18)
+- Recurring labels now require an actual recurring-post event matching the run, rather than any recurring-run reference.
+- Pre-existing manual transactions merely matched to a recurring due date are no longer incorrectly labeled.
+- Consistent on dashboard, CSV export and transaction entry; no ledger, balance, rule or bind-mount changes.
+
 ## 1.9.58-dev.6 – Recurring label under transaction date (2026-11-18)
 - The recurring label appears below the date, like the future-date label, instead of beside the transaction type.
 - Future recurring entries display both labels below the date.
