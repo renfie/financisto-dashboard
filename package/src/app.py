@@ -1,5 +1,6 @@
 from __future__ import annotations
 import calendar
+import csv
 import hashlib
 import notifications
 import webpush
@@ -12,7 +13,7 @@ import secrets
 import sqlite3
 import time
 from decimal import Decimal, InvalidOperation
-from io import BytesIO
+from io import BytesIO, StringIO
 from flask import send_file
 from zoneinfo import ZoneInfo
 from collections import defaultdict
@@ -2880,6 +2881,40 @@ def dashboard():
             if sort=='amount': return (value or 0,t['id'])
             return (str(value or '').casefold(),t['id'])
         ledger_transactions.sort(key=sort_key,reverse=direction=='desc')
+        # CSV export uses the exact same filtered and sorted ledger as the page,
+        # before pagination. It never modifies any financial record.
+        if request.args.get('export') == 'csv':
+            csv_text = StringIO(newline='')
+            writer = csv.writer(csv_text, delimiter=';', lineterminator='\r\n')
+            writer.writerow(['Datum', 'Art', 'Konto', 'Zielkonto', 'Kategorie',
+                             'Empfänger', 'Notiz', 'Betrag', 'Währung', 'Wiederkehrend',
+                             'Kontostand danach'])
+            running_export = running_account_balances(db, currency)
+            def safe_cell(value):
+                # Spreadsheet formulas must not be executable through payee/note text.
+                result = str(value or '')
+                return "'" + result if result.lstrip().startswith(('=', '+', '-', '@')) or result.startswith(('\t', '\r', '\n')) else result
+            def amount_csv(minor):
+                return f'{Decimal(minor) / Decimal(divisor):.{decimals}f}'.replace('.', ',')
+            for entry in ledger_transactions:
+                transfer = bool(entry['to_account_id'])
+                kind = ('Umbuchung' if transfer else 'Saldoabgleich' if entry['adjustment']
+                        else 'Durchlaufend' if entry['pass_through'] else 'Ausgabe' if entry['amount'] < 0
+                        else 'Einnahme' if entry['amount'] > 0 else 'Ohne Betrag')
+                balance = running_export.get(entry['id'])
+                writer.writerow([
+                    entry['day'][8:10]+'.'+entry['day'][5:7]+'.'+entry['day'][:4], kind,
+                    safe_cell(entry['account_title']), safe_cell(entry.get('target_account_title')) if transfer else '',
+                    '' if transfer else safe_cell(entry.get('category_title') or 'Ohne Kategorie'),
+                    safe_cell(entry.get('payee_title')), safe_cell(entry.get('note')),
+                    amount_csv(entry['amount']), selected_currency['code'],
+                    'Ja' if entry['is_recurring'] else 'Nein',
+                    amount_csv(balance) if balance is not None else ''])
+            payload = ('\ufeff' + csv_text.getvalue()).encode('utf-8')
+            return send_file(BytesIO(payload), mimetype='text/csv; charset=utf-8',
+                             as_attachment=True,
+                             download_name=f'fielanzen-buchungen-{booking_start:%Y%m%d}-{booking_end:%Y%m%d}.csv',
+                             max_age=0)
         page_str=request.args.get('page','1')
         page=max(1,min(100000,int(page_str) if page_str.isdigit() else 1))
         count=len(ledger_transactions)
