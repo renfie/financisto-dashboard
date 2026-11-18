@@ -2183,6 +2183,13 @@ def booking_list():
                               JOIN audit_events ev ON ev.event IN ('recurring_posted_auto','recurring_posted_manual')
                                 AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
                               WHERE rr.booking_id=t.id) AS is_recurring,
+                          EXISTS(SELECT 1 FROM recurring_runs rr
+                              WHERE rr.booking_id=t.id
+                              AND NOT EXISTS (
+                                  SELECT 1 FROM audit_events ev
+                                  WHERE ev.event IN ('recurring_posted_auto','recurring_posted_manual')
+                                    AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
+                              )) AS is_rule_matched,
                           c.symbol,c.decimals,p.title payee_title
                           FROM transactions t JOIN accounts a ON a.id=t.account_id
                           JOIN currencies c ON c.id=a.currency_id
@@ -2871,6 +2878,13 @@ def dashboard():
                               JOIN audit_events ev ON ev.event IN ('recurring_posted_auto','recurring_posted_manual')
                                 AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
                               WHERE rr.booking_id=t.id) AS is_recurring,
+                          EXISTS(SELECT 1 FROM recurring_runs rr
+                              WHERE rr.booking_id=t.id
+                              AND NOT EXISTS (
+                                  SELECT 1 FROM audit_events ev
+                                  WHERE ev.event IN ('recurring_posted_auto','recurring_posted_manual')
+                                    AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
+                              )) AS is_rule_matched,
                          a.title account_title,target.title target_account_title,
                          c.title category_title,p.title payee_title
                  FROM transactions t JOIN accounts a ON a.id=t.account_id
@@ -2905,7 +2919,7 @@ def dashboard():
                     t.get('account_title') or '',t.get('target_account_title') or '',
                     cat_names.get(t['category_id'],'Ohne Kategorie'),
                     t.get('payee_title') or '',t.get('note') or '',
-                    'Wiederkehrend' if t.get('is_recurring') else '',
+                    'Wiederkehrend' if t.get('is_recurring') else 'Regel zugeordnet' if t.get('is_rule_matched') else '',
                     'Umbuchung' if t['to_account_id'] else
                     (('Saldoabgleich' if t['category_id'] in adjustment_ids else 'Durchlaufend') if t['category_id'] in neutral_ids else ('Ausgabe' if t['amount'] < 0 else ('Einnahme' if t['amount'] > 0 else 'Ohne Betrag'))),
                     money(t['amount']/divisor,decimals),f'{t["amount"]/divisor:.{decimals}f}')).casefold()
@@ -2931,7 +2945,7 @@ def dashboard():
             csv_text = StringIO(newline='')
             writer = csv.writer(csv_text, delimiter=';', lineterminator='\r\n')
             writer.writerow(['Datum', 'Art', 'Konto', 'Zielkonto', 'Kategorie',
-                             'Empfänger', 'Notiz', 'Betrag', 'Währung', 'Wiederkehrend',
+                             'Empfänger', 'Notiz', 'Betrag', 'Währung', 'Wiederkehrend', 'Regel zugeordnet',
                              'Kontostand danach'])
             running_export = running_account_balances(db, currency)
             def safe_cell(value):
@@ -2953,6 +2967,7 @@ def dashboard():
                     safe_cell(entry.get('payee_title')), safe_cell(entry.get('note')),
                     amount_csv(entry['amount']), selected_currency['code'],
                     'Ja' if entry['is_recurring'] else 'Nein',
+                    'Ja' if entry['is_rule_matched'] else 'Nein',
                     amount_csv(balance) if balance is not None else ''])
             payload = ('\ufeff' + csv_text.getvalue()).encode('utf-8')
             response = send_file(BytesIO(payload), mimetype='text/csv; charset=utf-8',
