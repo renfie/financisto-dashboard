@@ -2217,6 +2217,7 @@ def booking_list():
             LEFT JOIN payees p ON p.id=t.payee_id WHERE t.id=? AND t.is_template=0""",
             (int(clone_value),)).fetchone() if clone_value.isdigit() else None
         neutral_ids = pass_through_category_ids(db)
+        adjustment_ids = adjustment_category_ids(db)
         form_row = edit_row or clone_row
         # Cloning is preparation only. It must NEVER turn into an edit/update.
         valid_account_ids_all = {a['id'] for a in accounts}
@@ -2234,6 +2235,7 @@ def booking_list():
                            category_records=category_records,category_names=category_names,
                            payees=payees,rows=rows,edit_row=edit_row,clone_row=clone_row,
                            form_row=form_row,neutral_ids=neutral_ids,
+                           adjustment_ids=adjustment_ids,
                            default_account_id=default_account_id,
                            default_expense_category_id=default_expense_category_id,
                            booking_suggestion_limit=suggestion_limit,
