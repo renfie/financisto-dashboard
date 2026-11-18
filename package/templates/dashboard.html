@@ -172,8 +172,8 @@
    {% if t.balance_after is not none %}<span class="balance-after">{{ 'Quellkonto danach' if t.to_account_id else 'Kontostand danach' }}: {{ (t.balance_after/divisor)|money(decimals) }} {{ symbol }}</span>{% else %}<span class="balance-after balance-unknown">Kontostand nicht verfügbar</span>{% endif %}</td>{% if can_modify %}<td data-label="Aktionen" class="finance-row-actions dashboard-row-actions"><a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a><a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a><form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung dauerhaft löschen und den Kontostand entsprechend korrigieren?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN"><button class="secondary danger-action" type="submit">Löschen</button></form></td>{% endif %}</tr>
  {% else %}<tr class="mobile-booking-empty"><td colspan="{{ 8 if can_modify else 7 }}" class="no-results">Keine Buchungen vorhanden.</td></tr>{% endfor %}
  </tbody></table></div>
- {% if page_count>1 %}
- <div class="pagination"><span>Seite {{ page }} von {{ page_count }} · {{ page_size }} je Seite</span>
+ <div class="pagination ledger-pagination"><span class="ledger-page-info">Seite {{ page }} von {{ page_count }} · {{ page_size }} je Seite</span>
+  {% if page_count>1 %}
   <nav class="pagination-pages" aria-label="Buchungsseiten">
    {% if page>1 %}<a class="button secondary pagination-direction" href="{{ link(page=page-1) }}" rel="prev">Zurück</a>{% endif %}
    {% set navigation = namespace(last=0) %}
@@ -187,9 +187,9 @@
    {% endfor %}
    {% if page<page_count %}<a class="button secondary pagination-direction" href="{{ link(page=page+1) }}" rel="next">Weiter</a>{% endif %}
   </nav>
+  {% endif %}
+  <a class="button secondary ledger-export-button" href="{{ link(export='csv') }}" aria-label="Alle {{ count }} gefilterten Buchungen als CSV exportieren">CSV exportieren ({{ count }})</a>
  </div>
- {% endif %}
- <div class="ledger-export-actions"><a class="button secondary" href="{{ link(export='csv') }}" aria-label="Alle {{ count }} gefilterten Buchungen als CSV exportieren">CSV exportieren ({{ count }})</a></div>
   </div>
  </details>
 </section>
