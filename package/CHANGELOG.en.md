@@ -1,3 +1,8 @@
+## 1.9.58-dev.6 – Recurring label under transaction date (2026-11-18)
+- The recurring label appears below the date, like the future-date label, instead of beside the transaction type.
+- Future recurring entries display both labels below the date.
+- Full-row highlights remain unchanged; no ledger or bind mount changes.
+
 ## 1.9.58-dev.5 – Prefilled payee input in new bookings (2026-11-18)
 - Focusing or tapping an existing payee selects its entire value so the next input replaces it, matching category selection.
 - User-entered search queries remain editable and suggestions still work.
