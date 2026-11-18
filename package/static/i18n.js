@@ -241,6 +241,7 @@
   "Buchung": "Transaction",
   "Buchungsliste": "Transaction list",
   "Wiederkehrend": "Recurring",
+  "Regel zugeordnet": "Rule matched",
   "Wiederkehrende Buchungen": "Recurring transactions",
   "Historische Auswertung": "Historical analysis",
   "Monatsauswertung": "Monthly report",
