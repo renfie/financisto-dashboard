@@ -49,6 +49,7 @@ jobs:
           PYIMAGE
           bash -n package/install.sh
           node --check package/static/i18n.js
+          node --check package/static/app.js
           python3 - <<'PYVERIFY'
           import ast
           from pathlib import Path
