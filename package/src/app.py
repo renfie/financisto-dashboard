@@ -2204,6 +2204,31 @@ def booking_list():
                           JOIN currencies c ON c.id=a.currency_id
                           LEFT JOIN payees p ON p.id=t.payee_id
                           WHERE t.origin IN ('web','financisto_edited') ORDER BY t.day DESC,t.id DESC LIMIT 100''').fetchall()
+        # Always select the last 100 web transactions first; column sorting
+        # affects this fixed set rather than silently changing which rows exist.
+        sort_key = request.args.get('sort', 'date')
+        sort_direction = request.args.get('dir', 'desc')
+        if sort_key not in ('date', 'type', 'account', 'payee', 'note', 'amount'):
+            sort_key = 'date'
+        if sort_direction not in ('asc', 'desc'):
+            sort_direction = 'desc'
+        def booking_sort_value(row):
+            if sort_key == 'date':
+                return row['day']
+            if sort_key == 'type':
+                return ('Umbuchung' if row['to_account_id'] else
+                        'Saldoabgleich' if row['category_id'] in adjustment_category_ids(db) else
+                        'Durchlaufend' if row['category_id'] in pass_through_category_ids(db) else
+                        'Ausgabe' if row['amount'] < 0 else
+                        'Einnahme' if row['amount'] > 0 else 'Ohne Betrag').casefold()
+            if sort_key == 'account':
+                return (row['account_title'] or '').casefold()
+            if sort_key == 'payee':
+                return (row['payee_title'] or '').casefold()
+            if sort_key == 'note':
+                return (row['note'] or '').casefold()
+            return int(row['amount'])
+        rows = sorted(rows, key=booking_sort_value, reverse=(sort_direction == 'desc'))
         configured_default_account = finance_setting(db, 'default_account_id', '')
         default_expense_category_id = shared_default_expense_category(db)
         suggestion_limit = booking_suggestion_limit(db)
@@ -2240,7 +2265,8 @@ def booking_list():
                            default_expense_category_id=default_expense_category_id,
                            booking_suggestion_limit=suggestion_limit,
                            today=datetime.now(MONTH_TZ).date().isoformat(),
-                           edit_amount=edit_amount)
+                           edit_amount=edit_amount,
+                           booking_sort=sort_key,booking_direction=sort_direction)
 
 
 def booking_payload(db):
