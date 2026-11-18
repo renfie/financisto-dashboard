@@ -323,7 +323,7 @@
  </div>
  <div class="financisto-current-backups">
   <h3>Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)</h3>
-  <p class="muted">Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter <code>data/financisto-backups/</code> und können hier heruntergeladen werden. Bei fehlender Exportgrundlage oder nicht unterstützten Wiederholungsregeln bleibt die SQLite-Sicherung erhalten; der Fehler steht im Hintergrunddienst-Protokoll.</p>
+  <p class="muted">Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter <code>data/financisto-backups/</code> und können hier heruntergeladen werden. Die Sicherung nutzt den Standard-Rückexport aus dem aktuellen Web-Datenbestand. Wiederkehrende Web-Regeln werden dabei nicht automatisch übertragen. Bei fehlender Exportgrundlage bleibt die SQLite-Sicherung erhalten; der Fehler wird angezeigt bzw. protokolliert.</p>
   {% if financisto_current_backups %}
   <div class="settings-shortcuts">
    {% for backup in financisto_current_backups %}
