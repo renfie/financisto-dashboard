@@ -1,3 +1,9 @@
+## 1.9.58-dev.7 – Wiederkehrend nur bei tatsächlich erzeugten Buchungen (18.11.2026)
+- „Wiederkehrend“ erscheint ausschließlich bei Buchungen, die eine Wiederholungsregel tatsächlich selbst erstellt hat.
+- Bereits manuell erfasste Buchungen, die zur Vermeidung von Doppelbuchungen einer Wiederholungsregel als erledigt zugeordnet wurden, werden nicht mehr fälschlich gekennzeichnet.
+- Die Prüfung erfolgt anhand des eindeutigen Ereignisprotokolls für tatsächlich ausgeführte wiederkehrende Buchungen; Dashboard und CSV-Export sowie Buchungserfassung nutzen dieselbe Erkennung.
+- Keine Veränderung gespeicherter Buchungen, Kontostände, Regeln oder Bind-Mounts.
+
 ## 1.9.58-dev.6 – Wiederkehrend-Kennzeichnung in der Datumsspalte (18.11.2026)
 - „Wiederkehrend“ steht nun direkt unter dem Buchungsdatum, wie der Hinweis auf ein zukünftiges Buchungsdatum, statt neben dem Buchungstyp.
 - Bei zukünftigen wiederkehrenden Buchungen erscheinen beide Kennzeichnungen unter dem Datum.
