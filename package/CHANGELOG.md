@@ -1,3 +1,10 @@
+## 1.9.57 – Wiederkehrende Buchungen und aufgeräumte Dokumentation (18.11.2026)
+- Bei neuen wiederkehrenden Regeln entspricht der vorausgefüllte „Tag im Monat“ automatisch dem Startdatum. Wird das Startdatum geändert, folgt der Monatstag, bis dieser bewusst separat verändert wird.
+- Bei täglicher und wöchentlicher Wiederholung ist das nicht benötigte Monatstagsfeld ausgeblendet; monatliche, vierteljährliche und jährliche Regeln lassen eine freie Abweichung zu.
+- Bestehende gespeicherte Regeln, Termine und Buchungen bleiben unverändert.
+- GitHub-READMEs enthalten keine veralteten Releaseblöcke und keinen lokalen Teststand 1.9.48 mehr. Änderungen werden in den Releases und Changelogs dokumentiert.
+- Anwendung und Docker-Image-Versionen sind konsistent 1.9.57; vorhandene Bind-Mounts, Datenbank und Secrets bleiben erhalten.
+
 ## 1.9.56 – Kategoriefeld und Docker-Image-Version (17.11.2026)
 - Die vorausgewählte Kategorie wird beim Antippen/Fokussieren zum direkten Überschreiben markiert; Tipp-Eingaben hängen sich nicht mehr an den vorhandenen Text an.
 - Alle drei Anwendungsdienste verwenden wieder einen zur VERSION passenden Docker-Image-Tag (1.9.56).
