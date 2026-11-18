@@ -6,14 +6,11 @@
   <img src="package/static/sea-wolves-logo.webp" alt="Sea Wolves Logo des Dashboards" width="260">
 </p>
 
-<p align="center">
-  <img src="package/static/icons/icon-192.png" alt="App-Symbol des Financisto-Dashboards" width="84">
-</p>
 
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktuelles öffentliches Release:** v1.9.56 · 17. November 2026. [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/tag/v1.9.56).
+**Aktuelles Release:** [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/latest) · [Versionshistorie](https://github.com/renfie/financisto-dashboard/releases).
 
 
 ## Funktionen
