@@ -1,4 +1,5 @@
-## 1.9.58-dev.4 – Buchungszeilen und ausführbares Updatepaket (18.11.2026)
+## 1.9.58-dev.4 – Buchungszeilen, manuelle Doppel-Sicherung und ausführbares Updatepaket (18.11.2026)
+- „Jetzt Sicherung erstellen“ erstellt unabhängig voneinander eine manuelle SQLite-Sicherung und einen neuen Financisto-Export des aktuellen Web-Datenbestands und meldet die beiden Resultate einzeln.
 - Umbuchungen über die gesamte Tabellenzeile hellblau hervorgehoben.
 - Wiederkehrende Buchungen über die gesamte Zeile mintgrün markiert; wiederkehrende Umbuchungen in einem eigenen Violettton.
 - Zukünftige Buchungen behalten ihre gelbe Markierung mit Vorrang vor anderen Kennzeichnungen.
@@ -9,7 +10,7 @@
 ## 1.9.58-dev.3 – Zwei aktuelle Financisto-Rückexport-Sicherungen (18.11.2026)
 - Täglich zusätzlich zur SQLite-Sicherung ein validierter Export des aktuellen Web-Datenbestandes als `.backup`.
 - Es bleiben die letzten zwei erfolgreichen Exportversionen unter `data/financisto-backups/`; Download nur durch Administratoren unter Einstellungen.
-- Nutzt den bereits bestehenden Rückexport mit Wiederholungsregeln; bei fehlender Exportgrundlage oder nicht unterstützten Regeln wird nichts Falsches gespeichert, die SQLite-Sicherung läuft unabhängig weiter.
+- Nutzt den bestehenden Standard-Rückexport ohne optionale Web-Wiederholungsregeln; bei fehlender Exportgrundlage wird nichts Falsches gespeichert, die SQLite-Sicherung läuft unabhängig weiter.
 - Keine Löschung von Buchungen, keine Änderungen an den bestehenden Android-Importarchiven, Bind-Mounts oder Secrets.
 
 ## 1.9.58-dev.2 – CSV-Export kompakt und englische Texte (18.11.2026)
