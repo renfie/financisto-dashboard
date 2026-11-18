@@ -25,6 +25,6 @@ Das Skript prüft die SQLite-Datei, verlangt das Wort `WIEDERHERSTELLEN`, stoppt
 
 ## Aktuelle Financisto-Rückexporte zum Herunterladen (ab 1.9.58-dev.3)
 
-Bei aktiver automatischer Datensicherung wird täglich neben dem SQLite-Backup ein eigener `.backup`-Rückexport aus den **aktuellen Web-Buchungen** und freigegebenen wiederkehrenden Regeln erzeugt. Der bestehende Rückexport erfordert eine passende Originalvorlage und lehnt unbekannte oder nicht unterstützte Wiederholungsregeln ab; bei einem Fehler wird kein alter Android-Importstand als neue Sicherung ausgegeben. Die tägliche SQLite-Sicherung bleibt unabhängig funktionsfähig.
+Bei aktiver automatischer Datensicherung wird täglich neben dem SQLite-Backup ein eigener `.backup`-Rückexport aus den **aktuellen Web-Buchungen** erzeugt. Es verwendet den Standard-Rückexport ohne die optionale Übertragung von Web-Wiederholungsregeln. Der bestehende Rückexport erfordert eine passende Originalvorlage ; bei einem Fehler wird kein alter Android-Importstand als neue Sicherung ausgegeben. Die tägliche SQLite-Sicherung bleibt unabhängig funktionsfähig.
 
 Unter `data/financisto-backups/` bleiben maximal die **zwei letzten erfolgreich erzeugten** Versionen erhalten; der Administrator kann sie unter Einstellungen herunterladen. Mit einer separaten Testinstallation den Rückimport prüfen, bevor auf einem Android-Gerät produktive Daten ersetzt werden. Diese Sicherungen ersetzen das SQLite-Backup nicht; für die Wiederherstellung des Websystems außerdem `secrets/app_secret` sicher getrennt verwahren.
