@@ -1,3 +1,9 @@
+## 1.9.58-dev.12 – Notiz und Sortierung bei Web-Buchungen (18.11.2026)
+- Unter „Buchung erfassen → Über die Webseite erfasste Buchungen“ ist die Notiz als eigene Spalte sichtbar.
+- Datum, Buchungstyp, Konto, Empfänger, Notiz und Betrag können per Klick auf die jeweilige Überschrift auf- oder absteigend sortiert werden.
+- Die Sortierung erfolgt innerhalb der zuletzt erfassten bzw. geänderten 100 Web-Buchungen; die Auswahl bleibt unverändert. Die Aktionen zum Klonen, Bearbeiten und Löschen bleiben verfügbar.
+- Keine Änderung von Buchungen, Salden, Datenbank oder Bind-Mounts.
+
 ## 1.9.58-dev.11 – Buchungstypen auch unter „Buchung erfassen“ wie auf dem Dashboard (18.11.2026)
 - In „Über die Webseite erfasste Buchungen“ werden Buchungsarten wie im Dashboard als farbige Kennzeichen angezeigt: Ausgabe rot mit Pfeil nach unten, Einnahme grün mit Pfeil nach oben, Umbuchung und Saldoabgleich neutral, durchlaufende Posten separat.
 - Bisherige durchgehende Zeilenfarben und Kennzeichnungen für zukünftige beziehungsweise wiederkehrende Buchungen bleiben erhalten.
