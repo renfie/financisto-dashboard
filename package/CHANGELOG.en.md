@@ -1,3 +1,8 @@
+## 1.9.58-dev.13 – Edit larger income amounts and select recurring payees (2026-11-18)
+- Editing an existing transaction now pre-fills the amount without thousands separators so amounts from 1,000.00 upward parse correctly in the booking form.
+- New and edited recurring rules select a prefilled payee on focus/tap for direct replacement while keeping payee suggestions available.
+- No database schema, transaction, recurring-rule or bind mount changes.
+
 ## 1.9.58-dev.12 – Notes and sorting in the web booking list (2026-11-18)
 - Add a Note column under Booking entry → Web transactions.
 - Clicking the Date, Type, Account, Payee, Note or Amount header toggles ascending and descending sort.
