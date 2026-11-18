@@ -1,3 +1,9 @@
+## 1.9.58-dev.9 – Künftige Buchungen getrennt vom Ist-Stand anzeigen (18.11.2026)
+- Die Dashboard-Monatskarten berücksichtigen bei Einnahmen, Ausgaben und Saldo für die Ist-Zahlen nur Buchungen bis einschließlich heute. Soweit es künftige Buchungen gibt, wird der Gesamtwert einschließlich dieser Buchungen als Prognose in Klammern angezeigt.
+- Der angezeigte Gesamtkontostand und die einzelnen Kontostände ziehen bereits in gespeicherten Snapshots enthaltene zukünftige Buchungen für den Ist-Wert heraus; der bisher gespeicherte, zukunftsinklusive Wert ist separat als Prognose sichtbar.
+- Künftige Umbuchungen berücksichtigen Quell- und Zielkonto gegensätzlich. Der Kontostandsabgleich vergleicht mit dem Ist-Wert, ohne die Zukunftsprojektion zu verlieren. Die Kategorieauswertung berücksichtigt nur bis heute fällige Buchungen.
+- Buchungen bleiben sichtbar und werden nicht verändert; die SQLite-Snapshots und der Financisto-Rückexport bleiben unverändert. Die neue Ist-/Prognose-Trennung betrifft die Dashboard-Anzeige und den Kontostandsabgleich, nicht eine zeitversetzte physische Buchungsausführung.
+
 ## 1.9.58-dev.8 – Wiederholungsbuchung und Regelzuordnung getrennt (18.11.2026)
 - „Wiederkehrend“ steht für Buchungen, die tatsächlich durch die Regel erstellt wurden; „Regel zugeordnet“ kennzeichnet eine bereits bestehende Buchung, die einen fälligen Termin abgedeckt hat.
 - Beide Kennzeichnungen erscheinen links unter dem Datum, auch bei Umbuchungen. Die farbliche Kennzeichnung tatsächlich wiederkehrender Umbuchungen bleibt violett; einer Regel nur zugeordnete Umbuchungen bleiben blau.
