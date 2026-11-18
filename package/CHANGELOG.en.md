@@ -1,3 +1,9 @@
+## 1.9.58-dev.9 – Separate actual and projected future transactions (2026-11-18)
+- Monthly dashboard income, expenses, and net reflect transactions dated through today, with future-inclusive projections shown in parentheses when applicable.
+- Individual and total displayed balances back out the future-dated entries already included in SQLite snapshots and show the stored future-inclusive balance as a forecast.
+- Transfers adjust source and destination accounts in opposite directions; account reconciliation uses today's effective balance. Category comparisons exclude future-dated amounts.
+- Bookings remain visible and unchanged. Underlying stored snapshots and Financisto exports are unchanged: this is an as-of-date dashboard and reconciliation presentation, not a deferred ledger posting mechanism.
+
 ## 1.9.58-dev.8 – Distinguish posted recurring entries from matched existing transactions (2026-11-18)
 - “Recurring” identifies a transaction posted by a recurring rule, whereas “Rule matched” identifies an existing transaction assigned to a due occurrence without reposting it.
 - Labels appear beneath the date even for transfers. Truly recurring transfers stay purple; rule-matched transfers keep blue highlighting.
