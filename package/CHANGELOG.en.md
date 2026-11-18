@@ -1,3 +1,9 @@
+## 1.9.58-dev.4 – Booking row highlights and executable updater (2026-11-18)
+- Blue full-row highlights for transfers and green highlights for recurring transactions; recurring transfers have a distinct lavender background.
+- Future-dated rows retain the overriding yellow highlight. The compact mobile list also receives the new highlights.
+- The ZIP marks `update.sh` executable for the existing one-command installation procedure.
+- No financial-data, account-balance, database or bind-mount changes.
+
 ## 1.9.58-dev.3 – Two current Financisto export snapshots (2026-11-18)
 - Alongside daily SQLite snapshots, create a validated `.backup` export from the current web ledger.
 - Keep the two newest successful exports in `data/financisto-backups/`, downloadable by administrators from Settings.
