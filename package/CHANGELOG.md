@@ -1,3 +1,8 @@
+## 1.9.58-dev.10 – Buchungsfarben auch unter „Buchung erfassen“ (18.11.2026)
+- Die Liste „Über die Webseite erfasste Buchungen“ verwendet dieselben vollständigen Zeilenfarben wie das Dashboard: Umbuchungen hellblau, wiederkehrende Buchungen mintgrün, wiederkehrende Umbuchungen violett und zukünftige Buchungen weiterhin gelb mit Vorrang.
+- „Wiederkehrend“ und „Regel zugeordnet“ stehen unter dem Buchungsdatum; die Regelzuordnung allein verursacht keine zusätzliche Zeilenfarbe.
+- Keine Änderung an Buchungslogik, Konto- oder Datenbankständen.
+
 ## 1.9.58-dev.9 – Künftige Buchungen getrennt vom Ist-Stand anzeigen (18.11.2026)
 - Die Dashboard-Monatskarten berücksichtigen bei Einnahmen, Ausgaben und Saldo für die Ist-Zahlen nur Buchungen bis einschließlich heute. Soweit es künftige Buchungen gibt, wird der Gesamtwert einschließlich dieser Buchungen als Prognose in Klammern angezeigt.
 - Der angezeigte Gesamtkontostand und die einzelnen Kontostände ziehen bereits in gespeicherten Snapshots enthaltene zukünftige Buchungen für den Ist-Wert heraus; der bisher gespeicherte, zukunftsinklusive Wert ist separat als Prognose sichtbar.
