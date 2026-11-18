@@ -321,6 +321,20 @@
   <form method="post" action="{{ url_for('settings_create_backup') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="primary" type="submit">Jetzt Sicherung erstellen</button></form>
   <a class="button secondary" href="{{ url_for('settings_download_backup') }}">SQLite-Sicherung herunterladen</a>
  </div>
+ <div class="financisto-current-backups">
+  <h3>Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)</h3>
+  <p class="muted">Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter <code>data/financisto-backups/</code> und können hier heruntergeladen werden. Bei fehlender Exportgrundlage oder nicht unterstützten Wiederholungsregeln bleibt die SQLite-Sicherung erhalten; der Fehler steht im Hintergrunddienst-Protokoll.</p>
+  {% if financisto_current_backups %}
+  <div class="settings-shortcuts">
+   {% for backup in financisto_current_backups %}
+   <a class="button secondary" href="{{ url_for('settings_download_financisto_snapshot',name=backup.name) }}">Financisto-Backup {{ loop.index }} herunterladen (.backup)</a>
+   {% endfor %}
+  </div>
+  <p class="muted small">{% for backup in financisto_current_backups %}{{ 'Neueste' if loop.first else 'Vorherige' }}: {{ backup.name }} ({{ (backup.size/1024/1024)|round(2) }} MB){{ ' · ' if not loop.last else '' }}{% endfor %}</p>
+  {% else %}
+  <p class="muted">Noch kein erfolgreicher aktueller Financisto-Rückexport vorhanden.</p>
+  {% endif %}
+ </div>
  <details class="settings-create"><summary>Automatische Sicherung {{ 'deaktivieren' if daily_backup_enabled else 'aktivieren' }}</summary>
   <form method="post" action="{{ url_for('settings_backup_schedule') }}" class="formstack compact-form">
    <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="enabled" value="{{ '0' if daily_backup_enabled else '1' }}">
