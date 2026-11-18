@@ -20,6 +20,7 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from functools import wraps
 from pathlib import Path
+import stat
 from urllib.parse import urlencode
 
 from flask import Flask, abort, flash, redirect, render_template, request, session, url_for, jsonify
@@ -30,6 +31,7 @@ from financisto_import import BackupError, ImportPaused, parse_backup, save_snap
 from financisto_export import ExportError, make_export, ensure_source_table, store_matching_source
 from financisto_recurring_export import merge_recurring_export, preview_summary
 from backup_manager import create_backup as create_verified_backup, status as scheduled_backup_status
+from sync_import import BACKUP_SUFFIX, backup_marker, MAX_FILE as FINANCISTO_MAX_FILE
 from job_monitor import ensure_schema as ensure_monitor_schema, dashboard_status
 from recurring import (ensure_schema as ensure_recurring_schema, preview_from_backup,
                        save_import_preview, confirm_import, validate_rule,
@@ -816,6 +818,7 @@ def settings():
                  if any(int(c['id']) == cid and int(c['kind']) == 0 for c in categories)),
                 key=lambda item: item[1].casefold())
             daily_backup_enabled = finance_setting(db, 'daily_backup_enabled', '1') == '1'
+            financisto_archived_backups = available_financisto_archives()
             booking_page_size = finance_setting(db, 'booking_page_size', '30')
             booking_suggestions = booking_suggestion_limit(db)
             wanted_source = finance_setting(db, 'last_import_sha256', '')
@@ -842,6 +845,7 @@ def settings():
             default_expense_category_id = 0
             expense_category_choices = ()
             daily_backup_enabled = False
+            financisto_archived_backups = ()
             booking_page_size = '30'
             booking_suggestions = 20
             export_source_ready = False
@@ -866,6 +870,7 @@ def settings():
                            booking_suggestions=booking_suggestions,
                            export_source_ready=export_source_ready, recurring_export_summary=recurring_export_summary,
                            daily_backup_status=scheduled_backup_status(Path(DATABASE)) if is_admin else {},
+                           financisto_archived_backups=financisto_archived_backups,
                            background_status=background_status,
                            notify_config=(notify_config if is_admin else None),
                            notify_status=(notify_status if is_admin else {}),
@@ -1689,6 +1694,63 @@ def settings_switch_to_import():
                 audit(db,'financisto_authority_restored', backup.name + (' (web changes)' if writes or count else ''))
                 flash('Financisto wieder führend. Keine Web-Buchung wurde bei der Rückschaltung gelöscht. Auto-Import bleibt aus. Sicherung: '+backup.name, 'success')
     return redirect(url_for('settings') + '#datenfuehrung')
+
+
+def available_financisto_archives():
+    """The two newest *validated, imported* original Android backups.
+
+    Files are already managed by sync_import, which retains three originals.
+    Never expose files still in /data/inbox or generate synthetic .backup data.
+    """
+    directory = Path(DATABASE).parent / 'import-archive'
+    if directory.is_symlink() or not directory.is_dir():
+        return ()
+    now = time.time()
+    available = []
+    try:
+        for path in directory.iterdir():
+            if (not BACKUP_SUFFIX.search(path.name) or path.is_symlink()
+                    or not path.is_file()):
+                continue
+            details = path.stat()
+            if not 0 < details.st_size <= FINANCISTO_MAX_FILE:
+                continue
+            available.append((backup_marker(path, details, now), path.name,
+                              BACKUP_SUFFIX.search(path.name).group(0), details.st_size))
+    except OSError:
+        return ()
+    available.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return tuple(dict(name=item[1], original_name=item[2], size=item[3])
+                 for item in available[:2])
+
+
+@app.get('/settings/backup/financisto/<name>')
+@admin_required
+def settings_download_financisto_archive(name):
+    """Download an existing approved original, not a Web-to-Android export."""
+    eligible = next((b for b in available_financisto_archives()
+                     if b['name'] == name), None)
+    if eligible is None:
+        abort(404)
+    directory = Path(DATABASE).parent / 'import-archive'
+    flags = os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0)
+    try:
+        fd = os.open(directory / name, flags)
+        with os.fdopen(fd, 'rb') as handle:
+            info = os.fstat(handle.fileno())
+            if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= FINANCISTO_MAX_FILE:
+                abort(404)
+            raw = handle.read(FINANCISTO_MAX_FILE + 1)
+            if len(raw) != info.st_size:
+                abort(404)
+    except OSError:
+        abort(404)
+    response = send_file(BytesIO(raw), as_attachment=True,
+                         download_name=eligible['original_name'],
+                         mimetype='application/octet-stream', max_age=0)
+    response.headers['Cache-Control'] = 'private, no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
 
 
 @app.get('/settings/backup/download')
