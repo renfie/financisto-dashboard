@@ -22,3 +22,9 @@ cd /home/pi/docker-files/financisto-dashboard
 Das Skript prüft die SQLite-Datei, verlangt das Wort `WIEDERHERSTELLEN`, stoppt die beiden Datenbank-Schreiber sowie den Sicherungsdienst, erstellt `backups/vor-restore-...sqlite3`, stellt die Datenbank wieder her und startet die Dienste. Benutzer, Buchungen, 2FA-Daten und Einstellungen werden auf den Stand der Sicherung zurückgesetzt. Kein `.backup`-Import ist damit verbunden. Vor dem ersten realen Restore in einer Testinstallation ausprobieren.
 
 **Sicherheitskopien der Secrets** getrennt sichern; die von der App gespeicherten TOTP-Seeds sind ohne den ursprünglichen `app_secret` nicht entschlüsselbar.
+
+## Aktuelle Financisto-Rückexporte zum Herunterladen (ab 1.9.58-dev.3)
+
+Bei aktiver automatischer Datensicherung wird täglich neben dem SQLite-Backup ein eigener `.backup`-Rückexport aus den **aktuellen Web-Buchungen** und freigegebenen wiederkehrenden Regeln erzeugt. Der bestehende Rückexport erfordert eine passende Originalvorlage und lehnt unbekannte oder nicht unterstützte Wiederholungsregeln ab; bei einem Fehler wird kein alter Android-Importstand als neue Sicherung ausgegeben. Die tägliche SQLite-Sicherung bleibt unabhängig funktionsfähig.
+
+Unter `data/financisto-backups/` bleiben maximal die **zwei letzten erfolgreich erzeugten** Versionen erhalten; der Administrator kann sie unter Einstellungen herunterladen. Mit einer separaten Testinstallation den Rückimport prüfen, bevor auf einem Android-Gerät produktive Daten ersetzt werden. Diese Sicherungen ersetzen das SQLite-Backup nicht; für die Wiederherstellung des Websystems außerdem `secrets/app_secret` sicher getrennt verwahren.
