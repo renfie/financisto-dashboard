@@ -1,3 +1,9 @@
+## 1.9.58-dev.12 – Notes and sorting in the web booking list (2026-11-18)
+- Add a Note column under Booking entry → Web transactions.
+- Clicking the Date, Type, Account, Payee, Note or Amount header toggles ascending and descending sort.
+- Sorting operates on the existing latest 100 web-booking entries without changing the underlying selection. Edit, clone and delete actions remain available.
+- No changes to transactions, balances, database or bind mounts.
+
 ## 1.9.58-dev.11 – Booking type badges match the dashboard (2026-11-18)
 - The web-bookings entry table now displays the same rounded booking type badges as the dashboard: red downward expense, green upward income, and neutral transfer, adjustment and pass-through types.
 - Full-row highlights and future/recurring status badges remain unchanged. No financial data or balances are modified.
