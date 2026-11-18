@@ -1,4 +1,5 @@
-## 1.9.58-dev.4 – Booking row highlights and executable updater (2026-11-18)
+## 1.9.58-dev.4 – Booking highlights, manual dual backup and executable updater (2026-11-18)
+- The manual backup action independently creates and reports SQLite and current-ledger Financisto export snapshots.
 - Blue full-row highlights for transfers and green highlights for recurring transactions; recurring transfers have a distinct lavender background.
 - Future-dated rows retain the overriding yellow highlight. The compact mobile list also receives the new highlights.
 - The ZIP marks `update.sh` executable for the existing one-command installation procedure.
@@ -7,7 +8,7 @@
 ## 1.9.58-dev.3 – Two current Financisto export snapshots (2026-11-18)
 - Alongside daily SQLite snapshots, create a validated `.backup` export from the current web ledger.
 - Keep the two newest successful exports in `data/financisto-backups/`, downloadable by administrators from Settings.
-- Reuse the existing exporter including recurring rules; unsupported rules and missing source templates fail safely without affecting SQLite backups.
+- Reuse the tested default exporter without optional Web recurring-rule conversion; missing source templates fail safely without affecting SQLite backups.
 - Existing Android import archives, bind mounts, secrets and transactions remain unchanged.
 
 ## 1.9.58-dev.2 – Inline CSV export and English labels (2026-11-18)
