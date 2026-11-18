@@ -9,7 +9,6 @@ import os
 import re
 import secrets
 import sqlite3
-import gzip
 import sys
 import tempfile
 import time
