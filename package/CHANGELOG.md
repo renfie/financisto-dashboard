@@ -1,3 +1,9 @@
+## 1.9.58-dev.6 – Wiederkehrend-Kennzeichnung in der Datumsspalte (18.11.2026)
+- „Wiederkehrend“ steht nun direkt unter dem Buchungsdatum, wie der Hinweis auf ein zukünftiges Buchungsdatum, statt neben dem Buchungstyp.
+- Bei zukünftigen wiederkehrenden Buchungen erscheinen beide Kennzeichnungen unter dem Datum.
+- Die durchgehenden Farbmarkierungen der Buchungszeilen bleiben bestehen.
+- Nur Darstellung; Buchungen, Kontostände und Bind-Mounts bleiben unverändert.
+
 ## 1.9.58-dev.5 – Empfängerfeld bei neuen Buchungen (18.11.2026)
 - Vorhandener Empfänger wird beim Antippen/Fokussieren markiert und durch direkte Texteingabe ersetzt, wie bereits bei der Kategorie.
 - Bereits begonnene eigene Suchtexte bleiben während der Eingabe editierbar; die Empfänger-Vorschläge funktionieren weiterhin.
