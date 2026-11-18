@@ -1606,20 +1606,27 @@ def settings_backup_schedule():
 @admin_required
 def settings_create_backup():
     if not csrf_ok(): abort(400)
+    # Both backups are independent. A failed export must never be reported as
+    # successful, and must not suppress the completed SQLite snapshot.
     try:
         path = create_verified_backup(Path(DATABASE), 'manuell')
         with get_db() as db:
             audit(db, 'sqlite_backup_created', path.name)
         flash('SQLite-Sicherung erstellt: ' + path.name, 'success')
-        try:
-            export_current_financisto(Path(DATABASE), force=True)
-            flash('Aktueller Financisto-Rückexport erstellt.', 'success')
-        except (ExportError, BackupError, OSError, sqlite3.Error, ValueError, RuntimeError) as exc:
-            flash('SQLite gesichert; Financisto-Rückexport nicht möglich: ' + str(exc), 'error')
     except (OSError, sqlite3.Error, RuntimeError) as exc:
-        flash('Sicherung fehlgeschlagen: ' + str(exc), 'error')
+        flash('SQLite-Sicherung fehlgeschlagen: ' + str(exc), 'error')
+    try:
+        export_current_financisto(Path(DATABASE), force=True)
+        backups = current_financisto_backups(Path(DATABASE))
+        if not backups:
+            raise RuntimeError('Keine aktuelle Financisto-Backup-Datei gefunden.')
+        filename = backups[0]['name']
+        with get_db() as db:
+            audit(db, 'financisto_snapshot_created', filename)
+        flash('Financisto-Sicherung erstellt: ' + filename, 'success')
+    except (ExportError, BackupError, OSError, sqlite3.Error, ValueError, RuntimeError) as exc:
+        flash('Financisto-Sicherung fehlgeschlagen: ' + str(exc), 'error')
     return redirect(url_for('settings') + '#datensicherung')
-
 
 @app.post('/settings/switch-to-web')
 @admin_required
