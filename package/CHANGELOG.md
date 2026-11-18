@@ -1,3 +1,10 @@
+## 1.9.58-dev.1 – CSV-Export der Dashboard-Buchungsliste (Entwicklungsstand, 18.11.2026)
+- CSV-Export direkt unter der Dashboard-Buchungsliste, inkl. aller Seiten des aktuell gefilterten und sortierten Zeitraums.
+- Datum, Buchungsart, Quell-/Zielkonto, Kategorie, Empfänger, Notiz, Betrag, Währung, Wiederholung und Kontostand danach.
+- Excel-kompatibel: UTF-8-BOM, Semikolon und deutsches Dezimalkomma; Text wird gegen Formelausführung abgesichert.
+- Nur lesend, keine Änderung an Buchungen, Datenbank oder Bind-Mounts.
+- Kein offizielles Release: Entwicklungszweig, vorläufige Version.
+
 ## 1.9.57 – Wiederkehrende Buchungen und aufgeräumte Dokumentation (18.11.2026)
 - Bei neuen wiederkehrenden Regeln entspricht der vorausgefüllte „Tag im Monat“ automatisch dem Startdatum. Wird das Startdatum geändert, folgt der Monatstag, bis dieser bewusst separat verändert wird.
 - Bei täglicher und wöchentlicher Wiederholung ist das nicht benötigte Monatstagsfeld ausgeblendet; monatliche, vierteljährliche und jährliche Regeln lassen eine freie Abweichung zu.
