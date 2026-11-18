@@ -1,3 +1,7 @@
+## 1.9.58-dev.11 – Booking type badges match the dashboard (2026-11-18)
+- The web-bookings entry table now displays the same rounded booking type badges as the dashboard: red downward expense, green upward income, and neutral transfer, adjustment and pass-through types.
+- Full-row highlights and future/recurring status badges remain unchanged. No financial data or balances are modified.
+
 ## 1.9.58-dev.10 – Booking-entry row highlighting matches dashboard (2026-11-18)
 - The web-bookings table now uses matching full-row colors: transfers light blue, recurring transactions mint green, recurring transfers lavender, and future-dated transactions yellow with priority.
 - Recurring and rule-matched labels appear beneath the date. A matched rule alone does not add a row color.
