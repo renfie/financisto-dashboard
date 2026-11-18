@@ -1,3 +1,8 @@
+## 1.9.58-dev.10 – Booking-entry row highlighting matches dashboard (2026-11-18)
+- The web-bookings table now uses matching full-row colors: transfers light blue, recurring transactions mint green, recurring transfers lavender, and future-dated transactions yellow with priority.
+- Recurring and rule-matched labels appear beneath the date. A matched rule alone does not add a row color.
+- No changes to transaction posting, account balances or financial data.
+
 ## 1.9.58-dev.9 – Separate actual and projected future transactions (2026-11-18)
 - Monthly dashboard income, expenses, and net reflect transactions dated through today, with future-inclusive projections shown in parentheses when applicable.
 - Individual and total displayed balances back out the future-dated entries already included in SQLite snapshots and show the stored future-inclusive balance as a forecast.
