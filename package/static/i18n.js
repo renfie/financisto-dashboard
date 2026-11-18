@@ -47,6 +47,8 @@
   "Systemstatus und Hintergrunddienste": "System status and background services",
   "Quellkonto danach": "Source-account balance after",
   "Kontostand danach": "Account balance after",
+  "CSV exportieren": "Export CSV",
+  "Buchungsseiten": "Transaction pages",
   "Die drei Bereiche werden": "The three sections are",
   "getrennt gespeichert": "saved separately",
   "Gespeicherte Telegram-Token entfernen": "Remove saved Telegram token",
@@ -1186,6 +1188,12 @@
     // Captions with variable counts, dates or protected confirmation words.
     const cashflowSummary = value.match(/^(\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · ([A-Z]{3}) · (\d+) Zeiträume$/);
     if (cashflowSummary) return `${cashflowSummary[1]} to ${cashflowSummary[2]} · ${cashflowSummary[3]} · ${cashflowSummary[4]} periods`;
+    let ledger = value.match(/^Seite (\d+) von (\d+) · (\d+) je Seite$/);
+    if (ledger) return `Page ${ledger[1]} of ${ledger[2]} · ${ledger[3]} per page`;
+    ledger = value.match(/^CSV exportieren \((\d+)\)$/);
+    if (ledger) return `Export CSV (${ledger[1]})`;
+    ledger = value.match(/^(Kontostand danach|Quellkonto danach): (.+)$/);
+    if (ledger) return `${catalog[ledger[1]] || ledger[1]}: ${ledger[2]}`;
     // Account, payee, category and note values are never rewritten.
     let extra;
     extra = value.match(/^(\d+)(?: von (\d+))? Buchungen von (\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · (\d+) pro Seite$/);
