@@ -964,6 +964,12 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 /* Popover entries share the normal compact picker styling while floating over the dialog. */
 .recurring-payee-suggestions:popover-open{margin:0;inset:auto;position:fixed;z-index:2147483647;box-sizing:border-box}
 
-/* Development: one-click download of the complete filtered booking ledger. */
-#buchungen .ledger-export-actions{display:flex;justify-content:flex-end;margin-top:12px}
-#buchungen .ledger-export-actions .button{padding:8px 12px;font-size:.83rem}
+/* Inline CSV export beside ledger pagination. */
+#buchungen .ledger-pagination{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#buchungen .ledger-pagination .pagination-pages{margin-left:auto}
+#buchungen .ledger-pagination .ledger-export-button{padding:8px 12px;font-size:.83rem;white-space:nowrap}
+@media(max-width:700px){
+ #buchungen .ledger-pagination{gap:8px}
+ #buchungen .ledger-pagination .pagination-pages{width:auto;justify-content:flex-start;margin-left:auto}
+ #buchungen .ledger-pagination .ledger-export-button{margin-left:auto}
+}
