@@ -1012,3 +1012,13 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
  #buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){background:#e6f6ef!important}
  #buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){background:#f0ecfc!important}
 }
+
+/* dev.6: recurring indicator under date, matching the future booking marker. */
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .recurring-date-badge,
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .future-booking-badge{
+ display:table;
+ margin:3px 0 0 5px;
+}
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .recurring-date-badge{
+ border-color:#96c9c0;
+}
