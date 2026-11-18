@@ -1,3 +1,8 @@
+## 1.9.58-dev.2 – CSV-Export kompakt und englische Texte (18.11.2026)
+- CSV-Export-Schaltfläche direkt neben der Seitennavigation, ohne zusätzliche Zeile am Desktop.
+- Englische Übersetzungen für Seitenzählung, CSV-Export und Kontostand nach der Buchung ergänzt.
+- Weiterhin Entwicklungsstand ohne offizielles Release. Finanzdaten und Bind-Mounts bleiben unverändert.
+
 ## 1.9.58-dev.1 – CSV-Export der Dashboard-Buchungsliste (Entwicklungsstand, 18.11.2026)
 - CSV-Export direkt unter der Dashboard-Buchungsliste, inkl. aller Seiten des aktuell gefilterten und sortierten Zeitraums.
 - Datum, Buchungsart, Quell-/Zielkonto, Kategorie, Empfänger, Notiz, Betrag, Währung, Wiederholung und Kontostand danach.
