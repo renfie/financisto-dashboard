@@ -1,3 +1,8 @@
+## 1.9.58-dev.2 – Inline CSV export and English labels (2026-11-18)
+- CSV export button is positioned beside ledger pagination instead of on an extra row.
+- Add English translations for page count, CSV export and running balance labels.
+- Development build only; no official release or financial-data changes.
+
 ## 1.9.58-dev.1 – Dashboard ledger CSV export (development, 2026-11-18)
 - Export the entire filtered and sorted dashboard ledger, across all pages, as CSV.
 - Includes dates, transaction type, source/destination account, category, payee, note, amount, currency, recurring status and running balance.
