@@ -973,3 +973,42 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
  #buchungen .ledger-pagination .pagination-pages{width:auto;justify-content:flex-start;margin-left:auto}
  #buchungen .ledger-pagination .ledger-export-button{margin-left:auto}
 }
+
+/* v1.9.58-dev.4: consistent full-row highlighting; future dates take precedence.
+   Transfer: blue; recurring: turquoise; recurring transfer: lavender.
+   Only visual CSS, no changes to posting, filtering, or balances. */
+#buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking) > td{
+ background:#eaf4fb!important;
+}
+#buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking) > td{
+ background:#e6f6ef!important;
+}
+#buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking) > td{
+ background:#f0ecfc!important;
+}
+#buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking){
+ box-shadow:inset 3px 0 #65a3cf;
+}
+#buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){
+ box-shadow:inset 3px 0 #42a483;
+}
+#buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){
+ box-shadow:inset 3px 0 #9983c9;
+}
+#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking){
+ background:#eaf4fb;border-color:#a5cae3;
+}
+#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking){
+ background:#e6f6ef;border-color:#a1d9c5;
+}
+#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking){
+ background:#f0ecfc;border-color:#c6b9e5;
+}
+#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking) .compact-booking-details{background:#f5faff}
+#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking) .compact-booking-details{background:#f4fbf7}
+#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking) .compact-booking-details{background:#f8f6ff}
+@media screen and (max-width:760px){
+ #buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking){background:#eaf4fb!important}
+ #buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){background:#e6f6ef!important}
+ #buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){background:#f0ecfc!important}
+}
