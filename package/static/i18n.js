@@ -52,6 +52,12 @@
   "Systemstatus & Hintergrunddienste": "System status & background services",
   "Systemstatus und Hintergrunddienste": "System status and background services",
   "Quellkonto danach": "Source-account balance after",
+  "mit künftigen Buchungen:": "including future transactions:",
+  "nach künftigen Buchungen:": "after future transactions:",
+  "Bis heute gebuchte Umsätze; Prognose einschließlich künftiger Buchungen in Klammern.": "Posted transactions through today; forecast including future transactions in parentheses.",
+  "Kontostände gelten bis heute; künftige Buchungen erscheinen separat als Prognose. Die gespeicherten Finanzdaten bleiben unverändert. Ein Monats-Saldo ist kein Kontostand. Fremdwährungen werden nicht umgerechnet.": "Account balances reflect transactions dated through today; future entries are shown separately as a forecast. Stored finance records are unchanged. Monthly net is not an account balance. Foreign currencies are not converted.",
+  "Quellkonto voraussichtlich danach": "Projected source-account balance after",
+  "Voraussichtlicher Kontostand danach": "Projected account balance after",
   "Kontostand danach": "Account balance after",
   "CSV exportieren": "Export CSV",
   "Buchungsseiten": "Transaction pages",
@@ -1197,6 +1203,10 @@
     if (cashflowSummary) return `${cashflowSummary[1]} to ${cashflowSummary[2]} · ${cashflowSummary[3]} · ${cashflowSummary[4]} periods`;
     let archiveButton = value.match(/^Financisto-Backup (\d+) herunterladen \(\.backup\)$/);
     if (archiveButton) return `Download Financisto backup ${archiveButton[1]} (.backup)`;
+    let projected = value.match(/^\(mit künftigen Buchungen: (.+)\)$/);
+    if (projected) return `(including future transactions: ${projected[1]})`;
+    projected = value.match(/^\(nach künftigen Buchungen: (.+)\)$/);
+    if (projected) return `(after future transactions: ${projected[1]})`;
     let ledger = value.match(/^Seite (\d+) von (\d+) · (\d+) je Seite$/);
     if (ledger) return `Page ${ledger[1]} of ${ledger[2]} · ${ledger[3]} per page`;
     ledger = value.match(/^CSV exportieren \((\d+)\)$/);
