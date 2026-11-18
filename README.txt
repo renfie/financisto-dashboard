@@ -1,14 +1,8 @@
-FieLanzen v1.9.57 – Wiederkehrende Buchungen und Dokumentation (18.11.2026).
+FieLanzen 1.9.58-dev.1 – CSV-Export in der Dashboard-Buchungsliste.
+Entwicklungsstand, kein offizielles GitHub-Release.
 
-- Neue Wiederholungsregeln übernehmen den Tag im Monat aus dem Startdatum.
-- Bei täglicher und wöchentlicher Wiederholung wird das Monatstagsfeld ausgeblendet.
-- Manuell eingestellte Monatstage und bestehende Regeln bleiben erhalten.
-- GitHub-READMEs aufgeräumt; vollständige Neuerungen in GitHub Releases und Changelog.
-- Docker-Image der drei App-Dienste: financisto-dashboard:1.9.57.
+Update als Projektbesitzer ohne sudo aus /home/pi/docker-files:
+  unzip -o financisto-dashboard-1.9.58-dev.1.zip && \
+  ./financisto-release-1.9.58-dev.1/update.sh /home/pi/docker-files/financisto-dashboard
 
-Update als Projektbesitzer (ohne sudo), im Ordner /home/pi/docker-files:
-  unzip -o financisto-dashboard-v1.9.57.zip && \
-  ./financisto-release-1.9.57/update.sh /home/pi/docker-files/financisto-dashboard
-
-Datenbank, .env, Secrets und Caddy-Zertifikate bleiben bestehen.
-Details: package/CHANGELOG.md und package/CHANGELOG.en.md.
+Alle Daten, Bind-Mounts und Secrets bleiben bestehen.
