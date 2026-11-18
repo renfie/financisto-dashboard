@@ -1,6 +1,6 @@
-# Datensicherung und Wiederherstellung – Version 1.9.4
+# Datensicherung und Wiederherstellung
 
-**Wichtig:** SQLite-Sicherungen sind das Wiederherstellungsformat **dieser Webanwendung**, nicht Financisto-.backup-Dateien. Der manuelle Financisto-Import bleibt unverändert. Ein neuer, mit Financisto kompatibler Export ist noch nicht vorhanden.
+**Wichtig:** SQLite-Sicherungen sind das Wiederherstellungsformat **dieser Webanwendung**, nicht Financisto-.backup-Dateien. Der manuelle Financisto-Import bleibt unverändert. Für den aktuellen Web-Datenbestand gibt es zusätzlich den gesonderten Financisto-Rückexport; dieser ersetzt keine SQLite-Sicherung.
 
 ## Tagesbackup
 
