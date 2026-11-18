@@ -1,4 +1,4 @@
-FieLanzen 1.9.58-dev.4 – Durchgehende farbliche Markierung von Umbuchungen und wiederkehrenden Buchungen sowie zwei Financisto-Rückexport-Sicherungen; update.sh ist im ZIP ausführbar.
+FieLanzen 1.9.58-dev.4 – Durchgehende farbliche Markierung von Umbuchungen und wiederkehrenden Buchungen; 'Jetzt Sicherung erstellen' erzeugt SQLite und aktuellen Financisto-Rückexport separat; update.sh ist ausführbar.
 Entwicklungsstand, kein offizielles GitHub-Release.
 
 Update als Projektbesitzer ohne sudo aus /home/pi/docker-files:
