@@ -341,7 +341,7 @@
  </div>
  <div class="financisto-current-backups">
   <h3>Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)</h3>
-  <p class="muted">Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter <code>data/financisto-backups/</code> und können hier heruntergeladen werden. Die Sicherung nutzt den Standard-Rückexport aus dem aktuellen Web-Datenbestand. Wiederkehrende Web-Regeln werden dabei nicht automatisch übertragen. Bei fehlender Exportgrundlage bleibt die SQLite-Sicherung erhalten; der Fehler wird angezeigt bzw. protokolliert.</p>
+  <p class="muted">Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter <code>data/financisto-backups/</code> und können hier heruntergeladen werden. Die Sicherung enthält auch unterstützte Wiederholungsregeln. Originale Financisto-Dauerbuchungen bleiben erhalten. Regeln, die sich im Android-Format nicht sicher abbilden lassen, verhindern einen neuen Rückexport mit einer Fehlermeldung; ältere erfolgreiche Dateien bleiben bestehen. Die SQLite-Sicherung läuft unabhängig weiter.</p>
   {% if financisto_current_backups %}
   <div class="settings-shortcuts">
    {% for backup in financisto_current_backups %}
@@ -374,10 +374,9 @@
  <form method="post" action="{{ url_for('settings_export_financisto') }}" class="formstack compact-form">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
   <div class="recurring-export-option">
-   <label class="checkline"><input type="checkbox" name="include_recurring" value="1"> Wiederkehrende Regeln aus der Web-Verwaltung in Financisto übernehmen</label>
+   <p class="muted small"><strong>Wiederkehrende Regeln werden immer berücksichtigt.</strong> Ein Rückexport ohne die vorhandenen Wiederholungsregeln wird nicht mehr als vollständige Sicherung angeboten.</p>
    <p class="muted small">In der Web-Verwaltung: <strong>{{ recurring_export_summary.automatic }} automatisch</strong>, {{ recurring_export_summary.manual }} manuell, {{ recurring_export_summary.paused }} pausiert, {{ recurring_export_summary.removed }} gelöscht/archiviert.</p>
-   <p class="muted small">Bei aktivierter Option werden <strong>nur automatisch freigegebene</strong> Regeln exportiert. Pausierte und gelöschte Originalvorlagen werden entfernt. Manuell aktive oder nicht unterstützte Regeln verhindern den Export mit einer Fehlermeldung statt sie versehentlich auf Android automatisch auszuführen. Unveränderte Finanzbuchungen bleiben erhalten.</p>
-   <p class="muted small">Ohne Häkchen gilt der bisherige Testexport: ursprüngliche Financisto-Dauerbuchungen bleiben unverändert enthalten.</p>
+   <p class="muted small">Unterstützte aktive automatische Web-Regeln werden als Financisto-Vorlagen exportiert. Noch nicht importierte und pausierte <strong>Original-Financisto-Vorlagen</strong> behalten ihre ursprünglichen Definitionen (die Web-Pausierung wird nicht auf Android übertragen). Gelöschte Originalvorlagen bleiben gelöscht. Bei manuellen oder nicht sicher abbildbaren Web-Regeln, einschließlich pausierter Web-only-Regeln, wird der Export mit einer konkreten Fehlermeldung abgebrochen, statt eine unvollständige Datei auszugeben. Die vollständige Web-Regelverwaltung bleibt immer im SQLite-Backup erhalten.</p>
   </div>
   <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" required autocomplete="current-password"></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
   <button type="submit" class="secondary">Financisto-Testexport herunterladen (.backup)</button>
