@@ -303,6 +303,8 @@
   "Ausführungen": "executions",
   "Maximal so oft ausführen (optional)": "Maximum occurrences (optional)",
   "Unbegrenzt": "Unlimited",
+  "Gültigkeit": "Validity",
+  "Schlüssel haben kein automatisches Ablaufdatum und bleiben bis zur Sperrung oder einer sicherheitsbedingten Ungültigmachung aktiv. Die Ausgabe erfolgt genau einmal und erfordert dein Administratorpasswort und einen frischen 2FA-Code.": "Keys do not expire automatically and remain valid until revoked or invalidated for security reasons. Keys are displayed only once; creating a key requires the administrator password and a fresh 2FA code.",
   "Abgeschlossen": "Completed",
   "Ohne Enddatum und Anzahl wiederholt sich die Regel unbegrenzt. Werden beide Grenzen gesetzt, endet sie beim ersten erreichten Limit. Bereits ausgeführte Termine zählen mit; bestehende Buchungen bleiben erhalten.": "Without an end date or maximum number of runs, the rule repeats indefinitely. If both limits are set, the first reached limit ends the rule. Previous runs count toward the maximum; existing transactions are kept.",
 
