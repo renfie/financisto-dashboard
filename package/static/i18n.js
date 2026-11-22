@@ -303,6 +303,10 @@
   "Ausführungen": "executions",
   "Maximal so oft ausführen (optional)": "Maximum occurrences (optional)",
   "Unbegrenzt": "Unlimited",
+  "Schlüssel haben kein automatisches Ablaufdatum. Ein angemeldeter Administrator kann sie erstellen, sperren und endgültig löschen. Der Schlüssel wird nur einmal angezeigt; bitte sicher aufbewahren.": "Keys do not expire automatically. An authenticated administrator can create, revoke, or permanently delete them. Each key is displayed once; keep it safe.",
+  "Sperren": "Revoke",
+  "Geräte-API-Schlüssel dauerhaft gelöscht. Zugriff sofort beendet.": "Device API key deleted permanently. Access terminated immediately.",
+
   "Gültigkeit": "Validity",
   "Schlüssel haben kein automatisches Ablaufdatum und bleiben bis zur Sperrung oder einer sicherheitsbedingten Ungültigmachung aktiv. Die Ausgabe erfolgt genau einmal und erfordert dein Administratorpasswort und einen frischen 2FA-Code.": "Keys do not expire automatically and remain valid until revoked or invalidated for security reasons. Keys are displayed only once; creating a key requires the administrator password and a fresh 2FA code.",
   "Abgeschlossen": "Completed",
