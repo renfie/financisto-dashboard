@@ -173,10 +173,13 @@ def export_current_financisto(db_path: Path = DB, *, day=None, force=False) -> s
         db.row_factory = sqlite3.Row
         db.execute('BEGIN')
         try:
-            # Match the existing successfully tested standard Financisto
-            # return export. Recurring Web rules are not silently converted:
-            # that remains an explicit opt-in in the separate test-export UI.
+            # The plain return exporter preserves original transaction rows
+            # but does not materialize Web-created recurring rule templates.
+            # Require the verified recurring pass for *all* automated backups.
+            # Unsupported rule semantics raise an explicit error; never write
+            # an apparently complete .backup with missing schedules.
             raw, stats = make_export(db)
+            raw, stats = merge_recurring_export(db, raw, stats)
         finally:
             db.rollback()
     if not 0 < len(raw) <= FINANCISTO_MAX_BYTES:
