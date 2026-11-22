@@ -1,3 +1,10 @@
+## 1.9.58-dev.17 – API-Schlüssel ohne erneute Anmeldung und vollständigerer Financisto-Rückexport (22.11.2026)
+- API-Schlüssel werden mit vorhandener Admin-Sitzung und CSRF-Schutz erstellt, gesperrt oder nach einer separaten Bestätigung dauerhaft gelöscht; kein zusätzliches Passwort und kein erneuter 2FA-Code. API-Wiederholungsnachweise des gelöschten Schlüssels werden zuvor entfernt, Audit-Ereignisse bleiben erhalten.
+- Automatische und manuelle Financisto-Backups sowie der Test-Rückexport verwenden nun stets den Wiederholungsregel-Export: Bereits bestehende originale Financisto-Vorlagen werden unverändert bewahrt; kompatible aktive automatische Web-Regeln werden in die .backup-Datei übernommen.
+- Original-Financisto-Vorlagen, die Web-seitig pausiert sind, behalten für den Rückimport ihre ursprüngliche Financisto-Definition (die Web-Pausierung lässt sich nicht automatisch auf Android übertragen).
+- Manuell ausgelöste, nur Web-seitig pausierte oder im nativen Format nicht unterstützte Regeln (u. a. tägliche/wöchentliche, Endtermin- oder Uhrzeit-Sonderregeln) werden **nicht stillschweigend ausgelassen**: Der neue Financisto-Export wird mit einer verständlichen Fehlermeldung abgebrochen. Das SQLite-Backup sichert weiterhin alle Web-Regeln vollständig.
+- Keine Finanzbuchungen, Kontostände oder Wiederholungsregeln werden durch diese Änderungen verändert; kein offizielles GitHub-Release.
+
 ## 1.9.58-dev.16 – Dauerhafte, widerrufbare Mobile-API-Schlüssel (22.11.2026)
 - Neu erzeugte API-Schlüssel erhalten kein automatisches Ablaufdatum (Datenbankwert `expires_on=0`). Ein Ablaufdatum wird bei der API-Anmeldung nicht mehr geprüft.
 - Beim Upgrade werden bisherige noch gültige Schlüssel auf unbegrenzte Gültigkeit umgestellt; bereits abgelaufene Schlüssel werden aus Sicherheitsgründen nicht wieder aktiviert.
