@@ -85,8 +85,15 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
     untracked = prior_template_ids-set(by_source)
 
     for rule in rows:
-        if rule['deleted_on'] or not int(rule['active']):
+        if rule['deleted_on']:
             continue
+        if not int(rule['active']):
+            # Original Financisto templates are retained as genuine original
+            # schedule records. A Web-only paused rule has no known safe
+            # native representation, so never silently omit it.
+            if rule['source_kind'] == 'financisto':
+                continue
+            raise ExportError(f'Regel {rule["title"]}: pausierte Web-Regel kann nicht verlustfrei in ein natives Financisto-Backup übernommen werden. Für vollständige Sicherung zusätzlich SQLite nutzen.')
         if not int(rule['auto_post']):
             raise ExportError(f'Regel {rule["title"]}: manuell aktive Regeln können in Financisto unbeabsichtigt automatisch laufen. Bitte vor dem Export pausieren oder ausdrücklich auf Automatisch umstellen.')
         if rule['needs_review']:
@@ -119,9 +126,13 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
         orig_id = rule['source_id'] if is_original else None
         if is_original:
             seen_source_ids.add(orig_id)
-        if rule['deleted_on'] or not int(rule['active']):
+        if rule['deleted_on']:
             if is_original:
                 removed.add(orig_id)
+            continue
+        if not int(rule['active']):
+            # Preserve untouched native recurring templates (including GEEKY).
+            # Do not reactivate or recode them when Web rules are paused.
             continue
         if int(rule['account_id']) not in account_ids or (rule['to_account_id'] and int(rule['to_account_id']) not in account_ids):
             raise ExportError(f'Regel {rule["title"]}: fehlendes Konto.')
@@ -201,7 +212,10 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             raise ExportError(f'Stammdaten {entity} wurden beim Wiederholungsexport unerwartet verändert.')
     copy_stats = dict(stats)
     copy_stats.update({'recurring_updated':updated_count,'recurring_new':new_count,
-                       'recurring_preserved_original':len(untracked),
-                       'recurring_excluded':len(removed), 'recurring_exported':updated_count+new_count+len(untracked),
+                       'recurring_preserved_original':len(untracked)+sum(
+                           1 for r in rows if r['source_kind']=='financisto' and
+                           not r['deleted_on'] and not int(r['active'])),
+                       'recurring_excluded':len(removed), 'recurring_exported':updated_count+new_count+len(untracked)+sum(
+                           1 for r in rows if r['source_kind']=='financisto' and not r['deleted_on'] and not int(r['active'])),
                        'transactions_with_templates':len(out_tx)})
     return exported,copy_stats
