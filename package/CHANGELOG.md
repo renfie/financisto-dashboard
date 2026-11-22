@@ -1,3 +1,9 @@
+## 1.9.58-dev.14 – Mobile-API-Erkennung und vereinfachte Wiederholungsseite (22.11.2026)
+- Öffentlicher, rein lesender JSON-Erkennungsendpunkt `/api/mobile/v1/status` (mit Alias `/api/mobile/v1`, `/api/v1/mobile/status`, `/api/v1/mobile`) für den Verbindungstest der Android-Alpha 18.
+- Der Endpunkt veröffentlicht keine Konten, Buchungen oder Benutzerdaten und meldet `server_mode_available=false`. Anmeldung, Kontenzugriff und Synchronisierung bleiben deaktiviert; die Android-App bleibt lokal führend.
+- Doppelter .backup-Upload aus „Wiederkehrende Buchungen“ entfernt. Der reguläre Financisto-Import unter Einstellungen bleibt unverändert; bestehende Regeln bleiben bestehen.
+- Kein Datenbank- oder Bind-Mount-Wechsel. Entwicklungsstand, kein offizielles Release.
+
 ## 1.9.58-dev.13 – Einnahmen bearbeiten und Empfänger in Wiederholungsregeln (18.11.2026)
 - Beim Bearbeiten vorhandener Buchungen wird der Betrag ohne Tausendertrennzeichen im Eingabefeld vorbelegt. Dadurch werden auch Einnahmen ab 1.000,00 € unverändert akzeptiert; die eigentliche Buchungs- und Kontostandslogik bleibt erhalten.
 - Bei neuen und bearbeiteten wiederkehrenden Buchungen wird der vorhandene Empfänger beim Fokussieren/Antippen zum direkten Überschreiben markiert, während die Vorschläge weiter nutzbar bleiben.
