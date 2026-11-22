@@ -28,3 +28,13 @@ Das Skript prüft die SQLite-Datei, verlangt das Wort `WIEDERHERSTELLEN`, stoppt
 Bei aktiver automatischer Datensicherung wird täglich neben dem SQLite-Backup ein eigener `.backup`-Rückexport aus den **aktuellen Web-Buchungen** erzeugt. Es verwendet den Standard-Rückexport ohne die optionale Übertragung von Web-Wiederholungsregeln. Der bestehende Rückexport erfordert eine passende Originalvorlage ; bei einem Fehler wird kein alter Android-Importstand als neue Sicherung ausgegeben. Die tägliche SQLite-Sicherung bleibt unabhängig funktionsfähig.
 
 Unter `data/financisto-backups/` bleiben maximal die **zwei letzten erfolgreich erzeugten** Versionen erhalten; der Administrator kann sie unter Einstellungen herunterladen. Mit einer separaten Testinstallation den Rückimport prüfen, bevor auf einem Android-Gerät produktive Daten ersetzt werden. Diese Sicherungen ersetzen das SQLite-Backup nicht; für die Wiederherstellung des Websystems außerdem `secrets/app_secret` sicher getrennt verwahren.
+
+## Wiederkehrende Buchungen im Financisto-Rückexport (ab 1.9.58-dev.17)
+
+Jeder **neu** erzeugte manuelle oder automatische Financisto-`.backup`-Export enthält den geprüften Wiederholungsregel-Durchgang. Bestehende, nicht im Web geänderte originale Financisto-Vorlagen bleiben unverändert erhalten; aktive automatisch ausführbare Web-Regeln werden nur exportiert, wenn der bekannte native Monats-/Quartals-/Jahresrhythmus verlustfrei abbildbar ist.
+
+Nicht kompatible Regeln werden nicht stillschweigend ausgelassen. Bei manuellen Web-Regeln, pausierten Web-only-Regeln, Sonderrhythmen, individuellen Ausführungszeiten oder begrenzten Wiederholungen wird **kein neuer** Financisto-Rückexport erstellt. Die letzte erfolgreiche Exportdatei kann dadurch älter sein; die tägliche SQLite-Sicherung läuft weiter und enthält sämtliche Web-Wiederholungsregeln.
+
+Wichtig: Web-seitig pausierte **ursprüngliche** Financisto-Vorlagen werden mit ihrer originalen Definition bewahrt. Eine solche Android-Vorlage kann nach Wiederherstellung in Financisto erneut automatisch laufen. Vor einem produktiven Android-Restore deshalb alle Vorlagen prüfen; zunächst nur in einer separaten Testinstallation importieren.
+
+Alte `.backup`-Exporte werden durch diese Aktualisierung nicht nachträglich ergänzt. Unter Einstellungen → „Jetzt Sicherung erstellen“ wird eine neue Sicherung erzeugt. Ein vollständiges Zurückspielen von Web-Wiederholungsregeln ist nur über das SQLite-Backup gewährleistet.
