@@ -80,9 +80,9 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             by_source[source_id] = rule
             if source_id not in prior_template_ids:
                 raise ExportError(f'Die Vorlage {rule["title"]} stammt nicht aus der verwendeten Originalsicherung. Bitte Importstand prüfen.')
+    # Templates not imported into Web recurring_rules remain unchanged in the
+    # exact original Financisto backup. Do not require a second manual import.
     untracked = prior_template_ids-set(by_source)
-    if untracked:
-        raise ExportError(f'{len(untracked)} ursprüngliche Dauerbuchung(en) sind nicht in der Web-Regelverwaltung erfasst. Bitte zuerst die Vorlagen aus der passenden Sicherung importieren.')
 
     for rule in rows:
         if rule['deleted_on'] or not int(rule['active']):
@@ -91,6 +91,8 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             raise ExportError(f'Regel {rule["title"]}: manuell aktive Regeln können in Financisto unbeabsichtigt automatisch laufen. Bitte vor dem Export pausieren oder ausdrücklich auf Automatisch umstellen.')
         if rule['needs_review']:
             raise ExportError(f'Regel {rule["title"]}: noch nicht abgeschlossene Regelprüfung. Bitte bearbeiten.')
+        if (rule.get('run_at') or '00:00') != '00:00':
+            raise ExportError(f'Regel {rule["title"]}: individuelle Ausführungsuhrzeit kann in Financisto nicht sicher übernommen werden.')
         if rule.get('end_on') or rule.get('max_occurrences') is not None:
             raise ExportError(f'Regel {rule["title"]}: Begrenzte Wiederholungen (Enddatum/Anzahl) können nicht zuverlässig in das Android-Format exportiert werden. Bitte die Regel vor dem Export deaktivieren.')
         from recurring import validate_rule
@@ -150,8 +152,9 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             replacements[ident] = result
         else:
             inserts.append(result)
-    if seen_source_ids != prior_template_ids:
-        raise ExportError('Die Vorlagen stimmen nicht vollständig mit der Originaldatei überein.')
+    # Preserve untracked original templates instead of dropping or rewriting them.
+    if not seen_source_ids.issubset(prior_template_ids):
+        raise ExportError('Regelverweise auf unbekannte Financisto-Vorlagen gefunden.')
 
     outgoing=[]
     last_transaction_pos=max((idx for idx,c in enumerate(chunks) if c[0]=='transactions'), default=-1)
@@ -198,6 +201,7 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             raise ExportError(f'Stammdaten {entity} wurden beim Wiederholungsexport unerwartet verändert.')
     copy_stats = dict(stats)
     copy_stats.update({'recurring_updated':updated_count,'recurring_new':new_count,
-                       'recurring_excluded':len(removed), 'recurring_exported':updated_count+new_count,
+                       'recurring_preserved_original':len(untracked),
+                       'recurring_excluded':len(removed), 'recurring_exported':updated_count+new_count+len(untracked),
                        'transactions_with_templates':len(out_tx)})
     return exported,copy_stats
