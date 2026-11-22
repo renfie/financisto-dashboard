@@ -173,6 +173,27 @@ def init_db():
             key TEXT NOT NULL, moment INTEGER NOT NULL
         );
         CREATE INDEX IF NOT EXISTS auth_attempts_idx ON auth_attempts(key,moment);
+        CREATE TABLE IF NOT EXISTS mobile_api_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            user_version INTEGER NOT NULL,
+            label TEXT NOT NULL,
+            key_hash TEXT NOT NULL UNIQUE,
+            access TEXT NOT NULL CHECK(access IN ('read','write')),
+            issued_on INTEGER NOT NULL,
+            expires_on INTEGER NOT NULL,
+            revoked_on INTEGER
+        );
+        CREATE TABLE IF NOT EXISTS mobile_api_receipts (
+            key_id INTEGER NOT NULL REFERENCES mobile_api_keys(id),
+            request_id TEXT NOT NULL,
+            operation TEXT NOT NULL,
+            fingerprint TEXT NOT NULL,
+            response_json TEXT NOT NULL,
+            created_on INTEGER NOT NULL,
+            PRIMARY KEY(key_id,request_id)
+        );
+
         CREATE TABLE IF NOT EXISTS audit_events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             actor_id INTEGER, event TEXT NOT NULL, detail TEXT NOT NULL DEFAULT '',
@@ -314,36 +335,6 @@ def current_user():
 def inject_user():
     return {'viewer': current_user(), 'ui_language': interface_language(), **APP_BRANDING, 'app_footer': footer_for_language()}
 
-
-
-@app.get('/api/mobile/v1')
-@app.get('/api/mobile/v1/status')
-@app.get('/api/v1/mobile')
-@app.get('/api/v1/mobile/status')
-def mobile_api_discovery():
-    """Public capability discovery only; never disclose private finance data.
-
-    Android Alpha 18 probes for a versioned Mobile API. Authentication,
-    transaction transport and synchronization require a separate reviewed
-    protocol and must remain disabled until it exists.
-    """
-    response = jsonify(
-        service='FieLanzen Dashboard',
-        api='mobile',
-        api_version='1',
-        status='discovery_only',
-        server_mode_available=False,
-        authentication_available=False,
-        accounts_available=False,
-        transactions_available=False,
-        synchronization_available=False,
-        capabilities={'discovery': True, 'login': False, 'accounts': False,
-                      'transactions': False, 'sync': False},
-        message='Mobile API discovery is available. Server mode is not yet implemented.'
-    )
-    response.headers['Cache-Control'] = 'no-store'
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    return response
 
 
 @app.post('/language')
@@ -830,6 +821,10 @@ def settings():
             public_enabled = finance_setting(db, 'public_access_enabled', '0') == '1'
             pending_overwrite = finance_setting(db, 'import_overwrite_pending', '0') == '1'
             approved_overwrite = finance_setting(db, 'import_overwrite_approved', '0') == '1'
+            mobile_keys = db.execute('''SELECT m.id,m.label,m.access,m.issued_on,m.expires_on,m.revoked_on,u.username,
+                                      datetime(m.expires_on,'unixepoch') expires_label
+                                      FROM mobile_api_keys m JOIN users u ON u.id=m.user_id
+                                      ORDER BY m.id DESC LIMIT 50''').fetchall()
             users = db.execute('''SELECT id,username,display_name,role,is_active,totp_enabled,created_at
                                   FROM users ORDER BY username COLLATE NOCASE''').fetchall()
             accounts = db.execute('''SELECT a.id,a.title,a.kind,s.is_active FROM accounts a
@@ -873,6 +868,7 @@ def settings():
             # No user lists, PC allowlists, admin config or account management
             # data are fetched or passed to an editor's page.
             clients = users = accounts = currencies = default_account_choices = ()
+            mobile_keys = ()
             currency_catalog=()
             preferred_currency='EUR'
             public_enabled = pending_overwrite = approved_overwrite = auto_enabled = False
@@ -898,6 +894,7 @@ def settings():
                            default_account_choices=default_account_choices,
                            preferred_currency=preferred_currency,currency_catalog=currency_catalog,
                            reconcile_accounts=reconcile_accounts,
+                           mobile_keys=mobile_keys,
                            public_access=public_enabled, clients=clients,
                            current_ip=verified_ip() if is_admin else None,
                            pending_overwrite=pending_overwrite, approved_overwrite=approved_overwrite,
@@ -3433,3 +3430,358 @@ def pwa_manifest():
 @app.get('/sw.js')
 def pwa_service_worker():
     return app.send_static_file('sw.js'), 200, {'Content-Type': 'application/javascript', 'Service-Worker-Allowed': '/', 'Cache-Control': 'no-cache'}
+
+
+# --- Versioned Android API. All private requests use explicit bearer credentials;
+# session cookies are not API credentials and never skip CSRF for browser forms.
+import json as _mobile_json
+from uuid import UUID as _MobileUUID
+
+
+def _mobile_json_response(body, status=200):
+    response = jsonify(body)
+    response.status_code = status
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response
+
+
+def _mobile_denied(status=401, message='API-Key fehlt oder ist ungültig.'):
+    result = _mobile_json_response({'error': message}, status)
+    if status == 401:
+        result.headers['WWW-Authenticate'] = 'Bearer realm="FieLanzen Mobile"'
+    return result
+
+
+def _mobile_authorize(*, write=False):
+    header = request.headers.get('Authorization','')
+    if not header.startswith('Bearer '):
+        return None
+    token = header[7:].strip()
+    if len(token) < 32 or len(token) > 160 or not re.fullmatch(r'fm1_[A-Za-z0-9_-]+',token):
+        return None
+    digest = hashlib.sha256(('FieLanzen-Mobile-Key-v1:'+token).encode()).hexdigest()
+    with get_db() as db:
+        record = db.execute('''SELECT k.id key_id,k.access,k.expires_on,u.id user_id,
+               u.username,u.role,u.version,u.is_active,u.totp_enabled,k.user_version
+               FROM mobile_api_keys k JOIN users u ON k.user_id=u.id
+               WHERE k.key_hash=? AND k.revoked_on IS NULL''',(digest,)).fetchone()
+    if (not record or record['expires_on'] <= int(time.time()) or
+            not record['is_active'] or not record['totp_enabled'] or
+            record['version'] != record['user_version']):
+        return None
+    if write and (record['access'] != 'write' or record['role'] not in ('admin','editor')):
+        return None
+    return dict(record)
+
+
+def _mobile_require(write=False):
+    user=_mobile_authorize(write=write)
+    if user is None:
+        return None,_mobile_denied()
+    if write:
+        with get_db() as db:
+            if finance_setting(db,'finance_mode','import')!='web':
+                return None,_mobile_denied(409,'Web-Verwaltung ist nicht führend. Kein Schreibzugriff.')
+    return user,None
+
+
+def _mobile_book_hash(row):
+    attrs=(row['id'],row['day'],row['account_id'],row['to_account_id'],row['category_id'],
+           row['payee_id'],row['amount'],row['note'],row['origin'])
+    return hashlib.sha256(_mobile_json.dumps(attrs,ensure_ascii=False).encode()).hexdigest()[:32]
+
+
+def _mobile_booking(row):
+    return {'id':int(row['id']), 'date':row['day'],'account_id':int(row['account_id']),
+            'to_account_id':int(row['to_account_id'] or 0),
+            'category_id':int(row['category_id'] or 0),'payee_id':int(row['payee_id'] or 0),
+            'amount_minor':int(row['amount']), 'note':row['note'] or '',
+            'currency_code':row['currency_code'], 'decimals':int(row['decimals']),
+            'kind':'transfer' if row['to_account_id'] else 'income' if row['amount']>0 else 'expense',
+            'payee':row['payee_title'] or '', 'account':row['account_title'],
+            'revision':_mobile_book_hash(row)}
+
+
+def _mobile_book_query():
+    return '''SELECT t.*,a.title account_title,c.code currency_code,c.decimals,
+              p.title payee_title FROM transactions t
+              JOIN accounts a ON a.id=t.account_id
+              JOIN currencies c ON c.id=a.currency_id
+              LEFT JOIN payees p ON p.id=t.payee_id'''
+
+
+@app.get('/api/mobile/v1/capabilities')
+@app.get('/api/mobile/v1/status')
+@app.get('/api/mobile/v1')
+@app.get('/api/v1/mobile')
+@app.get('/api/v1/mobile/status')
+def mobile_api_capabilities():
+    return _mobile_json_response({'product':'fielanzen-dashboard','mobile_api':1,
+       'status':'available','authentication':'api_key_bearer',
+       'features':{'accounts':True,'categories':True,'payees':True,'bookings':True,
+                   'create_booking':True,'update_booking':True,'delete_booking':True,
+                   'server_authoritative':True,'offline_conflict_merge':False},
+       'server_base_path':'/api/mobile/v1',
+       'message':'Online-Servermodus verfügbar. Kein automatischer Import lokaler Android-Daten.'})
+
+
+@app.post('/settings/mobile-keys/create')
+@admin_required
+def mobile_key_create():
+    if not csrf_ok(): abort(400)
+    if not verify_admin_stepup():
+        flash('Für die Erstellung bitte Admin-Passwort und einen frischen 2FA-Code eingeben.','error')
+        return redirect(url_for('settings')+'#mobile-keys')
+    label=request.form.get('label','').strip()[:80]
+    access=request.form.get('access','read')
+    if not label or access not in ('read','write'):
+        flash('Gerätenamen und Berechtigung prüfen.','error')
+        return redirect(url_for('settings')+'#mobile-keys')
+    user=current_user()
+    token='fm1_'+secrets.token_urlsafe(32)
+    digest=hashlib.sha256(('FieLanzen-Mobile-Key-v1:'+token).encode()).hexdigest()
+    now=int(time.time())
+    with get_db() as db:
+        db.execute('''INSERT INTO mobile_api_keys(user_id,user_version,label,key_hash,access,issued_on,expires_on)
+                      VALUES(?,?,?,?,?,?,?)''',
+                   (user['id'],user['version'],label,digest,access,now,now+90*86400))
+        audit(db,'mobile_key_created',label,actor_id=user['id'])
+    return render_template('mobile_key_created.html',secret=token,label=label,access=access)
+
+
+@app.post('/settings/mobile-keys/<int:key_id>/revoke')
+@admin_required
+def mobile_key_revoke(key_id):
+    if not csrf_ok(): abort(400)
+    if not verify_admin_stepup():
+        flash('Sperren bitte mit Admin-Passwort und frischem 2FA-Code bestätigen.','error')
+        return redirect(url_for('settings')+'#mobile-keys')
+    with get_db() as db:
+        key=db.execute('SELECT label FROM mobile_api_keys WHERE id=?',(key_id,)).fetchone()
+        if key is None: abort(404)
+        db.execute('UPDATE mobile_api_keys SET revoked_on=? WHERE id=? AND revoked_on IS NULL',
+                   (int(time.time()),key_id))
+        audit(db,'mobile_key_revoked',key['label'])
+    flash('Geräteschlüssel gesperrt.','success')
+    return redirect(url_for('settings')+'#mobile-keys')
+
+
+@app.get('/api/mobile/v1/session')
+def mobile_api_session():
+    user,error=_mobile_require()
+    if error:return error
+    with get_db() as db:
+        mode=finance_setting(db,'finance_mode','import')
+    return _mobile_json_response({'username':user['username'],'role':user['role'],
+        'access':user['access'],'finance_mode':mode,'can_write':mode=='web' and user['access']=='write'
+        and user['role'] in ('admin','editor')})
+
+
+@app.get('/api/mobile/v1/accounts')
+def mobile_api_accounts():
+    user,error=_mobile_require()
+    if error:return error
+    with get_db() as db:
+        rows=db.execute('''SELECT a.id,a.title,c.code currency_code,c.symbol,c.decimals,
+                     s.balance_minor,s.is_active,s.include_in_totals
+                     FROM accounts a JOIN currencies c ON c.id=a.currency_id
+                     LEFT JOIN account_snapshots s ON s.account_id=a.id
+                     ORDER BY a.title COLLATE NOCASE''').fetchall()
+        future=future_account_deltas(db,datetime.now(MONTH_TZ).date().isoformat())
+    return _mobile_json_response({'items':[{'id':r['id'],'name':r['title'],
+         'currency':r['currency_code'],'symbol':r['symbol'],'decimals':r['decimals'],
+         'balance_minor':r['balance_minor']-future.get(r['id'],0) if r['balance_minor'] is not None else None,
+         'projected_balance_minor':r['balance_minor'],'active':bool(r['is_active']),
+         'included_in_total':bool(r['include_in_totals'])} for r in rows]})
+
+
+@app.get('/api/mobile/v1/categories')
+def mobile_api_categories():
+    user,error=_mobile_require()
+    if error:return error
+    with get_db() as db:
+        rows=db.execute('SELECT id,title,kind FROM categories ORDER BY title COLLATE NOCASE').fetchall()
+    return _mobile_json_response({'items':[{'id':r['id'],'name':r['title'],
+        'kind':'expense' if r['kind']==0 else 'income'} for r in rows]})
+
+
+@app.get('/api/mobile/v1/payees')
+def mobile_api_payees():
+    user,error=_mobile_require()
+    if error:return error
+    with get_db() as db:
+        rows=db.execute('SELECT id,title FROM payees ORDER BY title COLLATE NOCASE').fetchall()
+    return _mobile_json_response({'items':[{'id':r['id'],'name':r['title']} for r in rows]})
+
+
+@app.get('/api/mobile/v1/bookings')
+def mobile_api_bookings():
+    user,error=_mobile_require()
+    if error:return error
+    try:
+        limit=max(1,min(200,int(request.args.get('limit','100'))))
+        cursor=int(request.args.get('before','0'))
+        if cursor < 0: raise ValueError()
+    except (TypeError,ValueError):
+        return _mobile_denied(400,'Ungültige Paginierung.')
+    with get_db() as db:
+        sql=_mobile_book_query()+' WHERE t.is_template=0'
+        params=[]
+        if cursor:
+            sql+=' AND t.id<?';params.append(cursor)
+        sql+=' ORDER BY t.id DESC LIMIT ?';params.append(limit+1)
+        rows=db.execute(sql,params).fetchall()
+    page=rows[:limit]
+    return _mobile_json_response({'items':[_mobile_booking(r) for r in page],
+         'next_before':page[-1]['id'] if len(rows)>limit else None})
+
+
+def _mobile_payload(db, data):
+    if not isinstance(data,dict):raise ValueError('JSON-Objekt erforderlich.')
+    kind=data.get('kind','')
+    if kind not in ('income','expense','transfer'):
+        raise ValueError('Ungültige Buchungsart.')
+    day=data.get('date','')
+    if not isinstance(day,str) or not re.fullmatch(r'20\d\d-(0[1-9]|1[0-2])-([0-2]\d|3[01])',day):
+        raise ValueError('Ungültiges Datum.')
+    try: date.fromisoformat(day)
+    except ValueError:raise ValueError('Ungültiges Kalenderdatum.') from None
+    account_id=int(data.get('account_id',0))
+    account=existing_account(db,account_id)
+    amount=data.get('amount_minor')
+    if isinstance(amount,bool) or not isinstance(amount,int) or amount<=0 or amount>10**15:
+        raise ValueError('Ungültiger positiver Betrag (Minor Units).')
+    target=int(data.get('to_account_id') or 0)
+    if kind=='transfer':
+        destination=existing_account(db,target)
+        if target==account_id or destination['currency_id']!=account['currency_id']:
+            raise ValueError('Umbuchung benötigt ein anderes Konto derselben Währung.')
+    elif target:
+        raise ValueError('Nur Umbuchungen haben ein Zielkonto.')
+    category=int(data.get('category_id') or 0)
+    if kind=='transfer':
+        category=0
+    elif category:
+        row=db.execute('SELECT kind FROM categories WHERE id=?',(category,)).fetchone()
+        if not row or int(row['kind'])!=(1 if kind=='income' else 0):
+            raise ValueError('Kategorie passt nicht zur Buchungsart.')
+    payee_id=int(data.get('payee_id') or 0)
+    if payee_id:
+        if not db.execute('SELECT 1 FROM payees WHERE id=?',(payee_id,)).fetchone():
+            raise ValueError('Empfänger existiert nicht.')
+    else:
+        title=data.get('payee_title','')
+        if not isinstance(title,str) or len(title)>120:
+            raise ValueError('Ungültiger Empfänger.')
+        payee_id=entry_payee(db,title)
+
+    note=data.get('note','')
+    if not isinstance(note,str) or len(note)>1000:
+        raise ValueError('Notiz zu lang.')
+    return {'day':day,'account_id':account_id,'to_account_id':target,
+      'category_id':category,'payee_id':payee_id,
+      'amount':amount if kind=='income' else -amount,'note':note,'is_template':0}
+
+
+def _mobile_body_and_request_id():
+    data=request.get_json(silent=True)
+    if not isinstance(data,dict):raise ValueError('JSON-Objekt erforderlich.')
+    rid=request.headers.get('Idempotency-Key','')
+    try:
+        if str(_MobileUUID(rid))!=rid.lower():raise ValueError()
+    except (TypeError,ValueError,AttributeError):
+        raise ValueError('Idempotency-Key muss eine UUID sein.') from None
+    return data,rid
+
+
+def _mobile_receipt(db,user,request_id,operation,payload):
+    fingerprint=hashlib.sha256(_mobile_json.dumps(payload,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    old=db.execute('SELECT operation,fingerprint,response_json FROM mobile_api_receipts WHERE key_id=? AND request_id=?',
+                   (user['key_id'],request_id)).fetchone()
+    if old:
+        if old['operation']!=operation or old['fingerprint']!=fingerprint:
+            raise ValueError('Idempotency-Key wurde mit anderen Daten wiederverwendet.')
+        return _mobile_json.loads(old['response_json']),fingerprint
+    return None,fingerprint
+
+
+def _mobile_save_receipt(db,user,rid,operation,fingerprint,result):
+    db.execute('''INSERT INTO mobile_api_receipts(key_id,request_id,operation,fingerprint,response_json,created_on)
+                  VALUES(?,?,?,?,?,?)''',(user['key_id'],rid,operation,fingerprint,
+                  _mobile_json.dumps(result,ensure_ascii=False),int(time.time())))
+
+
+@app.post('/api/mobile/v1/bookings')
+def mobile_api_create_booking():
+    user,error=_mobile_require(write=True)
+    if error:return error
+    try:data,rid=_mobile_body_and_request_id()
+    except ValueError as exc:return _mobile_denied(400,str(exc))
+    try:
+        with get_db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            old,fingerprint=_mobile_receipt(db,user,rid,'create',data)
+            if old is not None:return _mobile_json_response(old)
+            values=_mobile_payload(db,data)
+            row=db.execute('''INSERT INTO transactions(day,account_id,to_account_id,category_id,
+                payee_id,amount,note,is_template,origin)
+                VALUES(:day,:account_id,:to_account_id,:category_id,:payee_id,:amount,:note,0,'web')''',values)
+            apply_balance_delta(db,values,+1)
+            db.execute("UPDATE meta SET value=CAST(value AS INTEGER)+1 WHERE key='ledger_web_writes'")
+            audit(db,'mobile_booking_created',str(row.lastrowid),actor_id=user['user_id'])
+            response={'id':row.lastrowid,'saved':True}
+            _mobile_save_receipt(db,user,rid,'create',fingerprint,response)
+        return _mobile_json_response(response,201)
+    except (ValueError,sqlite3.Error) as exc:
+        return _mobile_denied(409,str(exc))
+
+
+def _mobile_edit_booking(booking_id,delete=False):
+    user,error=_mobile_require(write=True)
+    if error:return error
+    try:data,rid=_mobile_body_and_request_id()
+    except ValueError as exc:return _mobile_denied(400,str(exc))
+    expected=request.headers.get('If-Match','')
+    if not re.fullmatch(r'[0-9a-f]{32}',expected):
+        return _mobile_denied(428,'If-Match mit aktueller Buchungsrevision erforderlich.')
+    op='delete' if delete else 'update'
+    try:
+        with get_db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            payload={'id':booking_id,'revision':expected,'data':data}
+            previous,fingerprint=_mobile_receipt(db,user,rid,op,payload)
+            if previous is not None:return _mobile_json_response(previous)
+            old=db.execute(_mobile_book_query()+' WHERE t.id=? AND t.is_template=0',(booking_id,)).fetchone()
+            if old is None:return _mobile_denied(404,'Buchung nicht vorhanden.')
+            if _mobile_book_hash(old)!=expected:
+                return _mobile_denied(409,'Buchung wurde inzwischen verändert. Bitte neu laden.')
+            if db.execute('SELECT 1 FROM recurring_runs WHERE booking_id=? LIMIT 1',(booking_id,)).fetchone():
+                return _mobile_denied(409,'Wiederkehrende Buchung bitte in der Weboberfläche bearbeiten.')
+            if delete:
+                apply_balance_delta(db,old,-1)
+                db.execute('DELETE FROM transactions WHERE id=?',(booking_id,))
+            else:
+                row=_mobile_payload(db,data)
+                apply_balance_delta(db,old,-1)
+                db.execute('''UPDATE transactions SET day=:day,account_id=:account_id,
+                  to_account_id=:to_account_id,category_id=:category_id,payee_id=:payee_id,
+                  amount=:amount,note=:note,is_template=0,origin='web' WHERE id=:id''',
+                  {**row,'id':booking_id})
+                apply_balance_delta(db,row,+1)
+            db.execute("UPDATE meta SET value=CAST(value AS INTEGER)+1 WHERE key='ledger_web_writes'")
+            audit(db,'mobile_booking_deleted' if delete else 'mobile_booking_updated',str(booking_id),actor_id=user['user_id'])
+            result={'id':booking_id,'deleted':delete,'saved':not delete}
+            _mobile_save_receipt(db,user,rid,op,fingerprint,result)
+        return _mobile_json_response(result)
+    except (ValueError,sqlite3.Error) as exc:
+        return _mobile_denied(409,str(exc))
+
+
+@app.put('/api/mobile/v1/bookings/<int:booking_id>')
+def mobile_api_update_booking(booking_id):
+    return _mobile_edit_booking(booking_id)
+
+
+@app.delete('/api/mobile/v1/bookings/<int:booking_id>')
+def mobile_api_delete_booking(booking_id):
+    return _mobile_edit_booking(booking_id,delete=True)
