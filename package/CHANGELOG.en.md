@@ -1,3 +1,9 @@
+## 1.9.58-dev.17 – Session-based API key management and safe recurring export (2026-11-22)
+- Existing admin session plus CSRF verification is sufficient to create or revoke device API keys. Permanent deletion requires a confirmation and removes related idempotency receipts; audit records remain. No repeated password or TOTP is needed.
+- Manual and scheduled Financisto backups and the test export now run the recurrence merge automatically. Unmodified original Financisto templates are preserved, and compatible active automatic Web rules are included.
+- Paused original templates retain their native original definition; Web pause status cannot be transported. Unsupported or manual/paused Web-only recurrence semantics cause a clear export error rather than silent data loss. Full SQLite backups always preserve all Web rules.
+- No financial ledger mutation, no schema changes and no official release.
+
 ## 1.9.58-dev.16 – Non-expiring, revocable Mobile API keys (2026-11-22)
 - New device API keys no longer have a scheduled expiry (`expires_on=0`); authentication no longer checks an expiry timestamp.
 - Previously unexpired keys are migrated to unlimited validity. Already expired keys stay disabled and are never silently reactivated.
