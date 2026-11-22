@@ -1,3 +1,11 @@
+## 1.9.58-dev.15 – Vollständige Mobile-API für Online-Servermodus (22.11.2026)
+- API-Key-Verwaltung nach Admin-Passwort und frischem 2FA-Code; Geräte-Keys nur einmal angezeigt, gehasht in SQLite, 90 Tage gültig und jederzeit sperrbar.
+- Mobile-API: öffentliche Capabilities, authentisierte Sitzung, Konten, Kategorien, Empfänger, paginierte Buchungen, sowie Anlegen/Bearbeiten/Löschen von Web-Buchungen.
+- Schreibzugriff nur bei führender Web-Verwaltung, Editor/Admin und Schlüssel mit Schreibrecht; UUID-Idempotenz und If-Match-Konfliktprüfung bei Bearbeiten/Löschen.
+- Datenabgleich nur im Online-Modus, serverführend, kein Mischen mit lokalen Android-Daten; Android-Zugangsschlüssel wird im Android-Keystore verschlüsselt abgelegt.
+- Neues SQLite-Schema nur additiv, Bind-Mounts, bestehende Kontostände und Web-Sessions erhalten.
+- Beim Server-Import gibt es keinen automatischen Upload vorhandener Offline-Buchungen.
+
 ## 1.9.58-dev.14 – Mobile-API-Erkennung und vereinfachte Wiederholungsseite (22.11.2026)
 - Öffentlicher, rein lesender JSON-Erkennungsendpunkt `/api/mobile/v1/status` (mit Alias `/api/mobile/v1`, `/api/v1/mobile/status`, `/api/v1/mobile`) für den Verbindungstest der Android-Alpha 18.
 - Der Endpunkt veröffentlicht keine Konten, Buchungen oder Benutzerdaten und meldet `server_mode_available=false`. Anmeldung, Kontenzugriff und Synchronisierung bleiben deaktiviert; die Android-App bleibt lokal führend.
