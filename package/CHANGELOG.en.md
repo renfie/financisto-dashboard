@@ -1,3 +1,9 @@
+## 1.9.58-dev.15 – Online Mobile API and device-scoped credentials (2026-11-22)
+- Admin 2FA-protected, revocable 90-day device API keys, stored as hashes; keys are shown only once.
+- Versioned Mobile API for session, accounts, categories, payees, paginated transactions and safe create/edit/delete with idempotency UUID and revision checks.
+- Remote online mode is server-authoritative, keeps offline Android data separate and never merges or uploads it automatically.
+- Additive database migration only; existing bind mounts and transactions preserved.
+
 ## 1.9.58-dev.14 – Mobile API discovery and simplified recurring screen (2026-11-22)
 - Add safe, public, read-only JSON API discovery at `/api/mobile/v1/status` (also `/api/mobile/v1`, `/api/v1/mobile/status` and `/api/v1/mobile`) for Android Alpha 18's connection check.
 - No private data or credentials are exposed. The response states `server_mode_available=false`; authentication, account endpoints and synchronization are not enabled.
