@@ -1795,10 +1795,9 @@ def settings_export_financisto():
         with get_db() as db:
             db.execute('BEGIN')
             raw, stats=make_export(db)
-            # Recurring schedules are optional and explicitly selected. The
-            # legacy export path is unchanged when the checkbox is empty.
-            if request.form.get('include_recurring') == '1':
-                raw, stats = merge_recurring_export(db,raw,stats)
+            # Always include current recurring templates. Never return a
+            # "successful" Financisto file with silently omitted Web rules.
+            raw, stats = merge_recurring_export(db,raw,stats)
             # Close the read transaction before returning the attachment.
         with get_db() as audit_db:
             audit(audit_db, 'financisto_test_export_downloaded', f"{stats['transactions']} bookings; recurring={stats.get('recurring_exported', 'not selected')}")
