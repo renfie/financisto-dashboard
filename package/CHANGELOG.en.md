@@ -1,3 +1,10 @@
+## 1.9.58-dev.16 – Non-expiring, revocable Mobile API keys (2026-11-22)
+- New device API keys no longer have a scheduled expiry (`expires_on=0`); authentication no longer checks an expiry timestamp.
+- Previously unexpired keys are migrated to unlimited validity. Already expired keys stay disabled and are never silently reactivated.
+- Administrator revocation, inactive users, disabled 2FA and account security-version changes continue to invalidate keys.
+- The Settings UI now shows “Unbegrenzt” instead of a date. Creation and revocation still require administrator password and fresh 2FA.
+- Dashboard only. No Android release, transaction changes or bind-mount changes; only API-key metadata is migrated.
+
 ## 1.9.58-dev.15 – Online Mobile API and device-scoped credentials (2026-11-22)
 - Admin 2FA-protected, revocable 90-day device API keys, stored as hashes; keys are shown only once.
 - Versioned Mobile API for session, accounts, categories, payees, paginated transactions and safe create/edit/delete with idempotency UUID and revision checks.
