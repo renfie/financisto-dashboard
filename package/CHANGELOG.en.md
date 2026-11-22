@@ -1,3 +1,9 @@
+## 1.9.58-dev.14 – Mobile API discovery and simplified recurring screen (2026-11-22)
+- Add safe, public, read-only JSON API discovery at `/api/mobile/v1/status` (also `/api/mobile/v1`, `/api/v1/mobile/status` and `/api/v1/mobile`) for Android Alpha 18's connection check.
+- No private data or credentials are exposed. The response states `server_mode_available=false`; authentication, account endpoints and synchronization are not enabled.
+- Remove duplicate .backup upload form from Recurring Bookings; the Settings import remains unchanged.
+- Development build only, no schema or bind mount changes.
+
 ## 1.9.58-dev.13 – Edit larger income amounts and select recurring payees (2026-11-18)
 - Editing an existing transaction now pre-fills the amount without thousands separators so amounts from 1,000.00 upward parse correctly in the booking form.
 - New and edited recurring rules select a prefilled payee on focus/tap for direct replacement while keeping payee suggestions available.
