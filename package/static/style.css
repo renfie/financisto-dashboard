@@ -1078,3 +1078,8 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 .mobile-web-booking-list th .booking-sort-link:hover{text-decoration:underline;text-underline-offset:3px}
 .mobile-web-booking-list th .booking-sort-link:focus-visible{outline:2px solid #0b6b79;outline-offset:3px;border-radius:3px}
 .mobile-web-booking-list td.note{max-width:230px;min-width:90px;overflow-wrap:anywhere;white-space:normal}
+
+/* Admin-only API key management, compact actions without repeated credentials. */
+.mobile-key-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mobile-key-actions form{margin:0}
+.mobile-key-actions button{white-space:nowrap}
