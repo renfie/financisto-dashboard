@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Android-Geräteschlüssel · {{ app_title }}{% endblock %}
+{% block content %}
+<section class="panel" style="max-width:800px;margin:auto;padding:28px">
+ <h1>Neuer Android-API-Schlüssel für {{ label }}</h1>
+ <p class="notice"><strong>Einmalige Anzeige:</strong> Dieser Schlüssel wird nicht noch einmal angezeigt. Kopiere ihn jetzt in die FieLanzen-App unter Mehr → Datenquelle. Speichere ihn nicht in unverschlüsselten Notizen oder Screenshots.</p>
+ <label>API-Schlüssel<input type="text" value="{{ secret }}" readonly id="mobile-api-secret" autocomplete="off" spellcheck="false"></label>
+ <p class="hint">Berechtigung: {{ 'Lesen und Buchen' if access=='write' else 'Nur lesen' }} · Gültigkeit: 90 Tage · Bei Verlust neuen Schlüssel erzeugen und den alten sperren.</p>
+ <a class="button secondary" href="{{ url_for('settings') }}#mobile-keys">Zur Schlüsselverwaltung zurück</a>
+</section>
+{% endblock %}
