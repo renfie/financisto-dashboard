@@ -1,3 +1,10 @@
+## 1.9.58-dev.16 – Dauerhafte, widerrufbare Mobile-API-Schlüssel (22.11.2026)
+- Neu erzeugte API-Schlüssel erhalten kein automatisches Ablaufdatum (Datenbankwert `expires_on=0`). Ein Ablaufdatum wird bei der API-Anmeldung nicht mehr geprüft.
+- Beim Upgrade werden bisherige noch gültige Schlüssel auf unbegrenzte Gültigkeit umgestellt; bereits abgelaufene Schlüssel werden aus Sicherheitsgründen nicht wieder aktiviert.
+- Schlüssel bleiben einzeln durch Administratoren sperrbar; Deaktivierung des Benutzers, fehlende 2FA oder Änderung seiner Sicherheitsversion machen sie weiterhin ungültig.
+- Die Schlüsselverwaltung zeigt „Unbegrenzt“ statt eines Ablaufdatums. Administratorpasswort und frischer 2FA-Code sind weiterhin Voraussetzung für Erstellung und Sperrung.
+- Ausschließlich Dashboard-Änderung. Keine neue Android-Version, keine Änderung an Konten, Buchungen, Bind-Mounts oder bestehenden Finanzdaten; nur API-Schlüsselmetadaten werden migriert.
+
 ## 1.9.58-dev.15 – Vollständige Mobile-API für Online-Servermodus (22.11.2026)
 - API-Key-Verwaltung nach Admin-Passwort und frischem 2FA-Code; Geräte-Keys nur einmal angezeigt, gehasht in SQLite, 90 Tage gültig und jederzeit sperrbar.
 - Mobile-API: öffentliche Capabilities, authentisierte Sitzung, Konten, Kategorien, Empfänger, paginierte Buchungen, sowie Anlegen/Bearbeiten/Löschen von Web-Buchungen.
