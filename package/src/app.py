@@ -315,6 +315,37 @@ def inject_user():
     return {'viewer': current_user(), 'ui_language': interface_language(), **APP_BRANDING, 'app_footer': footer_for_language()}
 
 
+
+@app.get('/api/mobile/v1')
+@app.get('/api/mobile/v1/status')
+@app.get('/api/v1/mobile')
+@app.get('/api/v1/mobile/status')
+def mobile_api_discovery():
+    """Public capability discovery only; never disclose private finance data.
+
+    Android Alpha 18 probes for a versioned Mobile API. Authentication,
+    transaction transport and synchronization require a separate reviewed
+    protocol and must remain disabled until it exists.
+    """
+    response = jsonify(
+        service='FieLanzen Dashboard',
+        api='mobile',
+        api_version='1',
+        status='discovery_only',
+        server_mode_available=False,
+        authentication_available=False,
+        accounts_available=False,
+        transactions_available=False,
+        synchronization_available=False,
+        capabilities={'discovery': True, 'login': False, 'accounts': False,
+                      'transactions': False, 'sync': False},
+        message='Mobile API discovery is available. Server mode is not yet implemented.'
+    )
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
+
 @app.post('/language')
 def set_interface_language():
     # CSRF must be verified even for presentation-only session changes.
