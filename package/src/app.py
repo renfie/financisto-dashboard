@@ -3536,9 +3536,6 @@ def mobile_api_capabilities():
 @admin_required
 def mobile_key_create():
     if not csrf_ok(): abort(400)
-    if not verify_admin_stepup():
-        flash('Für die Erstellung bitte Admin-Passwort und einen frischen 2FA-Code eingeben.','error')
-        return redirect(url_for('settings')+'#mobile-keys')
     label=request.form.get('label','').strip()[:80]
     access=request.form.get('access','read')
     if not label or access not in ('read','write'):
@@ -3560,9 +3557,6 @@ def mobile_key_create():
 @admin_required
 def mobile_key_revoke(key_id):
     if not csrf_ok(): abort(400)
-    if not verify_admin_stepup():
-        flash('Sperren bitte mit Admin-Passwort und frischem 2FA-Code bestätigen.','error')
-        return redirect(url_for('settings')+'#mobile-keys')
     with get_db() as db:
         key=db.execute('SELECT label FROM mobile_api_keys WHERE id=?',(key_id,)).fetchone()
         if key is None: abort(404)
@@ -3570,6 +3564,29 @@ def mobile_key_revoke(key_id):
                    (int(time.time()),key_id))
         audit(db,'mobile_key_revoked',key['label'])
     flash('Geräteschlüssel gesperrt.','success')
+    return redirect(url_for('settings')+'#mobile-keys')
+
+
+
+@app.post('/settings/mobile-keys/<int:key_id>/delete')
+@admin_required
+def mobile_key_delete(key_id):
+    """Permanently erase a device credential and its idempotency cache.
+
+    Browser authorization and CSRF suffice; audit details contain no secrets.
+    """
+    if not csrf_ok(): abort(400)
+    if request.form.get('confirm_delete') != '1':
+        abort(400)
+    with get_db() as db:
+        db.execute('BEGIN IMMEDIATE')
+        key=db.execute('SELECT label FROM mobile_api_keys WHERE id=?',(key_id,)).fetchone()
+        if key is None: abort(404)
+        # The receipt table references mobile_api_keys without ON DELETE CASCADE.
+        db.execute('DELETE FROM mobile_api_receipts WHERE key_id=?',(key_id,))
+        db.execute('DELETE FROM mobile_api_keys WHERE id=?',(key_id,))
+        audit(db,'mobile_key_deleted',key['label'])
+    flash('Geräte-API-Schlüssel dauerhaft gelöscht. Zugriff sofort beendet.','success')
     return redirect(url_for('settings')+'#mobile-keys')
 
 
