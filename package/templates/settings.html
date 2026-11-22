@@ -76,7 +76,7 @@
 {% endif %}
 <section class="panel" id="mobile-keys">
  <div class="section-head"><h2>Android-App · API-Schlüssel</h2><p class="muted">Erstelle für jedes Gerät einen widerrufbaren Schlüssel. Das Web-Passwort wird nicht in der App hinterlegt.</p></div>
- <p class="hint">Für den Servermodus muss „Web-Dashboard“ führend sein. Schlüssel sind 90 Tage gültig. Die Ausgabe erfolgt genau einmal und erfordert dein Administratorpasswort und einen frischen 2FA-Code.</p>
+ <p class="hint">Für den Servermodus muss „Web-Dashboard“ führend sein. Schlüssel haben kein automatisches Ablaufdatum und bleiben bis zur Sperrung oder einer sicherheitsbedingten Ungültigmachung aktiv. Die Ausgabe erfolgt genau einmal und erfordert dein Administratorpasswort und einen frischen 2FA-Code.</p>
  <form class="formstack" method="post" action="{{ url_for('mobile_key_create') }}" autocomplete="off">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
   <div class="formgrid"><label>Gerät<input name="label" maxlength="80" placeholder="Galaxy S26" required></label><label>Berechtigung<select name="access"><option value="write">Lesen und Buchungen bearbeiten</option><option value="read">Nur lesen</option></select></label></div>
@@ -84,7 +84,7 @@
   <button type="submit" class="primary">Neuen Geräte-API-Schlüssel erzeugen</button>
  </form>
  {% if mobile_keys %}
- <div class="table-wrap"><table><thead><tr><th>Gerät</th><th>Konto</th><th>Recht</th><th>Gültig bis (UTC)</th><th>Status</th><th>Aktion</th></tr></thead><tbody>
+ <div class="table-wrap"><table><thead><tr><th>Gerät</th><th>Konto</th><th>Recht</th><th>Gültigkeit</th><th>Status</th><th>Aktion</th></tr></thead><tbody>
  {% for key in mobile_keys %}<tr><td>{{ key.label }}</td><td>{{ key.username }}</td><td>{{ 'Lesen und Schreiben' if key.access=='write' else 'Nur Lesen' }}</td><td>{{ key.expires_label }}</td><td>{{ 'Gesperrt' if key.revoked_on else 'Aktiv' }}</td><td>
  {% if not key.revoked_on %}<form method="post" action="{{ url_for('mobile_key_revoke',key_id=key.id) }}" class="formstack" autocomplete="off"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input name="admin_password" type="password" placeholder="Admin-Passwort" required><input name="admin_totp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="2FA-Code" required><button type="submit" class="secondary">Sperren</button></form>{% else %}–{% endif %}</td></tr>{% endfor %}
  </tbody></table></div>
