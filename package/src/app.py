@@ -181,7 +181,7 @@ def init_db():
             key_hash TEXT NOT NULL UNIQUE,
             access TEXT NOT NULL CHECK(access IN ('read','write')),
             issued_on INTEGER NOT NULL,
-            expires_on INTEGER NOT NULL,
+            expires_on INTEGER NOT NULL DEFAULT 0, -- 0: no time-based expiry
             revoked_on INTEGER
         );
         CREATE TABLE IF NOT EXISTS mobile_api_receipts (
@@ -207,6 +207,13 @@ def init_db():
         );
         ''')
         db.execute('BEGIN IMMEDIATE')  # serialize schema check across multiple Gunicorn workers
+        # dev.16: existing active API keys remain valid indefinitely. Expired
+        # historical keys must never be silently reactivated during migration.
+        now_epoch = int(time.time())
+        db.execute('''UPDATE mobile_api_keys SET revoked_on=expires_on
+                      WHERE revoked_on IS NULL AND expires_on>0 AND expires_on<=?''',
+                   (now_epoch,))
+        db.execute('UPDATE mobile_api_keys SET expires_on=0 WHERE expires_on<>0')
         ensure_account_snapshots(db)
         ensure_source_table(db)
         ensure_monitor_schema(db)
@@ -822,7 +829,8 @@ def settings():
             pending_overwrite = finance_setting(db, 'import_overwrite_pending', '0') == '1'
             approved_overwrite = finance_setting(db, 'import_overwrite_approved', '0') == '1'
             mobile_keys = db.execute('''SELECT m.id,m.label,m.access,m.issued_on,m.expires_on,m.revoked_on,u.username,
-                                      datetime(m.expires_on,'unixepoch') expires_label
+                                      CASE WHEN m.expires_on=0 THEN 'Unbegrenzt'
+                                           ELSE datetime(m.expires_on,'unixepoch') END expires_label
                                       FROM mobile_api_keys m JOIN users u ON u.id=m.user_id
                                       ORDER BY m.id DESC LIMIT 50''').fetchall()
             users = db.execute('''SELECT id,username,display_name,role,is_active,totp_enabled,created_at
@@ -3465,8 +3473,7 @@ def _mobile_authorize(*, write=False):
                u.username,u.role,u.version,u.is_active,u.totp_enabled,k.user_version
                FROM mobile_api_keys k JOIN users u ON k.user_id=u.id
                WHERE k.key_hash=? AND k.revoked_on IS NULL''',(digest,)).fetchone()
-    if (not record or record['expires_on'] <= int(time.time()) or
-            not record['is_active'] or not record['totp_enabled'] or
+    if (not record or not record['is_active'] or not record['totp_enabled'] or
             record['version'] != record['user_version']):
         return None
     if write and (record['access'] != 'write' or record['role'] not in ('admin','editor')):
@@ -3544,7 +3551,7 @@ def mobile_key_create():
     with get_db() as db:
         db.execute('''INSERT INTO mobile_api_keys(user_id,user_version,label,key_hash,access,issued_on,expires_on)
                       VALUES(?,?,?,?,?,?,?)''',
-                   (user['id'],user['version'],label,digest,access,now,now+90*86400))
+                   (user['id'],user['version'],label,digest,access,now,0))
         audit(db,'mobile_key_created',label,actor_id=user['id'])
     return render_template('mobile_key_created.html',secret=token,label=label,access=access)
 
