@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Opt-in per-user browser push: SQLite outbox, no finance data in payloads.
 
 Encryption keys are generated once and persisted encrypted under app_secret.
