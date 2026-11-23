@@ -41,7 +41,7 @@ Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Re
 
 ## Screenshots
 
-Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.58 können abweichen.
+Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.59 können abweichen.
 
 ### Dashboard am Desktop
 
@@ -69,7 +69,7 @@ Alle Übersetzungen befinden sich lokal im Programm; es werden keine Finanzdaten
 
 **Ausführliche Anleitung:** [Caddy, HTTPS und Nginx Proxy Manager auf Deutsch](package/docs/CADDY.de.md) · [English](package/docs/CADDY.en.md).
 
-**Update-Hinweis:** Auf v1.9.58 kann direkt von älteren Releases oder Entwicklungsständen aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
+**Update-Hinweis:** Auf v1.9.59 kann direkt von älteren Releases oder Entwicklungsständen aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
 
 ## Repository-Struktur
 
@@ -126,3 +126,8 @@ Das ursprüngliche Android-Projekt Financisto steht ebenfalls unter GPL v2. Die 
 **Automatische Veröffentlichung:** Der Workflow [Release erstellen](.github/workflows/release.yml) erstellt beim ersten Durchlauf sowie bei neuen Versionsständen in `package/VERSION` einen vollständigen Release-ZIP-Download mit SHA256-Prüfsumme. Bereits veröffentlichte Versionen bleiben unverändert. Alternativ kann der Workflow unter **Actions → Build and publish Financisto Dashboard release → Run workflow** manuell gestartet werden.
 
 Alle fertigen Versionen stehen öffentlich unter [GitHub Releases](https://github.com/renfie/financisto-dashboard/releases). Das Repository ist öffentlich; Bearbeitungsrechte erhält dadurch niemand automatisch.
+
+
+## Urheberrecht und Weitergabe
+
+Copyright © 2026 René Fieler (RenFie). Eigene Programmteile stehen unter der **GNU GPL v2 (GPL-2.0-only)**. Bei Weitergabe müssen vorhandene Urheber-, Lizenz- und Gewährleistungshinweise erhalten bleiben; geänderte Dateien und Änderungsdaten sind zu kennzeichnen. Die vollständige GPL v2 ist beizulegen; bei Weitergabe ausführbarer Programme ist der zugehörige Quellcode oder eine nach §3 GPL v2 zulässige Alternative bereitzustellen. Einzelheiten: [LICENSE](LICENSE) und [NOTICE.md](NOTICE.md). Rechte Dritter bleiben unberührt.
