@@ -3,7 +3,7 @@ Neuerungen: CSV-Export und sortierbare Buchungslisten; farbige Kennzeichnung von
 Wiederholungen und Regelzuordnungen; heutige Kontostände mit Prognose für künftige Buchungen;
 tägliche SQLite- und Financisto-Sicherung einschließlich kompatibler Wiederholungsvorlagen;
 versionierte Mobile-API mit dauerhaften, widerrufbaren Geräteschlüsseln und Wiederholungskennzeichen.
-Vollständige Änderungen: CHANGELOG.md und CHANGELOG.en.md. Die Readmes enthalten ausschließlich Projektdokumentation. Weitergabe nach GNU GPL v2, siehe LICENSE und NOTICE.md.
+Vollständige Änderungen: CHANGELOG.md und CHANGELOG.en.md. Weitergabe nach GNU GPL v2, siehe LICENSE und NOTICE.md.
  
 Update als Projektbesitzer ohne sudo aus /home/pi/docker-files:
   unzip -o financisto-dashboard-v1.9.60.zip && \
