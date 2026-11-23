@@ -1,3 +1,9 @@
+## 1.9.58-dev.19 – Finite recurring schedules in Financisto exports (2026-11-23)
+- Monthly, quarterly and yearly Web rules with an end date or maximum occurrence count now use native Financisto `STOPS_ON_DATE:date@yyyyMMddT000000#` and `EXACTLY_TIMES:count@N#` termination formats.
+- When both constraints are set, the earlier effective constraint is encoded. Format verified against Financisto `RecurrencePeriod` / `RecurrenceViewFactory` sources; sample backups parse correctly and preserve existing native templates.
+- Monthly day 29–31 is rejected rather than silently altering short-month behavior. Other unsupported recurrence patterns still produce explicit errors.
+- Bump export validation revision so scheduled backup retries after installation even when a same-day export already exists. Financial data and SQLite backups remain unchanged. Native Android restore still requires an independent test.
+
 ## 1.9.58-dev.18 – Unified SQLite and Financisto backup status (2026-11-23)
 - Remove duplicate test-export section; existing administrator session suffices for the combined backup action.
 - Scheduled backup service independently attempts both SQLite and a current Financisto .backup every day; recurrence templates are always validated.
