@@ -1,3 +1,12 @@
+## 1.9.58-dev.18 – Unified SQLite and Financisto backup status (2026-11-23)
+- Remove duplicate test-export section; existing administrator session suffices for the combined backup action.
+- Scheduled backup service independently attempts both SQLite and a current Financisto .backup every day; recurrence templates are always validated.
+- Persist the last Financisto attempt, success, and failure in a protected status file and display errors in Settings. Stale downloaded files are not presented as fresh exports.
+- Force an upgraded-format Financisto export on first scheduled pass after updating, even if an old file exists for today. Keep the latest two successful exports.
+- Preserve existing executed bookings and native recurrence templates; explicitly verify recurrence counts. Unsupported rule types fail with an explanation rather than being silently omitted.
+- Allow supplying the exact matching original backup, when missing, from inside Backup Settings under the existing admin session and SHA256 check.
+- No Android release or changes to financial ledger data; SQLite remains the complete restore format.
+
 ## 1.9.58-dev.17 – Session-based API key management and safe recurring export (2026-11-22)
 - Existing admin session plus CSRF verification is sufficient to create or revoke device API keys. Permanent deletion requires a confirmation and removes related idempotency receipts; audit records remain. No repeated password or TOTP is needed.
 - Manual and scheduled Financisto backups and the test export now run the recurrence merge automatically. Unmodified original Financisto templates are preserved, and compatible active automatic Web rules are included.
