@@ -19,26 +19,80 @@ TZ = ZoneInfo('Europe/Berlin')
 
 
 def recurrence_for(rule):
-    """The precise EVERY_NTH_DAY monthly dialect found in the 2026-11-02 backup."""
+    """Encode supported Web recurring rules in Financisto's native recurrence dialect.
+
+    Financisto RecurrencePeriod recognizes the mutually exclusive endings
+    INDEFINETELY, EXACTLY_TIMES:count@N# and
+    STOPS_ON_DATE:date@yyyyMMddTHHmmss#.  When both Web limits exist, the
+    earlier effective limit is selected; neither limit is silently ignored.
+    """
+    label = rule['title']
     freq = rule['frequency']
     distance = int(rule['interval_count'])
     day = int(rule['day_of_month'])
     if not (1 <= distance <= 120 and 1 <= day <= 31):
-        raise ExportError(f'Regel {rule["title"]}: ungültiger Abstand bzw. Monatstag.')
+        raise ExportError(f'Regel {label}: ungültiger Abstand bzw. Monatstag.')
     if freq not in ('monthly', 'quarterly', 'yearly'):
-        raise ExportError(f'Regel {rule["title"]}: {freq} kann noch nicht sicher nach Financisto exportiert werden. Bitte zuerst pausieren.')
+        raise ExportError(f'Regel {label}: {freq} kann noch nicht sicher nach Financisto exportiert werden.')
     distance *= {'monthly': 1, 'quarterly': 3, 'yearly': 12}[freq]
     if distance > 120:
-        raise ExportError(f'Regel {rule["title"]}: Abstand über 120 Monaten wird nicht unterstützt.')
+        raise ExportError(f'Regel {label}: Abstand über 120 Monaten wird nicht unterstützt.')
     try:
         date = dt.date.fromisoformat(rule['start_on'])
-    except ValueError as exc:
-        raise ExportError(f'Regel {rule["title"]}: ungültiges Startdatum.') from exc
+    except (TypeError, ValueError) as exc:
+        raise ExportError(f'Regel {label}: ungültiges Startdatum.') from exc
     if date.year < 2000 or date.year > 2100:
-        raise ExportError(f'Regel {rule["title"]}: Startdatum außerhalb 2000–2100.')
+        raise ExportError(f'Regel {label}: Startdatum außerhalb 2000–2100.')
+    # The Web scheduler clamps days 29-31 to the last calendar day, while
+    # Financisto's BYMONTHDAY simply skips months lacking that day.  Do not
+    # create schedules that could silently produce different payment dates.
+    if day > 28:
+        raise ExportError(f'Regel {label}: Monatstag {day} wird im Web in kurzen Monaten auf den Monatsletzten gelegt, in Financisto aber übersprungen. Kein verlustfreier Export möglich.')
+    if date.day > day:
+        # On both systems the first recurrence is in the next interval; the
+        # count-based ending below must account for the skipped start period.
+        first_step = 1
+    else:
+        first_step = 0
+    raw_end = rule.get('end_on')
+    raw_max = rule.get('max_occurrences')
+    try:
+        end = dt.date.fromisoformat(raw_end) if raw_end else None
+    except (TypeError, ValueError) as exc:
+        raise ExportError(f'Regel {label}: ungültiges Enddatum.') from exc
+    if end and end < date:
+        raise ExportError(f'Regel {label}: Enddatum liegt vor dem Startdatum.')
+    try:
+        count = int(raw_max) if raw_max is not None else None
+    except (ValueError, TypeError) as exc:
+        raise ExportError(f'Regel {label}: ungültige maximale Anzahl.') from exc
+    if count is not None and not 1 <= count <= 10000:
+        raise ExportError(f'Regel {label}: Anzahl muss zwischen 1 und 10000 liegen.')
+    # Financisto has one native end mode. With two limits pick whichever stops
+    # sooner; compute the Nth Web occurrence without disregarding the anchor.
+    if count is not None and end is not None:
+        from recurring import planned_date
+        try:
+            nth = planned_date(date, freq, int(rule['interval_count']), day,
+                               count - 1 + first_step)
+        except (ValueError, OverflowError) as exc:
+            raise ExportError(f'Regel {label}: Ausführungstermin außerhalb des zulässigen Datumsbereichs.') from exc
+        # A Web rule with both conditions terminates at whichever is earlier.
+        # The native rule gets exactly one of these equivalent bounds.
+        if nth <= end:
+            end = None
+        else:
+            count = None
+    if count is not None:
+        period = f'EXACTLY_TIMES:count@{count}#'
+    elif end is not None:
+        # DateUtils.FORMAT_DATE_RFC_2445 = yyyyMMdd'T'HHmmss.
+        period = f'STOPS_ON_DATE:date@{end:%Y%m%d}T000000#'
+    else:
+        period = 'INDEFINETELY:null'
     return (f'{date.isoformat()}T12:00:00~MONTHLY:'
             f'monthly_pattern_0@EVERY_NTH_DAY#count@1#interval@{distance}#'
-            f'monthly_pattern_params_0@{day}#~INDEFINETELY:null')
+            f'monthly_pattern_params_0@{day}#~{period}')
 
 
 def preview_summary(db):
@@ -100,8 +154,6 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             raise ExportError(f'Regel {rule["title"]}: noch nicht abgeschlossene Regelprüfung. Bitte bearbeiten.')
         if (rule.get('run_at') or '00:00') != '00:00':
             raise ExportError(f'Regel {rule["title"]}: individuelle Ausführungsuhrzeit kann in Financisto nicht sicher übernommen werden.')
-        if rule.get('end_on') or rule.get('max_occurrences') is not None:
-            raise ExportError(f'Regel {rule["title"]}: Begrenzte Wiederholungen (Enddatum/Anzahl) können nicht zuverlässig in das Android-Format exportiert werden. Bitte die Regel vor dem Export deaktivieren.')
         from recurring import validate_rule
         try:
             validate_rule(db,rule)
