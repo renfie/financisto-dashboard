@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Private, opt-in expense notifications via a durable SQLite outbox.
 
 Sender has outbound network access, but never receives an HTTP port or user login.
