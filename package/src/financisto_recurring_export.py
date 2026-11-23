@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Conservative export of enabled Web recurring rules to a Financisto .backup.
 
 This module consumes a *fully validated* export from financisto_export.make_export,
