@@ -40,7 +40,7 @@ All rights in third-party projects and names remain with their respective owners
 
 ## Screenshots
 
-These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.59.
+These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.60.
 
 ### Desktop dashboard
 
@@ -101,7 +101,7 @@ Check out the new version **in a separate directory**. Run the update script as 
 ./update.sh /path/to/existing/financisto-dashboard
 ```
 
-Updates can be applied **directly to v1.9.59**, including from earlier development versions; intermediate installation steps are not necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
+Updates can be applied **directly to v1.9.60**, including from earlier development versions; intermediate installation steps are not necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
 
 For additional details see the [English operations guide](package/README.en.md) and [backup/restore documentation](package/docs/BACKUP_RESTORE.md) (German).
 
@@ -121,7 +121,6 @@ Own dashboard components are distributed under the **GNU General Public License 
 
 [**Download the latest release**](https://github.com/renfie/financisto-dashboard/releases/latest) or browse the [release history](https://github.com/renfie/financisto-dashboard/releases). Each release includes a complete Docker installation/update ZIP archive and its SHA256 checksum.
 
-A GitHub Actions [release workflow](.github/workflows/release.yml) creates a new versioned release when `package/VERSION` changes on `main`. Publishing is **not automatic when we discuss or edit code in ChatGPT**; source changes first need to be committed to GitHub and the version needs to be updated. Release notes are available in both English and German.
 
 The repository and downloadable releases are public. Only authorized collaborators can modify the official repository.
 
