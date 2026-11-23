@@ -1,11 +1,18 @@
-FieLanzen 1.9.58-dev.21 – Mobile-API liefert is_recurring und is_rule_matched als JSON-Boolean bei Buchungslisten; alle vorherigen Dashboard-Funktionen bleiben erhalten. Begrenzte Wiederholungsregeln mit Enddatum oder maximaler Ausführungszahl werden jetzt im nativen Financisto-Format exportiert. SQLite- und Financisto-Sicherung unter „Automatische Datensicherung“ vereint, neuer Exportstatus mit klaren Fehlermeldungen und vollständigerer Terminregel-Prüfung. API-Schlüssel ohne Passwort/2FA-Zweitabfrage, mit Sperren und endgültigem Löschen; alle Financisto-Rückexporte prüfen jetzt Wiederholungsregeln. Unsichere Regelumwandlungen werden mit Fehler abgebrochen statt unvollständig exportiert. Dauerhafte, jederzeit widerrufbare Mobile-API-Schlüssel und vollständige Web-API; kein automatischer Ablauf. Der doppelte Backup-Import bei Wiederholungen ist entfernt. Korrektur für das Bearbeiten von Einnahmen über 999 € und Markieren des Empfängers bei Wiederholungsregeln. Notizspalte und sortierbare Tabellenüberschriften unter „Buchung erfassen“. Gleiche farbige Buchungstyp-Kennzeichen und Zeilenfarben in „Buchung erfassen“ und Dashboard. Ist-Kontostände und Monatssalden ohne künftige Buchungen; Prognosewerte inklusive künftiger Buchungen separat in Klammern. Wiederkehrend und Regel zugeordnet bleiben getrennt ausgewiesen. Empfängertext wird beim Antippen zum Überschreiben markiert. Durchgehende farbliche Markierung von Umbuchungen und wiederkehrenden Buchungen; 'Jetzt Sicherung erstellen' erzeugt SQLite und aktuellen Financisto-Rückexport separat; update.sh ist ausführbar.
-Entwicklungsstand, kein offizielles GitHub-Release.
-
+FieLanzen Dashboard v1.9.58 – Offizielles Sammelrelease aus 21 Entwicklungsständen (dev.1–dev.21).
+Neuerungen: CSV-Export und sortierbare Buchungslisten; farbige Kennzeichnung von Buchungsarten,
+Wiederholungen und Regelzuordnungen; heutige Kontostände mit Prognose für künftige Buchungen;
+tägliche SQLite- und Financisto-Sicherung einschließlich kompatibler Wiederholungsvorlagen;
+versionierte Mobile-API mit dauerhaften, widerrufbaren Geräteschlüsseln und Wiederholungskennzeichen.
+Die vollständigen Änderungen stehen in den deutschen und englischen Release Notes auf GitHub.
+ 
 Update als Projektbesitzer ohne sudo aus /home/pi/docker-files:
-  unzip -o financisto-dashboard-1.9.58-dev.21.zip && \
-  ./financisto-release-1.9.58-dev.21/update.sh /home/pi/docker-files/financisto-dashboard
+  unzip -o financisto-dashboard-v1.9.58.zip && \
+  ./financisto-release-1.9.58/update.sh /home/pi/docker-files/financisto-dashboard
 
-Alle Daten, Bind-Mounts und Secrets bleiben bestehen.
+Direkter Wechsel von älteren Releases/Entwicklungsständen ohne Zwischenversion möglich.
+Bestehende Finanzdaten, Bind-Mounts, Einstellungen und Secrets bleiben erhalten.
 
-Mobile-API: Als bereits angemeldeter Administrator unter Einstellungen → Android-App einen API-Schlüssel erstellen, sperren oder endgültig löschen; keine erneute Passwort-/2FA-Abfrage.
-Schnittstellenübergabe an den separaten Android-Entwicklungschat: Basisadresse https://finance.fieler.de ohne /api/ verwenden, API-Token über HTTPS als Bearer senden. Android-Versionen ausschließlich dort erstellen; lokale Daten dürfen nicht automatisch übertragen werden.
+Die SQLite-Sicherung ist das vollständige Web-Wiederherstellungsformat.
+Financisto-.backup-Rückimporte zuerst in einer isolierten Android-Testinstallation prüfen.
+Geräte-API-Schlüssel werden durch angemeldete Administratoren unter Einstellungen verwaltet;
+die Android-App selbst wird getrennt vom Dashboard entwickelt.
