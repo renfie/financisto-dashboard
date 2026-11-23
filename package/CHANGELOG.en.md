@@ -1,3 +1,45 @@
+## 1.9.58 – Consolidated release: dashboard, backups and Mobile API (2026-11-23)
+
+This release combines **all 21 development increments from 1.9.58-dev.1 through 1.9.58-dev.21** since v1.9.57. Detailed notes for each increment remain in the changelog below.
+
+### Highlights
+
+- **Bookings and UI:** Filtered/sorted CSV export, sortable booking columns, notes, more consistent mobile booking forms, and full-row color coding for expenses, income, transfers and recurring entries.
+- **Recurring provenance:** Distinguish transactions actually posted by a rule from existing entries merely matched to a scheduled occurrence, including transfers and Mobile API flags.
+- **Balances:** Separate today's displayed month and account balances from projected values including future-dated entries, with transfer and reconciliation handling.
+- **Backups:** Daily and manual independent SQLite and Financisto `.backup` creation in one Settings section, clear success/error reporting, and downloads of the latest two successful Financisto snapshots. Manual import stays available.
+- **Financisto return export:** Preserve native templates and include compatible Web recurring rules with end dates, maximum occurrence limits and day 29–31 handling. Reject unsupported conversions rather than silently omitting schedules.
+- **Mobile API:** Versioned bearer-key endpoints for accounts, categories, payees and paginated bookings, plus controlled create/update/delete operations with idempotency and revision checks. Admin-managed keys do not expire automatically and can be revoked or deleted without repeated password/TOTP prompts.
+- **Maintenance:** Remove duplicate recurring-rule import and redundant test export; improve translations, payee editing, release packaging and update checks. Keep financial data, bind mounts and secrets intact.
+
+### Complete development history (dev.1–dev.21)
+
+- **dev.1:** Excel-compatible CSV export of all filtered and sorted dashboard bookings with formula-injection protection.
+- **dev.2:** Compact export button beside page navigation and missing English translations.
+- **dev.3:** Two downloadable current-ledger Financisto snapshots in addition to SQLite backups.
+- **dev.4:** Independent manual dual backup, full-row transfer/recurrence colors and executable ZIP updater.
+- **dev.5:** Select existing payee text on focus for direct replacement.
+- **dev.6:** Move recurring indicator below the booking date.
+- **dev.7:** Identify actual recurring postings via audit events, not merely linked rules.
+- **dev.8:** Distinguish “Recurring” and “Rule matched” in bookings, transfers and CSV export.
+- **dev.9:** Today's actual month/account balances and separate future-inclusive projections.
+- **dev.10:** Apply the same row colors on the Booking Entry screen.
+- **dev.11:** Consistent colored type badges for expense, income, transfer and special entries.
+- **dev.12:** Notes column and ascending/descending sorting of the latest 100 Web bookings.
+- **dev.13:** Fix editing income amounts with thousands separators; select payees in recurring rules.
+- **dev.14:** Prepare versioned Mobile API discovery; remove duplicate backup upload from recurring rules.
+- **dev.15:** Full Mobile API with device keys, pagination, write permissions, revisions and idempotency.
+- **dev.16:** Non-expiring API keys with administrator revocation and account security checks.
+- **dev.17:** Create/revoke/delete API keys using an existing admin session; validate recurring templates in return exports.
+- **dev.18:** Unite daily/manual SQLite and Financisto backups with transparent status/errors; remove redundant test export.
+- **dev.19:** Export finite recurrence with end date, maximum count or both.
+- **dev.20:** Export recurring dates on day 29–31 in short months using Financisto/iCalendar extended patterns.
+- **dev.21:** Add `is_recurring` and `is_rule_matched` boolean flags to every paginated Mobile API booking.
+
+### Upgrade and restore notes
+
+The complete Docker ZIP includes `update.sh`; intermediate development versions are not required. Existing SQLite databases, bind mounts, configuration and secrets remain in place. SQLite is the complete Web-dashboard restore format. Restoring a newly exported Financisto `.backup` in the original Android app has **not yet been fully production-tested**; verify recurring templates and their next due dates in an isolated test installation first.
+
 ## 1.9.58-dev.21 – Recurring provenance flags in the Mobile API (2026-11-23)
 - Add JSON booleans `is_recurring` (transaction actually posted by a recurring rule) and `is_rule_matched` (pre-existing transaction merely matched to a scheduled occurrence) to each record returned by `GET /api/mobile/v1/bookings`.
 - Match the existing dashboard SQL using `recurring_runs` and the `recurring_posted_auto`/`recurring_posted_manual` audit events. A verified posted event takes priority over a mere rule match.
