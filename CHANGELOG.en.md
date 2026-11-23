@@ -2,6 +2,7 @@
 
 - Removed internal process commentary from the public README files.
 - Cleaned up README files, release notes and version references; application features, licensing, copyright and stored data remain unchanged.
+- Copyright links in desktop sidebar and footer now lead to the public GitHub project, independent of any specific server address or certificate.
 
 ## 1.9.59 – Copyright attribution, GPL notices and complete changelog (2026-11-23)
 
