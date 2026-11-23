@@ -2,6 +2,7 @@
 
 - Interne Prozesshinweise aus den öffentlichen README-Dateien entfernt.
 - README, Release-Hinweise und Versionsangaben redaktionell bereinigt; Anwendungsfunktionen, Lizenz, Copyright und gespeicherte Daten unverändert.
+- Copyright-Links in Seitenleiste und Footer verweisen nun auf das öffentliche GitHub-Projekt, unabhängig von einer bestimmten Serveradresse oder deren Zertifikat.
 
 ## 1.9.59 – Copyright, GPL-Kennzeichnung und vollständiger Änderungsverlauf (23.11.2026)
 
