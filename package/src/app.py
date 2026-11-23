@@ -30,7 +30,7 @@ from financisto_import import BackupError, ImportPaused, parse_backup, save_snap
 from financisto_export import ExportError, make_export, ensure_source_table, store_matching_source
 from financisto_recurring_export import merge_recurring_export, preview_summary
 from backup_manager import (create_backup as create_verified_backup, status as scheduled_backup_status,
-                            current_financisto_backups, export_dir as financisto_export_dir,
+                            current_financisto_backups, financisto_status, export_dir as financisto_export_dir,
                             export_current_financisto)
 from job_monitor import ensure_schema as ensure_monitor_schema, dashboard_status
 from recurring import (ensure_schema as ensure_recurring_schema, preview_from_backup,
@@ -853,6 +853,7 @@ def settings():
                 key=lambda item: item[1].casefold())
             daily_backup_enabled = finance_setting(db, 'daily_backup_enabled', '1') == '1'
             financisto_current_backups = current_financisto_backups(Path(DATABASE))
+            financisto_backup_status = financisto_status(Path(DATABASE))
             booking_page_size = finance_setting(db, 'booking_page_size', '30')
             booking_suggestions = booking_suggestion_limit(db)
             wanted_source = finance_setting(db, 'last_import_sha256', '')
@@ -886,6 +887,7 @@ def settings():
             expense_category_choices = ()
             daily_backup_enabled = False
             financisto_current_backups = ()
+            financisto_backup_status = {}
             booking_page_size = '30'
             booking_suggestions = 20
             export_source_ready = False
@@ -912,6 +914,7 @@ def settings():
                            export_source_ready=export_source_ready, recurring_export_summary=recurring_export_summary,
                            daily_backup_status=scheduled_backup_status(Path(DATABASE)) if is_admin else {},
                            financisto_current_backups=financisto_current_backups,
+                           financisto_backup_status=financisto_backup_status,
                            background_status=background_status,
                            notify_config=(notify_config if is_admin else None),
                            notify_status=(notify_status if is_admin else {}),
@@ -1783,48 +1786,19 @@ def settings_download_backup():
                      mimetype='application/vnd.sqlite3', max_age=0)
 
 
-@app.post('/settings/export-financisto')
-@admin_required
-def settings_export_financisto():
-    # An experimental OFFLINE return file; never alters the ledger or Android.
-    if not csrf_ok(): abort(400)
-    if not verify_admin_stepup():
-        flash('Für den Export bitte Administratorpasswort und einen frischen 2FA-Code verwenden.', 'error')
-        return redirect(url_for('settings')+'#financisto-export')
-    try:
-        with get_db() as db:
-            db.execute('BEGIN')
-            raw, stats=make_export(db)
-            # Always include current recurring templates. Never return a
-            # "successful" Financisto file with silently omitted Web rules.
-            raw, stats = merge_recurring_export(db,raw,stats)
-            # Close the read transaction before returning the attachment.
-        with get_db() as audit_db:
-            audit(audit_db, 'financisto_test_export_downloaded', f"{stats['transactions']} bookings; recurring={stats.get('recurring_exported', 'not selected')}")
-        filename='financisto-testexport-'+date.today().strftime('%Y%m%d')+'.backup'
-        return send_file(BytesIO(raw), as_attachment=True, download_name=filename,
-                         mimetype='application/octet-stream',max_age=0)
-    except (ExportError,BackupError,sqlite3.Error,ValueError) as exc:
-        flash('Financisto-Testexport nicht möglich: '+str(exc),'error')
-        return redirect(url_for('settings')+'#financisto-export')
-
-
 @app.post('/settings/export-source')
 @admin_required
 def settings_upload_export_source():
     # Store a missing exact-match original in SQLite; no financial data import.
     if not csrf_ok(): abort(400)
-    if not verify_admin_stepup():
-        flash('Administratorpasswort und frischen 2FA-Code bestätigen.', 'error')
-        return redirect(url_for('settings')+'#financisto-export')
     upload=request.files.get('export_source')
     if not upload or not upload.filename.lower().endswith('.backup'):
         flash('Bitte die zuletzt importierte Original-.backup-Datei auswählen.', 'error')
-        return redirect(url_for('settings')+'#financisto-export')
+        return redirect(url_for('settings')+'#datensicherung')
     raw=upload.read(30*1024*1024+1)
     if len(raw)>30*1024*1024:
         flash('Die Sicherung überschreitet die maximal zulässige Größe.', 'error')
-        return redirect(url_for('settings')+'#financisto-export')
+        return redirect(url_for('settings')+'#datensicherung')
     try:
         with get_db() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1836,7 +1810,7 @@ def settings_upload_export_source():
         flash('Die exakt passende Original-Sicherung ist nun für den Rückexport gesichert. Finanzbuchungen unverändert.', 'success')
     except (ExportError,BackupError,sqlite3.Error,ValueError) as exc:
         flash('Originaldatei wurde nicht übernommen: '+str(exc),'error')
-    return redirect(url_for('settings')+'#financisto-export')
+    return redirect(url_for('settings')+'#datensicherung')
 
 
 @app.post('/settings/payees/save')
