@@ -1,3 +1,10 @@
+## 1.9.58-dev.21 – Kennzeichen für wiederkehrende Buchungen in der Mobile-API (23.11.2026)
+- `GET /api/mobile/v1/bookings` liefert zusätzlich pro Buchung zwei echte JSON-Boolean-Felder: `is_recurring` (nachweislich durch die Ausführung einer Regel erzeugt) und `is_rule_matched` (bereits vorhandene Buchung wurde einem Regeltermin nur zugeordnet).
+- Die SQL-Erkennung entspricht der bestehenden Dashboard-Liste: `recurring_runs` mit den Audit-Ereignissen `recurring_posted_auto` und `recurring_posted_manual`. Nur eine Regelzuordnung ohne passendes Audit-Ereignis zählt nicht als echte Wiederholung.
+- Bei Mehrfachzuordnungen hat die nachweislich erfolgte Ausführung Vorrang; `is_rule_matched` wird dann als `false` ausgegeben.
+- Bestehende API-Felder, Paginierung (`before`/`next_before`), Authentifizierung, Schreibrechte, Buchungsrevisionen und Idempotenzschutz bleiben unverändert.
+- Zehn datenbankgestützte Regressionstests einschließlich aller sieben geforderten Fälle, mehrseitiger API-Listen und Zugriffsschutz. Nur Dashboard-Entwicklung; keine Android-Änderung und kein offizielles Release.
+
 ## 1.9.58-dev.20 – Wiederholungen am 29., 30. oder 31. (23.11.2026)
 - Financisto-Rückexport unterstützt nun monatliche, vierteljährliche und jährliche Wiederholungen am 29.–31., deren Termine bei kurzen Monaten auf den Monatsletzten fallen. Dafür wird der native erweiterte GEEKY-/iCalendar-Modus verwendet (BYMONTHDAY mit BYSETPOS), nicht der fehlerhafte normale Monatstag-Modus.
 - Der Endtermin oder die maximale Anzahl der Wiederholungen wird beim erweiterten Format als COUNT in der tatsächlichen Terminfolge berücksichtigt. Auch zwei gleichzeitig gesetzte Grenzen begrenzen die Anzahl korrekt.
