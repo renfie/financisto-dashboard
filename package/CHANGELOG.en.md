@@ -1,3 +1,9 @@
+## 1.9.58-dev.20 – Clipped recurring dates (29th–31st) (2026-11-23)
+- Export month-end-clipped recurring rules on the 29th–31st using Financisto's native GEEKY/iCalendar RRULE encoding with BYMONTHDAY and BYSETPOS. The standard MONTHLY mode silently skips missing dates.
+- Encode end dates and maximum counts inside GEEKY's native RRULE as an exact occurrence count, including when both termination limits are present.
+- Test February, leap years, quarterly and yearly intervals, and bounded/unbounded schedules. Existing bookings and rules stay unchanged.
+- Bump backup verification revision to force a new daily attempt after upgrading. Native Android runtime behavior still requires a separate test. No official release.
+
 ## 1.9.58-dev.19 – Finite recurring schedules in Financisto exports (2026-11-23)
 - Monthly, quarterly and yearly Web rules with an end date or maximum occurrence count now use native Financisto `STOPS_ON_DATE:date@yyyyMMddT000000#` and `EXACTLY_TIMES:count@N#` termination formats.
 - When both constraints are set, the earlier effective constraint is encoded. Format verified against Financisto `RecurrencePeriod` / `RecurrenceViewFactory` sources; sample backups parse correctly and preserve existing native templates.
