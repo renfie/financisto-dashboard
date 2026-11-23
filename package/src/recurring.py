@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Financisto recurring templates: read-only preview, controlled import and idempotent posting.
 
 No original customer backup is shipped or stored in this module. The backup is
