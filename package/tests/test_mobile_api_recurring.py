@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Regression tests for the Mobile API recurrence flags (stdlib only).
 
 The production endpoint code is evaluated from app.py with a read-only SQLite
