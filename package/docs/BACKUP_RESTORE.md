@@ -29,6 +29,10 @@ Bei aktiver automatischer Datensicherung wird täglich neben dem SQLite-Backup e
 
 Unter `data/financisto-backups/` bleiben maximal die **zwei letzten erfolgreich erzeugten** Versionen erhalten; der Administrator kann sie unter Einstellungen herunterladen. Mit einer separaten Testinstallation den Rückimport prüfen, bevor auf einem Android-Gerät produktive Daten ersetzt werden. Diese Sicherungen ersetzen das SQLite-Backup nicht; für die Wiederherstellung des Websystems außerdem `secrets/app_secret` sicher getrennt verwahren.
 
+## Einheitliche Sicherungsfunktion (ab 1.9.58-dev.18)
+
+Unter Einstellungen → Automatische Datensicherung wird die aktuelle SQLite-Sicherung sowie der letzte Financisto-Exportstatus angezeigt. Manuell werden beide Dateitypen unabhängig voneinander gesichert. Der tägliche Dienst versucht ebenfalls beide. Bei inkompatiblen wiederkehrenden Web-Regeln wird der Fehler mit Datum ausgewiesen und die letzte erfolgreiche `.backup`-Datei beibehalten. Die Statusdatei unter `data/financisto-backups/status.json` enthält keine geheimen Schlüssel, ist aber nur für den Server-Eigentümer lesbar. Kein separater Testexport mehr; Originalgrundlage kann bei Bedarf an derselben Stelle hinterlegt werden. Ein Android-Rückimport bleibt separat zu testen.
+
 ## Wiederkehrende Buchungen im Financisto-Rückexport (ab 1.9.58-dev.17)
 
 Jeder **neu** erzeugte manuelle oder automatische Financisto-`.backup`-Export enthält den geprüften Wiederholungsregel-Durchgang. Bestehende, nicht im Web geänderte originale Financisto-Vorlagen bleiben unverändert erhalten; aktive automatisch ausführbare Web-Regeln werden nur exportiert, wenn der bekannte native Monats-/Quartals-/Jahresrhythmus verlustfrei abbildbar ist.
