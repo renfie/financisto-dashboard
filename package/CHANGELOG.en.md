@@ -1,3 +1,12 @@
+## 1.9.59 – Copyright attribution, GPL notices and complete changelog (2026-11-23)
+
+- Read-only, offline German/English license and version-history pages, linked from desktop and mobile navigation.
+- Persistent, linked copyright attribution in sidebar and footer: © 2026 René Fieler (RenFie) · GPL v2.
+- Consistent copyright and SPDX license identifiers in first-party Python, JavaScript and CSS source files; third-party notices remain unaffected.
+- Expanded NOTICE.md clarifies preservation of copyright/license notices, marking modified files and dates, and GPLv2 distribution/source obligations; full original license bundled offline.
+- Complete bilingual changelogs in the GitHub root, package and dashboard, including all 21 v1.9.58 development iterations.
+- Financial records, import, backups, recurring transactions and Mobile API unchanged; safe update via the supplied `update.sh`.
+
 ## 1.9.59-dev.1 – License information and complete changelog menu (2026-11-23)
 - Add “License & legal” and “Changelog” to desktop/mobile navigation, each fully bilingual through the existing DE/EN switch, working offline.
 - Explain GPL-2.0-only rights and duties for use, modification and distribution, third-party content, warranties and liability. Bundle the complete legally relevant English GPLv2 original and existing original NOTICE.md for local reading/download.
