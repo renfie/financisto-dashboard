@@ -1,3 +1,11 @@
+## 1.9.58-dev.19 – Begrenzte Wiederholungen im Financisto-Export (23.11.2026)
+- Monatliche, vierteljährliche und jährliche Regeln mit **Enddatum** oder **maximaler Anzahl** werden jetzt im nativen Financisto-Format exportiert (`STOPS_ON_DATE:date@yyyyMMddT000000#` beziehungsweise `EXACTLY_TIMES:count@N#`). Dies beseitigt die pauschale Ablehnung der Regel „Samsung S26“ bei begrenzter Laufzeit.
+- Sind **beide Begrenzungen** gesetzt, gilt diejenige, die zuerst erreicht wird; die relevante Grenze wird sicher als ein einzelner nativer Zeitraum codiert.
+- Die Kodierung ist anhand des originalen Financisto-Quellcodes für `RecurrencePeriod` und `RecurrenceViewFactory` überprüft. Die Test-`.backup`-Datei wurde erneut eingelesen; die Originalvorlagen bleiben erhalten.
+- Monatsregeln für den **29.–31. Tag** werden aus Sicherheitsgründen derzeit abgewiesen, da das Web-Dashboard die Tage in kurzen Monaten auf den Monatsletzten legt, die native Android-Regel aber diese Monate überspringt. Andere nicht sicher übertragbare Regeln bleiben weiterhin explizit gesperrt.
+- Die interne Exportprüfversion wird erhöht, sodass beim Start nach dem Update trotz eines bereits vorhandenen Tagesstands ein neuer Financisto-Exportversuch erfolgt. Die bestehenden SQLite- und Buchungsdaten bleiben unverändert.
+- Der produktive Android-Rückimport ist weiterhin gesondert zu testen. Kein offizielles GitHub-Release.
+
 ## 1.9.58-dev.18 – Vereinheitlichte tägliche SQLite-/Financisto-Sicherung (23.11.2026)
 - Doppelte „Rückexport nach Financisto (Testfunktion)“ aus Einstellungen entfernt. Admin erstellt beide Sicherungen über denselben Button ohne zusätzliche Passwort- oder 2FA-Abfrage; manueller Import bleibt erhalten.
 - Der automatische Sicherungsdienst prüft täglich **beide** Sicherungsformate, unabhängig voneinander. Alle neuen Financisto-Backups durchlaufen den prüfenden Wiederholungsregel-Export.
