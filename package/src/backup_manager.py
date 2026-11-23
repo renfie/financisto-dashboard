@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Daily SQLite snapshots. Only automatic snapshots are pruned.
 
 Each backup is created through SQLite's backup API, validated, then atomically
