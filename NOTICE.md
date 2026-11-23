@@ -2,7 +2,7 @@
 
 ## Financisto-Dashboard (FieLanzen)
 
-Copyright (C) 2026 RenFie.
+Copyright (C) 2026 René Fieler (RenFie).
 
 Lizenz für die vom Dashboard-Projekt bereitgestellten eigenen Programmteile:
 **GNU General Public License, Version 2 (GPL-2.0-only)**.
@@ -37,3 +37,7 @@ Auch bei einem öffentlichen GitHub-Repository bleibt das Schreib- und
 Administrationsrecht beim Repository-Eigentümer und den ausdrücklich
 berechtigten Mitwirkenden. Das Recht von Empfängern, **eigene Kopien** des
 GPL-lizenzierten Quellcodes zu ändern und zu verteilen, bleibt davon unberührt.
+
+## Weitergabe und Änderungen
+
+Wer das Programm unverändert oder verändert weitergibt, muss vorhandene Urheberrechts-, Lizenz- und Gewährleistungshinweise beibehalten und den vollständigen Text der GNU GPL v2 beifügen. Änderungen an Dateien sind deutlich und mit Änderungsdatum zu kennzeichnen. Für abgeleitete Werke gelten die Bedingungen der GPL v2. Bei Weitergabe ausführbarer Programme müssen der vollständige zugehörige Quellcode oder die zulässigen Alternativen nach GPL v2, Abschnitt 3, bereitgestellt werden. Eigene Copyright-Hinweise für eigene Änderungen dürfen ergänzt werden; die ursprünglichen Hinweise bleiben bestehen. Rechte Dritter (insbesondere Logos und Marken) bleiben unberührt.
