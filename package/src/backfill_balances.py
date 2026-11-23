@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """One-time, safe balance extraction from an already imported archived backup.
 
 Only a backup whose SHA-256 matches the transaction snapshot in SQLite is used.

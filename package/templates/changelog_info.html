@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Changelog' if ui_language == 'en' else 'Änderungsverlauf' }} · {{ app_title }}{% endblock %}
+{% block content %}
+<div class="changelog-page" data-no-i18n>
+  <div class="heading"><div>
+    <p class="eyebrow">{{ 'Project history' if ui_language == 'en' else 'Entwicklungshistorie' }}</p>
+    <h1>{{ 'Changelog' if ui_language == 'en' else 'Änderungsverlauf' }}</h1>
+    <p class="muted">{{ 'The complete release and development history, with the latest changes first. Expand older versions to read their notes.' if ui_language == 'en' else 'Die vollständige Release- und Entwicklungshistorie, neueste Änderungen zuerst. Frühere Versionen lassen sich einzeln aufklappen.' }}</p>
+  </div></div>
+  <section class="panel changelog-intro">
+    <h2>{{ 'German and English source files' if ui_language == 'en' else 'Deutsche und englische Originaldateien' }}</h2>
+    <p>{{ 'This page uses the same DE/EN selection as the dashboard; no changes are translated automatically or fetched from the Internet. The source files are also available on GitHub.' if ui_language == 'en' else 'Diese Seite verwendet die vorhandene DE/EN-Auswahl des Dashboards. Die Änderungen werden nicht automatisch übersetzt und nicht aus dem Internet nachgeladen. Die Dateien sind auch auf GitHub verfügbar.' }}</p>
+    <div class="changelog-links">
+      <a class="button secondary" href="{{ url_for('static',filename='legal/CHANGELOG.de.md') }}" download="CHANGELOG.md">{{ 'Download German changelog' if ui_language == 'en' else 'Deutsches Changelog herunterladen' }}</a>
+      <a class="button secondary" href="{{ url_for('static',filename='legal/CHANGELOG.en.md') }}" download="CHANGELOG.en.md">{{ 'Download English changelog' if ui_language == 'en' else 'Englisches Changelog herunterladen' }}</a>
+      <a class="button secondary" href="https://github.com/renfie/financisto-dashboard/blob/develop/CHANGELOG.md" target="_blank" rel="noopener noreferrer">GitHub · Deutsch</a>
+      <a class="button secondary" href="https://github.com/renfie/financisto-dashboard/blob/develop/CHANGELOG.en.md" target="_blank" rel="noopener noreferrer">GitHub · English</a>
+    </div>
+  </section>
+  <div class="changelog-entries">
+    {% for entry in sections %}
+      <details class="panel changelog-entry" {% if loop.first %}open{% endif %}>
+        <summary><span>{{ entry.title }}</span><span class="changelog-expand" aria-hidden="true">⌄</span></summary>
+        <div class="changelog-body">{{ entry.body_html }}</div>
+      </details>
+    {% else %}
+      <section class="panel">{{ 'No release notes are available.' if ui_language == 'en' else 'Es sind keine Versionshinweise vorhanden.' }}</section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

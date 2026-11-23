@@ -40,6 +40,8 @@
   {% endif %}
   <a class="nav-entry {{ 'active' if request.endpoint == 'change_password' else '' }}" href="{{ url_for('change_password') }}"><span class="nav-icon" aria-hidden="true">⚿</span>Passwort ändern</a>
   <a class="nav-entry tour-help-nav" data-tour-start href="{{ url_for('dashboard',tour=1) }}"><span class="nav-icon" aria-hidden="true">?</span>Hilfe / Einführung</a>
+  <a class="nav-entry {{ 'active' if request.endpoint == 'license_info' else '' }}" href="{{ url_for('license_info') }}" {% if request.endpoint == 'license_info' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true">§</span>{{ 'License & legal' if ui_language == 'en' else 'Lizenz & Rechtliches' }}</a>
+  <a class="nav-entry {{ 'active' if request.endpoint == 'changelog_info' else '' }}" href="{{ url_for('changelog_info') }}" {% if request.endpoint == 'changelog_info' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true">≡</span>{{ 'Changelog' if ui_language == 'en' else 'Änderungsverlauf' }}</a>
   <form class="nav-logout-form" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button type="submit" class="nav-entry nav-logout"><span class="nav-icon" aria-hidden="true">↪</span>Abmelden</button></form>
 {% endmacro %}
 <a class="skip-to-content" href="#hauptinhalt">Direkt zum Inhalt</a>
@@ -61,6 +63,7 @@
       </div>
     </div>
     <div class="sidebar-bottom" data-no-i18n>{{ app_footer }}</div>
+    <div class="project-copyright" data-no-i18n><a href="{{ url_for('license_info') }}">© 2026 René Fieler (RenFie) · GPL v2</a></div>
   </aside>
 {% endif %}
   <div class="app-main-column">
@@ -99,7 +102,7 @@
       {% endwith %}
       {% block content %}{% endblock %}
     </main>
-    <footer class="footer" data-no-i18n>{{ app_footer }}</footer>
+    <footer class="footer" data-no-i18n>{{ app_footer }}<span class="footer-copyright"><a href="{{ url_for('license_info') }}">© 2026 René Fieler (RenFie) · GPL v2</a></span></footer>
   </div>
 </div>
 </body>

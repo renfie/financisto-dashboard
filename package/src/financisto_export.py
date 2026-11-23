@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Conservative, experimental Financisto backup writer.
 
 Uses an original, SHA256-matched backup as a preservation template; unmodelled

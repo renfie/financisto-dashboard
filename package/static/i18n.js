@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: GPL-2.0-only
+ * Copyright (C) 2026 René Fieler (RenFie)
+ * See LICENSE and NOTICE.md for terms and third-party notices.
+ */
 /* German/English interface dictionary. Works completely offline; no external translators.
  * All accounting records, backend keys, form field names and numeric values stay unchanged. */
 (() => {

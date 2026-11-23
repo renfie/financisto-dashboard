@@ -1,3 +1,19 @@
+## 1.9.59 – Copyright, GPL-Kennzeichnung und vollständiger Änderungsverlauf (23.11.2026)
+
+- Lizenz- und Änderungsverlauf im Dashboard als deutsch/englische, offline verfügbare Seiten; Links im Desktop- und Mobilmenü.
+- Dauerhafter, verlinkter Copyright-Hinweis in Seitenleiste und Footer: © 2026 René Fieler (RenFie) · GPL v2.
+- Einheitliche Urheberangabe und SPDX-Lizenzkennzeichen in den eigenen Python-, JavaScript- und CSS-Quelltexten; ursprüngliche Hinweise Dritter bleiben unberührt.
+- NOTICE.md erläutert die erforderlichen Urheber-, Lizenz- und Änderungsvermerke bei Weitergabe, einschließlich GPL-v2-Quellcodepflichten; vollständiger Original-Lizenztext offline enthalten.
+- Vollständige deutsch- und englischsprachige Changelogs in GitHub-Stammverzeichnis, Paket und Dashboard, einschließlich aller 21 Entwicklungsstände von v1.9.58.
+- Bestehende Finanzdaten, Importe, Sicherungen, wiederkehrende Buchungen und Mobile-API bleiben unverändert; Update über das mitgelieferte `update.sh`.
+
+## 1.9.59-dev.1 – Lizenzinformationen und vollständiger Änderungsverlauf im Menü (23.11.2026)
+- Neue Navigationspunkte „Lizenz & Rechtliches“ sowie „Änderungsverlauf“ (Desktop und Mobilansicht). Beide Seiten sind vollständig deutsch/englisch über die bestehende DE/EN-Umschaltung verfügbar, ohne Internetabfrage.
+- Übersicht zu GPL-2.0-only, Nutzungs-, Änderungs- und Weitergaberechten sowie Pflichten, Drittsoftware und Haftung. Vollständiger verbindlicher englischer GPL-v2-Lizenztext und bestehende originale NOTICE.md lokal einsehbar und als Datei verfügbar.
+- Vollständige deutsch- und englischsprachige Changelogs, einschließlich der 21 Entwicklungsstände des Releases v1.9.58, mit aufklappbaren Versionen und Downloads direkt in der Weboberfläche.
+- Auch im **Repository-Stammverzeichnis** liegen nun `CHANGELOG.md` (Deutsch) und `CHANGELOG.en.md` (Englisch). Die kanonischen Dateien unter `package/` und die offline ausgelieferten Web-Kopien haben denselben Inhalt.
+- Keine Änderungen an Buchungen, Datenbank, Finanzberichten, Rechten, API, Datenexport oder Sicherungen. Entwicklung ausschließlich in `develop`; kein offizielles Release.
+
 ## 1.9.58 – Sammelrelease: Dashboard, Datensicherung und Mobile-API (23.11.2026)
 
 Dieses Release bündelt **alle 21 Entwicklungsschritte von 1.9.58-dev.1 bis 1.9.58-dev.21** gegenüber v1.9.57. Vollständige Detailbeschreibungen der einzelnen Entwicklungsstände bleiben in den nachfolgenden Changelog-Abschnitten erhalten.

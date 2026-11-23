@@ -325,3 +325,8 @@ Ab 1.9.29: `/finanz 24,90 Edeka | Lebensmittel | Bargeld` (Ausgabe mit Kategorie
 
 
 Ab 1.9.30: Unter Einstellungen → Standardkonto für neue Buchungen werden Web-Standardkonto und eine zentrale Ausgaben-Standardkategorie gewählt; die Kategorie gilt auch für Telegram.
+
+
+## Urheberrecht und Weitergabe
+
+Copyright © 2026 René Fieler (RenFie). Eigene Programmteile stehen unter der **GNU GPL v2 (GPL-2.0-only)**. Bei Weitergabe müssen vorhandene Urheber-, Lizenz- und Gewährleistungshinweise erhalten bleiben; geänderte Dateien und Änderungsdaten sind zu kennzeichnen. Die vollständige GPL v2 ist beizulegen; bei Weitergabe ausführbarer Programme ist der zugehörige Quellcode oder eine nach §3 GPL v2 zulässige Alternative bereitzustellen. Einzelheiten: [LICENSE](../LICENSE) und [NOTICE.md](../NOTICE.md). Rechte Dritter bleiben unberührt.

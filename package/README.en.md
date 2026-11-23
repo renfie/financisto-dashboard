@@ -93,3 +93,8 @@ Existing display names such as `APP_TITLE`, `APP_SUBTITLE`, and `APP_FOOTER` can
 ## License and upstream
 
 The independent dashboard is licensed under [GPL-2.0-only](../LICENSE). Refer to [NOTICE.md](../NOTICE.md) for attribution. The original Financisto Android project is at https://github.com/dsolonenko/financisto.
+
+
+## Copyright and redistribution
+
+Copyright © 2026 René Fieler (RenFie). First-party source files are licensed under **GNU GPL v2 only (GPL-2.0-only)**. Keep existing copyright, license and warranty notices when distributing copies. Clearly mark modified files and change dates, include the complete GPLv2 license, and provide corresponding source code or another GPLv2 §3-compliant option with distributed executables. See [LICENSE](../LICENSE) and [NOTICE.md](../NOTICE.md). Third-party rights remain with their owners.

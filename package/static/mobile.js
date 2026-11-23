@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: GPL-2.0-only
+ * Copyright (C) 2026 René Fieler (RenFie)
+ * See LICENSE and NOTICE.md for terms and third-party notices.
+ */
 /* 1.9.20: Mobile thumb navigation. Uses existing server-generated menu and routes. */
 (() => {
  'use strict';

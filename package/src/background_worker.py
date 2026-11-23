@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """One offline worker for safe, independently scheduled Financisto jobs.
 
 Each task keeps its original DB checks and its own error boundary. Only one

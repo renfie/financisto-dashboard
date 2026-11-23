@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Direct Telegram group receiver for FieLanzen, using the existing notifications worker.
 
 One dedicated bot token, one getUpdates consumer. No public webhook and no Node-RED.

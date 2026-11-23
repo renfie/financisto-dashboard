@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Persist only operational metadata about the single background worker.
 
 No financial contents, file payloads, secrets or login details are stored.

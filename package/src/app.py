@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 from __future__ import annotations
 import calendar
 import csv
@@ -359,6 +363,100 @@ def set_interface_language():
         destination = '/'
     return redirect(destination, code=303)
 
+
+@app.get('/lizenz')
+@app.get('/license')
+def license_info():
+    """Public, read-only GPLv2 and project notices in the selected UI language.
+
+    The complete licence is bundled with the Docker image and works offline;
+    it is never assembled from user content or fetched from a third party.
+    """
+    source = Path(app.static_folder) / 'legal'
+    return render_template('license_info.html',
+                           full_gpl_text=(source / 'GPL-2.0.txt').read_text(encoding='utf-8'),
+                           full_notice_text=(source / 'NOTICE.md').read_text(encoding='utf-8'))
+
+
+
+def _render_changelog_body(raw):
+    """Render trusted bundled changelog Markdown with a small safe subset.
+
+    No new runtime dependency. Escape all markup before adding allowed headings,
+    list items, paragraphs and inline bold/code formatting.
+    """
+    from html import escape as html_escape
+    from markupsafe import Markup
+    def inline(text):
+        value = html_escape(text, quote=True)
+        value = re.sub(r'\x60([^\x60]+)\x60', r'<code>\1</code>', value)
+        value = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', value)
+        return value
+    out=[]
+    in_list=False
+    in_code=False
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            out.append('</ul>')
+            in_list=False
+    for line in raw.splitlines():
+        if line.startswith(chr(96)*3):
+            close_list()
+            if in_code:
+                out.append('</code></pre>')
+            else:
+                out.append('<pre class="changelog-code"><code>')
+            in_code=not in_code
+            continue
+        if in_code:
+            out.append(html_escape(line) + '\n')
+            continue
+        if not line.strip():
+            close_list()
+            continue
+        if line.startswith('### '):
+            close_list()
+            out.append('<h3>'+inline(line[4:])+'</h3>')
+        elif line.startswith('#### '):
+            close_list()
+            out.append('<h4>'+inline(line[5:])+'</h4>')
+        elif re.match(r'^\s*[-*] ',line):
+            if not in_list:
+                out.append('<ul>')
+                in_list=True
+            out.append('<li>'+inline(re.sub(r'^\s*[-*] ', '', line))+'</li>')
+        elif line.strip() == '---':
+            close_list()
+            out.append('<hr>')
+        else:
+            close_list()
+            out.append('<p>'+inline(line)+'</p>')
+    close_list()
+    if in_code:
+        out.append('</code></pre>')
+    return Markup(''.join(out))
+
+
+def _parse_changelog_sections(document):
+    """One collapsible section per original ## version heading."""
+    headings = list(re.finditer(r'(?m)^## (.+)$',document))
+    sections=[]
+    for i, heading in enumerate(headings):
+        start=heading.end()
+        stop=headings[i+1].start() if i+1<len(headings) else len(document)
+        sections.append({'title': heading.group(1).strip(),
+                         'body_html': _render_changelog_body(document[start:stop])})
+    return sections
+
+
+@app.get('/aenderungen')
+@app.get('/changelog')
+def changelog_info():
+    language=interface_language()
+    path=Path(app.static_folder) / 'legal' / ('CHANGELOG.en.md' if language=='en' else 'CHANGELOG.de.md')
+    sections=_parse_changelog_sections(path.read_text(encoding='utf-8'))
+    return render_template('changelog_info.html', sections=sections)
 
 def login_required(f):
     @wraps(f)

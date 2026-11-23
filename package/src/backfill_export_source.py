@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Retain SHA256-matched original backup in SQLite for future round-trip export.
 
 Never imports or changes bookings. A missing source just disables experimental export.
