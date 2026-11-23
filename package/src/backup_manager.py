@@ -5,6 +5,7 @@ published. Never expose this directory via Caddy or import it as Financisto.
 """
 from __future__ import annotations
 import logging
+import json
 import os
 import re
 import secrets
@@ -15,6 +16,9 @@ import time
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from financisto_export import make_export, ExportError
+from financisto_recurring_export import merge_recurring_export
+from financisto_import import parse_backup, BackupError
 
 LOG = logging.getLogger('finance-backup')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -23,6 +27,10 @@ TZ = ZoneInfo('Europe/Berlin')
 KEEP = 14
 INTERVAL = 3600
 AUTO_NAME = re.compile(r'^automatisch-\d{8}-\d{6}-[0-9a-f]{6}\.sqlite3$')
+FINANCISTO_KEEP = 2
+FINANCISTO_NAME = re.compile(r'^financisto-aktuell-\d{8}-\d{6}-[0-9a-f]{6}\.backup$')
+FINANCISTO_MAX_BYTES = 30 * 1024 * 1024
+FINANCISTO_FORMAT_REV = 20
 
 
 def target_dir(db_path: Path) -> Path:
@@ -110,12 +118,177 @@ def scan_once(db_path: Path = DB, today=None):
     day = today or now.strftime('%Y%m%d')
     directory = target_dir(db_path)
     prefix = f'automatisch-{day}-'
-    if any(p.is_file() and not p.is_symlink() and AUTO_NAME.fullmatch(p.name) and p.name.startswith(prefix) for p in directory.iterdir()):
+    sqlite_exists = any(p.is_file() and not p.is_symlink() and AUTO_NAME.fullmatch(p.name) and p.name.startswith(prefix) for p in directory.iterdir())
+    sqlite_failed = False
+    try:
+        if not sqlite_exists:
+            create_backup(db_path, 'automatisch')
         prune_automatic(directory)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
+        sqlite_failed = True
+        LOG.warning('Tägliche SQLite-Sicherung fehlgeschlagen (Financisto wird unabhängig versucht): %s', exc)
+    try:
+        export_current_financisto(db_path, day=day)
+    except (ExportError, BackupError, sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
+        LOG.warning('Aktuelle Financisto-Sicherung nicht erstellt: %s', exc)
+    return 'sqlite_failed' if sqlite_failed else 'already_backed_up' if sqlite_exists else 'created'
+
+
+def export_dir(db_path: Path, *, create=True) -> Path | None:
+    directory = db_path.parent / 'financisto-backups'
+    if directory.is_symlink():
+        raise RuntimeError('Unsicherer Financisto-Sicherungsordner (Symlink)')
+    if create:
+        directory.mkdir(mode=0o700, exist_ok=True)
+        directory.chmod(0o700)
+    elif not directory.is_dir():
+        return None
+    return directory
+
+
+def current_financisto_backups(db_path: Path = DB) -> tuple:
+    """Only app-created current-data exports; never the old Android archive."""
+    directory = export_dir(db_path, create=False)
+    if directory is None:
+        return ()
+    result = []
+    for path in directory.iterdir():
+        if not FINANCISTO_NAME.fullmatch(path.name) or path.is_symlink() or not path.is_file():
+            continue
+        info = path.stat()
+        if not 0 < info.st_size <= FINANCISTO_MAX_BYTES:
+            continue
+        result.append(dict(name=path.name, size=info.st_size, day=path.name[19:27]))
+    result.sort(key=lambda item: item['name'], reverse=True)
+    return tuple(result[:FINANCISTO_KEEP])
+
+
+def _financisto_status_file(db_path: Path) -> Path:
+    return export_dir(db_path) / 'status.json'
+
+
+def financisto_status(db_path: Path = DB) -> dict:
+    """Persist separately from SQLite: the UI must never confuse old .backup files
+    with a successfully created CURRENT backup. No financial data is stored here.
+    """
+    default = dict(last_attempt='', last_success='', last_filename='', last_day='',
+                   error='', ok=None, format_revision=0, recurring_templates=None,
+                   transaction_count=None)
+    directory = export_dir(db_path, create=False)
+    if directory is None:
+        return default
+    path = directory / 'status.json'
+    if path.is_symlink() or not path.is_file():
+        return default
+    try:
+        with path.open('r', encoding='utf-8') as stream:
+            value = json.load(stream)
+        if isinstance(value, dict):
+            for name in default:
+                if name in value and isinstance(value[name], type(default[name])):
+                    default[name] = value[name]
+                elif name in value and default[name] is None:
+                    default[name] = value[name]
+    except (OSError, ValueError, TypeError):
+        pass
+    return default
+
+
+def _save_financisto_status(db_path: Path, data: dict) -> None:
+    directory = export_dir(db_path)
+    fd, temp = tempfile.mkstemp(prefix='.status-', suffix='.tmp', dir=directory)
+    os.fchmod(fd, 0o600)
+    tmp = Path(temp)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+            json.dump(data, stream, ensure_ascii=False, sort_keys=True)
+            stream.flush()
+            os.fsync(stream.fileno())
+        tmp.replace(directory / 'status.json')
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def export_current_financisto(db_path: Path = DB, *, day=None, force=False) -> str:
+    """Create and validate a current-data Financisto backup including scheduled
+    templates. On failure keep older files but publish the failure prominently.
+    SQLite backups remain independent and are never touched here.
+    """
+    directory = export_dir(db_path)
+    now = datetime.now(TZ)
+    day = day or now.strftime('%Y%m%d')
+    former = financisto_status(db_path)
+    # Version migration: old .backup files from dev.17 can be incomplete.
+    # A new dev.18 process must re-export even when such a file exists today.
+    if (not force and former.get('format_revision') == FINANCISTO_FORMAT_REV
+            and former.get('last_day') == day
+            and isinstance(former.get('last_filename'), str)
+            and FINANCISTO_NAME.fullmatch(former['last_filename'])
+            and not (directory / former['last_filename']).is_symlink()
+            and (directory / former['last_filename']).is_file()):
         return 'already_backed_up'
-    create_backup(db_path, 'automatisch')
-    prune_automatic(directory)
-    return 'created'
+    attempt = now.isoformat(timespec='seconds')
+    try:
+        with sqlite3.connect(db_path, timeout=30) as db:
+            db.row_factory = sqlite3.Row
+            db.execute('BEGIN')
+            try:
+                raw, stats = make_export(db)
+                raw, stats = merge_recurring_export(db, raw, stats)
+            finally:
+                db.rollback()
+        if not 0 < len(raw) <= FINANCISTO_MAX_BYTES:
+            raise RuntimeError('Financisto-Export größer als 30 MiB oder leer')
+        parsed = parse_backup(raw)
+        if not parsed.get('transactions') or not parsed.get('account'):
+            raise RuntimeError('Financisto-Export ohne Konten oder Buchungen')
+        # All scheduled, exportable rules must have become native templates.
+        expected_templates = stats.get('recurring_exported')
+        actual_templates = sum(1 for row in parsed['transactions']
+                               if row.get('is_template') == '2' and row.get('recurrence'))
+        if expected_templates is None or actual_templates != expected_templates:
+            raise RuntimeError('Wiederholungsvorlagen unvollständig: '
+                               f'{actual_templates}/{expected_templates}')
+        name = f'financisto-aktuell-{day}-{now:%H%M%S}-{secrets.token_hex(3)}.backup'
+        fd, temp = tempfile.mkstemp(prefix='.financisto-', suffix='.backup', dir=directory)
+        os.fchmod(fd, 0o600)
+        tmp = Path(temp)
+        try:
+            with os.fdopen(fd, 'wb') as stream:
+                stream.write(raw)
+                stream.flush()
+                os.fsync(stream.fileno())
+            dest = directory / name
+            if dest.exists() or dest.is_symlink():
+                raise RuntimeError('Financisto-Dateiname bereits vorhanden')
+            tmp.replace(dest)
+        finally:
+            tmp.unlink(missing_ok=True)
+        success = dict(former, last_attempt=attempt, last_success=attempt,
+                       last_filename=name, last_day=day, ok=True, error='',
+                       format_revision=FINANCISTO_FORMAT_REV,
+                       recurring_templates=actual_templates,
+                       transaction_count=len(parsed['transactions']))
+        _save_financisto_status(db_path, success)
+        # Prune only successfully published automatic Financisto files.
+        files = sorted((p for p in directory.iterdir() if FINANCISTO_NAME.fullmatch(p.name)
+                        and p.is_file() and not p.is_symlink()),
+                       key=lambda p: p.name, reverse=True)
+        for old in files[FINANCISTO_KEEP:]:
+            old.unlink()
+        LOG.info('Financisto-Sicherung erstellt: %s, Buchungen inkl. Vorlagen: %d, Vorlagen: %d',
+                 name, len(parsed['transactions']), actual_templates)
+        return 'created'
+    except (ExportError, BackupError, sqlite3.Error, OSError, RuntimeError,
+            ValueError, KeyError, TypeError) as exc:
+        error = str(exc)[:600] or type(exc).__name__
+        failed = dict(former, last_attempt=attempt, ok=False, error=error)
+        try:
+            _save_financisto_status(db_path, failed)
+        except OSError as status_exc:
+            LOG.error('Financisto-Status konnte nicht gespeichert werden: %s', status_exc)
+        LOG.warning('Kein frisches Financisto-Backup erstellt: %s', error)
+        raise
 
 
 def main():

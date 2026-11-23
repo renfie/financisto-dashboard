@@ -19,26 +19,115 @@ TZ = ZoneInfo('Europe/Berlin')
 
 
 def recurrence_for(rule):
-    """The precise EVERY_NTH_DAY monthly dialect found in the 2026-11-02 backup."""
+    """Encode supported Web recurring rules in Financisto's native recurrence dialect.
+
+    Financisto RecurrencePeriod recognizes the mutually exclusive endings
+    INDEFINETELY, EXACTLY_TIMES:count@N# and
+    STOPS_ON_DATE:date@yyyyMMddTHHmmss#.  When both Web limits exist, the
+    earlier effective limit is selected; neither limit is silently ignored.
+    """
+    label = rule['title']
     freq = rule['frequency']
     distance = int(rule['interval_count'])
     day = int(rule['day_of_month'])
     if not (1 <= distance <= 120 and 1 <= day <= 31):
-        raise ExportError(f'Regel {rule["title"]}: ungültiger Abstand bzw. Monatstag.')
+        raise ExportError(f'Regel {label}: ungültiger Abstand bzw. Monatstag.')
     if freq not in ('monthly', 'quarterly', 'yearly'):
-        raise ExportError(f'Regel {rule["title"]}: {freq} kann noch nicht sicher nach Financisto exportiert werden. Bitte zuerst pausieren.')
+        raise ExportError(f'Regel {label}: {freq} kann noch nicht sicher nach Financisto exportiert werden.')
     distance *= {'monthly': 1, 'quarterly': 3, 'yearly': 12}[freq]
     if distance > 120:
-        raise ExportError(f'Regel {rule["title"]}: Abstand über 120 Monaten wird nicht unterstützt.')
+        raise ExportError(f'Regel {label}: Abstand über 120 Monaten wird nicht unterstützt.')
     try:
         date = dt.date.fromisoformat(rule['start_on'])
-    except ValueError as exc:
-        raise ExportError(f'Regel {rule["title"]}: ungültiges Startdatum.') from exc
+    except (TypeError, ValueError) as exc:
+        raise ExportError(f'Regel {label}: ungültiges Startdatum.') from exc
     if date.year < 2000 or date.year > 2100:
-        raise ExportError(f'Regel {rule["title"]}: Startdatum außerhalb 2000–2100.')
+        raise ExportError(f'Regel {label}: Startdatum außerhalb 2000–2100.')
+    # Web dates are min(requested_day, last_day_of_month). Financisto's
+    # ordinary EVERY_NTH_DAY skips invalid dates instead. Its GEEKY format
+    # accepts iCalendar RRULEs, so BYMONTHDAY=29,-1;BYSETPOS=1 yields
+    # 29 Jan, 28 Feb, 29 Mar, ... (likewise 30 and 31). The first candidate
+    # of the two sorted days is exactly the clipped Web date. Day 31 is the
+    # last day of each month and can be written as BYMONTHDAY=-1.
+    if date.day > day:
+        # On both systems the first recurrence is in the next interval; the
+        # count-based ending below must account for the skipped start period.
+        first_step = 1
+    else:
+        first_step = 0
+    raw_end = rule.get('end_on')
+    raw_max = rule.get('max_occurrences')
+    try:
+        end = dt.date.fromisoformat(raw_end) if raw_end else None
+    except (TypeError, ValueError) as exc:
+        raise ExportError(f'Regel {label}: ungültiges Enddatum.') from exc
+    if end and end < date:
+        raise ExportError(f'Regel {label}: Enddatum liegt vor dem Startdatum.')
+    try:
+        count = int(raw_max) if raw_max is not None else None
+    except (ValueError, TypeError) as exc:
+        raise ExportError(f'Regel {label}: ungültige maximale Anzahl.') from exc
+    if count is not None and not 1 <= count <= 10000:
+        raise ExportError(f'Regel {label}: Anzahl muss zwischen 1 und 10000 liegen.')
+    # Financisto has one native end mode. With two limits pick whichever stops
+    # sooner; compute the Nth Web occurrence without disregarding the anchor.
+    if count is not None and end is not None:
+        from recurring import planned_date
+        try:
+            nth = planned_date(date, freq, int(rule['interval_count']), day,
+                               count - 1 + first_step)
+        except (ValueError, OverflowError) as exc:
+            raise ExportError(f'Regel {label}: Ausführungstermin außerhalb des zulässigen Datumsbereichs.') from exc
+        # A Web rule with both conditions terminates at whichever is earlier.
+        # The native rule gets exactly one of these equivalent bounds.
+        if nth <= end:
+            end = None
+        else:
+            count = None
+    if day > 28:
+        # For GEEKY, Financisto calls new RRule() directly with the embedded
+        # rule, bypassing RecurrencePeriod.updateRRule(). COUNT/UNTIL must
+        # therefore be written directly into that RRULE, not its period.
+        # To avoid differences between UNTIL time zones on Android, encode an
+        # inclusive end_on as the exact count of Web occurrences through that
+        # day. Never approximate a bounded Web rule with an unlimited schedule.
+        effective_count = count
+        if end is not None:
+            from recurring import planned_date
+            first = first_step
+            end_count = 0
+            for step in range(first, 10001 + first):
+                try:
+                    occurrence = planned_date(date, freq,
+                        int(rule['interval_count']), day, step)
+                except (ValueError, OverflowError) as exc:
+                    raise ExportError(f'Regel {label}: Enddatum außerhalb des unterstützten Zeitraums.') from exc
+                if occurrence > end:
+                    break
+                end_count += 1
+            else:
+                raise ExportError(f'Regel {label}: mehr als 10.000 Termine bis zum Enddatum.')
+            if end_count == 0:
+                raise ExportError(f'Regel {label}: Enddatum liegt vor dem ersten Termin.')
+            effective_count = min(count, end_count) if count is not None else end_count
+        if effective_count is not None and effective_count < 1:
+            raise ExportError(f'Regel {label}: Wiederholungsanzahl ungültig.')
+        days = '-1' if day == 31 else f'{day},-1'
+        position = '' if day == 31 else ';BYSETPOS=1'
+        rrule = f'FREQ=MONTHLY;INTERVAL={distance};BYMONTHDAY={days}{position}'
+        if effective_count is not None:
+            rrule += f';COUNT={effective_count}'
+        return f'{date.isoformat()}T12:00:00~GEEKY:interval@{rrule}#~INDEFINETELY:null'
+    if count is not None:
+        period = f'EXACTLY_TIMES:count@{count}#'
+    elif end is not None:
+        # DateUtils.FORMAT_DATE_RFC_2445 = yyyyMMdd'T'HHmmss.
+        period = f'STOPS_ON_DATE:date@{end:%Y%m%d}T000000#'
+    else:
+        period = 'INDEFINETELY:null'
     return (f'{date.isoformat()}T12:00:00~MONTHLY:'
             f'monthly_pattern_0@EVERY_NTH_DAY#count@1#interval@{distance}#'
-            f'monthly_pattern_params_0@{day}#~INDEFINETELY:null')
+            f'monthly_pattern_params_0@{day}#~{period}')
 
 
 def preview_summary(db):
@@ -80,19 +169,26 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             by_source[source_id] = rule
             if source_id not in prior_template_ids:
                 raise ExportError(f'Die Vorlage {rule["title"]} stammt nicht aus der verwendeten Originalsicherung. Bitte Importstand prüfen.')
+    # Templates not imported into Web recurring_rules remain unchanged in the
+    # exact original Financisto backup. Do not require a second manual import.
     untracked = prior_template_ids-set(by_source)
-    if untracked:
-        raise ExportError(f'{len(untracked)} ursprüngliche Dauerbuchung(en) sind nicht in der Web-Regelverwaltung erfasst. Bitte zuerst die Vorlagen aus der passenden Sicherung importieren.')
 
     for rule in rows:
-        if rule['deleted_on'] or not int(rule['active']):
+        if rule['deleted_on']:
             continue
+        if not int(rule['active']):
+            # Original Financisto templates are retained as genuine original
+            # schedule records. A Web-only paused rule has no known safe
+            # native representation, so never silently omit it.
+            if rule['source_kind'] == 'financisto':
+                continue
+            raise ExportError(f'Regel {rule["title"]}: pausierte Web-Regel kann nicht verlustfrei in ein natives Financisto-Backup übernommen werden. Für vollständige Sicherung zusätzlich SQLite nutzen.')
         if not int(rule['auto_post']):
             raise ExportError(f'Regel {rule["title"]}: manuell aktive Regeln können in Financisto unbeabsichtigt automatisch laufen. Bitte vor dem Export pausieren oder ausdrücklich auf Automatisch umstellen.')
         if rule['needs_review']:
             raise ExportError(f'Regel {rule["title"]}: noch nicht abgeschlossene Regelprüfung. Bitte bearbeiten.')
-        if rule.get('end_on') or rule.get('max_occurrences') is not None:
-            raise ExportError(f'Regel {rule["title"]}: Begrenzte Wiederholungen (Enddatum/Anzahl) können nicht zuverlässig in das Android-Format exportiert werden. Bitte die Regel vor dem Export deaktivieren.')
+        if (rule.get('run_at') or '00:00') != '00:00':
+            raise ExportError(f'Regel {rule["title"]}: individuelle Ausführungsuhrzeit kann in Financisto nicht sicher übernommen werden.')
         from recurring import validate_rule
         try:
             validate_rule(db,rule)
@@ -117,9 +213,13 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
         orig_id = rule['source_id'] if is_original else None
         if is_original:
             seen_source_ids.add(orig_id)
-        if rule['deleted_on'] or not int(rule['active']):
+        if rule['deleted_on']:
             if is_original:
                 removed.add(orig_id)
+            continue
+        if not int(rule['active']):
+            # Preserve untouched native recurring templates (including GEEKY).
+            # Do not reactivate or recode them when Web rules are paused.
             continue
         if int(rule['account_id']) not in account_ids or (rule['to_account_id'] and int(rule['to_account_id']) not in account_ids):
             raise ExportError(f'Regel {rule["title"]}: fehlendes Konto.')
@@ -150,8 +250,9 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             replacements[ident] = result
         else:
             inserts.append(result)
-    if seen_source_ids != prior_template_ids:
-        raise ExportError('Die Vorlagen stimmen nicht vollständig mit der Originaldatei überein.')
+    # Preserve untracked original templates instead of dropping or rewriting them.
+    if not seen_source_ids.issubset(prior_template_ids):
+        raise ExportError('Regelverweise auf unbekannte Financisto-Vorlagen gefunden.')
 
     outgoing=[]
     last_transaction_pos=max((idx for idx,c in enumerate(chunks) if c[0]=='transactions'), default=-1)
@@ -198,6 +299,10 @@ def merge_recurring_export(db, base_raw: bytes, stats: dict):
             raise ExportError(f'Stammdaten {entity} wurden beim Wiederholungsexport unerwartet verändert.')
     copy_stats = dict(stats)
     copy_stats.update({'recurring_updated':updated_count,'recurring_new':new_count,
-                       'recurring_excluded':len(removed), 'recurring_exported':updated_count+new_count,
+                       'recurring_preserved_original':len(untracked)+sum(
+                           1 for r in rows if r['source_kind']=='financisto' and
+                           not r['deleted_on'] and not int(r['active'])),
+                       'recurring_excluded':len(removed), 'recurring_exported':updated_count+new_count+len(untracked)+sum(
+                           1 for r in rows if r['source_kind']=='financisto' and not r['deleted_on'] and not int(r['active'])),
                        'transactions_with_templates':len(out_tx)})
     return exported,copy_stats

@@ -1,14 +1,18 @@
-FieLanzen v1.9.57 – Wiederkehrende Buchungen und Dokumentation (18.11.2026).
+FieLanzen Dashboard v1.9.58 – Offizielles Sammelrelease aus 21 Entwicklungsständen (dev.1–dev.21).
+Neuerungen: CSV-Export und sortierbare Buchungslisten; farbige Kennzeichnung von Buchungsarten,
+Wiederholungen und Regelzuordnungen; heutige Kontostände mit Prognose für künftige Buchungen;
+tägliche SQLite- und Financisto-Sicherung einschließlich kompatibler Wiederholungsvorlagen;
+versionierte Mobile-API mit dauerhaften, widerrufbaren Geräteschlüsseln und Wiederholungskennzeichen.
+Die vollständigen Änderungen stehen in den deutschen und englischen Release Notes auf GitHub.
+ 
+Update als Projektbesitzer ohne sudo aus /home/pi/docker-files:
+  unzip -o financisto-dashboard-v1.9.58.zip && \
+  ./financisto-release-1.9.58/update.sh /home/pi/docker-files/financisto-dashboard
 
-- Neue Wiederholungsregeln übernehmen den Tag im Monat aus dem Startdatum.
-- Bei täglicher und wöchentlicher Wiederholung wird das Monatstagsfeld ausgeblendet.
-- Manuell eingestellte Monatstage und bestehende Regeln bleiben erhalten.
-- GitHub-READMEs aufgeräumt; vollständige Neuerungen in GitHub Releases und Changelog.
-- Docker-Image der drei App-Dienste: financisto-dashboard:1.9.57.
+Direkter Wechsel von älteren Releases/Entwicklungsständen ohne Zwischenversion möglich.
+Bestehende Finanzdaten, Bind-Mounts, Einstellungen und Secrets bleiben erhalten.
 
-Update als Projektbesitzer (ohne sudo), im Ordner /home/pi/docker-files:
-  unzip -o financisto-dashboard-v1.9.57.zip && \
-  ./financisto-release-1.9.57/update.sh /home/pi/docker-files/financisto-dashboard
-
-Datenbank, .env, Secrets und Caddy-Zertifikate bleiben bestehen.
-Details: package/CHANGELOG.md und package/CHANGELOG.en.md.
+Die SQLite-Sicherung ist das vollständige Web-Wiederherstellungsformat.
+Financisto-.backup-Rückimporte zuerst in einer isolierten Android-Testinstallation prüfen.
+Geräte-API-Schlüssel werden durch angemeldete Administratoren unter Einstellungen verwaltet;
+die Android-App selbst wird getrennt vom Dashboard entwickelt.

@@ -20,8 +20,10 @@
 - **Manueller Financisto-`.backup`-Import bleibt erhalten**; optional automatischer Import per SFTP/FolderSync, in der Weboberfläche steuerbar
 - Finanzverwaltung mit wahlweise **Financisto oder der Weboberfläche als führendem System**; Schutz vor unbeabsichtigtem Überschreiben eigener Buchungen
 - Wiederkehrende Buchungen mit optionalem Enddatum oder maximaler Anzahl an Ausführungen; Benachrichtigungen über Web Push, Gotify oder Telegram
-- Zukünftig datierte Buchungen werden bis zum Buchungsdatum gelb hervorgehoben (nur Anzeige, kein Aufschub der Kontostandsänderung)
+- Zukünftig datierte Buchungen bleiben gelb sichtbar; der heutige angezeigte Kontostand berücksichtigt sie noch nicht und zeigt die Prognose separat (gespeicherte Buchungen werden nicht zeitversetzt ausgeführt)
 - Responsive Oberfläche für PC, Tablet und Smartphone mit installierbarer PWA
+- Gemeinsame tägliche und manuelle SQLite- sowie Financisto-Sicherungen mit Statusanzeige und Prüfung wiederkehrender Vorlagen
+- Versionierte Mobile-API für Konten und Buchungen mit dauerhaft gültigen, sperr- und löschbaren Geräte-API-Schlüsseln
 - Docker Compose, lokale HTTPS-Konfiguration und Backup-/Update-Skripte; persistente Daten in Bind-Mounts
 
 ## Interaktive Einführung für neue Benutzer
@@ -39,7 +41,7 @@ Die Rechte an Financisto und dessen Kennzeichen verbleiben bei den jeweiligen Re
 
 ## Screenshots
 
-Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.40 können abweichen.
+Die folgenden Bilder zeigen die **tatsächliche Gestaltung der Weboberfläche**, allerdings teilweise aus früheren Entwicklungsständen. Kontonamen, Beträge und weitere Angaben wurden durch **Demodaten** ersetzt. Die Desktop-/Mobilansichten stammen aus v1.9.17; einzelne Elemente der aktuellen v1.9.58 können abweichen.
 
 ### Dashboard am Desktop
 
@@ -67,7 +69,7 @@ Alle Übersetzungen befinden sich lokal im Programm; es werden keine Finanzdaten
 
 **Ausführliche Anleitung:** [Caddy, HTTPS und Nginx Proxy Manager auf Deutsch](package/docs/CADDY.de.md) · [English](package/docs/CADDY.en.md).
 
-**Update-Hinweis:** Von v1.9.35 kann direkt auf v1.9.40 aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
+**Update-Hinweis:** Auf v1.9.58 kann direkt von älteren Releases oder Entwicklungsständen aktualisiert werden; eine Zwischeninstallation ist nicht notwendig. Das Skript sichert vorab Programmcode und SQLite-Datenbank.
 
 ## Repository-Struktur
 

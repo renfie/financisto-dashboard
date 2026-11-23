@@ -1,27 +1,33 @@
-# Rückexport in Financisto (`.backup`): Testfunktion 1.9.5
+# Financisto-Rückexport (`.backup`) – Stand 1.9.58-dev.18
 
-## Voraussetzungen
+## Ein zentraler Sicherungsbereich
 
-1. Administrator mit eingerichteter TOTP-2FA.
-2. Die zuletzt tatsächlich importierte Original-Sicherung muss als exportierbare Grundlage in SQLite gespeichert sein. Das Upgrade übernimmt sie automatisch aus `data/import-archive` oder `data/inbox`, wenn SHA256 exakt übereinstimmt. Falls nicht, kann sie über Einstellungen hochgeladen werden, ohne Finanzdaten zu überschreiben.
-3. Der Export rekonstruiert heutige Web-Buchungen und Stammdaten und kopiert alle übrigen Datenfelder und Entitäten der Originaldatei. Der Export ist **experimentell**.
+Unter **Einstellungen → Automatische Datensicherung** werden täglich unabhängig voneinander eine SQLite-Sicherung sowie ein Financisto-Rückexport versucht. **Jetzt Sicherung erstellen** löst beide unabhängig voneinander aus – ohne erneut Adminpasswort oder 2FA abzufragen; die reguläre Admin-Sitzung mit CSRF-Schutz ist ausreichend. Den früheren separaten Testexport gibt es nicht mehr.
 
-## Datenschutz
+Die SQLite-Sicherung ist das vollständige Wiederherstellungsformat des Web-Dashboards und enthält alle Regeln. Die `.backup`-Datei ist für den separat zu prüfenden Rückimport in Financisto vorgesehen. Die zwei letzten erfolgreichen `.backup`-Dateien stehen als Download bereit. Der tatsächliche letzte Exportversuch, seine Uhrzeit und eine eventuelle Fehlermeldung sind gesondert sichtbar; ältere Backups sind bei einem Fehler nicht aktuell.
 
-Die SQLite-Datenbank enthält die exportierte Originaldatei als unveränderten gzip-BLOB. Dies ist **keine Verschlüsselung**. DB, Backups und heruntergeladene Dateien vertraulich behandeln. Die DB-Sicherungen enthalten diese Datei vollständig.
+Die **zuletzt importierte Originaldatei** muss SHA256-genau als Vorlage gespeichert sein. Ist sie nicht vorhanden, lässt sie sich im gleichen Sicherungsbereich hochladen; das ändert keine Finanzdaten und überschreibt keine Buchungen.
 
-## Tests
+## Terminierte Buchungen und Vorlagen
 
-Lokale Tests prüfen die GZIP-Struktur, Paketkennung, Pflichtfelder, IDs, Gesamtanzahl, historische Buchungen und Web-Buchungen. Eine **echte Rücksicherung auf Android** wurde nicht durchgeführt, insbesondere nicht mit der aktuellen Android-Version DB 257. Der Export ist noch nicht als voll kompatibler Rückweg freigegeben.
+Ausgeführte Buchungen werden als Buchungsdatensätze exportiert. Wiederkehrende Regeln werden als Financisto-Wiederholungsvorlagen exportiert, sofern ihr Verhalten im bekannten nativen Format sicher darstellbar ist. Unveränderte ursprüngliche Vorlagen werden übernommen. Kompatible automatisch aktive Monats-/Quartals-/Jahresregeln werden erzeugt und gezählt. Die tatsächlich ausgegebenen Vorlagen werden gegen die erwartete Zahl geprüft.
 
-Nicht die produktive Handyinstallation damit überschreiben! Nur auf einem zweiten Testgerät/-profil mit dortiger Testdatenbank prüfen, ob Konten, Kategorien, Empfänger, Umbuchungen, Buchungsbeträge und Kontostände korrekt sind.
+**Nicht sicher unterstützte** Web-Regeln (u. a. wöchentliche oder tägliche Sonderformen, individuelle Ausführungszeiten, begrenzte Laufzeit sowie pausierte Web-only-Regeln) führen zu einem **klaren Exportfehler statt einer unvollständigen `.backup`-Datei**. Die bisherige erfolgreiche Datei bleibt erhalten, die unabhängige SQLite-Sicherung läuft weiter. Originale Financisto-Vorlagen, die nur im Web pausiert wurden, behalten im Financisto-Export ihre originale Definition: Das Pause-Flag lässt sich nicht verlustfrei übertragen und ist bei Android-Rückimport zu prüfen.
 
+## Sicherheit und Prüfung
 
-### Kontrollierter Rückexport wiederkehrender Buchungen (1.9.14)
+Die Quelle liegt in SQLite als originaler gzip-BLOB (keine zusätzliche Verschlüsselung). Die Verzeichnisse und heruntergeladenen Dateien sind vertraulich zu behandeln. Die Statusdatei `data/financisto-backups/status.json` enthält Erfolg/Fehler, Zeit und Vorlagenanzahl, keine Schlüssel. Ein Export greift nicht schreibend auf Buchungen oder Kontostände zu.
 
-Auf **Einstellungen → Rückexport nach Financisto** die Option für Wiederholungen aktivieren. Nur explizit freigegebene **automatische Monats-/Quartals-/Jahresregeln** werden in das exakte bekannte `MONTHLY:EVERY_NTH_DAY`-Format umgewandelt. Importierte Vorlagen werden aktualisiert; neue Web-Vorlagen erhalten neue, kollisionsfreie IDs. Pausierte und archivierte Vorlagen erscheinen nicht in der Android-Datei. Manuell aktive und nicht sicher unterstützte Intervallformate werden **nicht** stillschweigend übertragen: Der Export wird mit einer Fehlermeldung abgebrochen.
+Struktur, Pflichtfelder, Datensatz- und Wiederholungsvorlagenanzahl werden geprüft. Ein produktiver Android-Restore ist damit **nicht nachgewiesen**. Neue `.backup`-Dateien deshalb zuerst in einer separaten Financisto-Testinstallation importieren, Konten, Buchungen, Terminregeln und deren nächste Fälligkeiten kontrollieren und keinesfalls ungeprüft die einzige produktive Handy-Datenbank überschreiben.
 
-Unveränderte Transaktionen und alle Stammdaten bleiben erhalten. Durch das Exportieren oder durch den Wechsel des führenden Systems wird **nichts auf das Smartphone übertragen**; hierfür die resultierende `.backup` bewusst in Financisto importieren. `last_recurrence` wird vorsorglich auf mindestens den Exportzeitpunkt gesetzt; ob die Android-App damit alte Termine tatsächlich nicht nachholt, muss auf einem getrennten Testprofil geprüft werden. Der Android-Import von Wiederholungsregeln ist weiterhin experimentell.
+## Begrenzungen von wiederkehrenden Regeln (ab 1.9.58-dev.19)
 
-Ohne aktivierte Option verhält sich der Testexport unverändert wie in 1.9.13.
+Financisto kennt `EXACTLY_TIMES:count@N#` für eine maximale Anzahl sowie `STOPS_ON_DATE:date@yyyyMMddT000000#` für ein Enddatum. Für Web-Monats-, Quartals- und Jahresregeln wird das jeweils zutreffende Format geschrieben; bei zwei Grenzen wird die **früher wirksame** Grenze verwendet. Das Schema wurde anhand der nativen Financisto-Java-Klassen `RecurrencePeriod` und `RecurrenceViewFactory` geprüft.
 
+**Achtung:** Web-Regeln für den 29., 30. oder 31. können nicht ohne Termindifferenz in das native `BYMONTHDAY`-Muster übertragen werden, da das Web die Termine in kurzen Monaten auf den letzten Tag verschiebt, Financisto aber überspringt. Ein solcher Export wird ausdrücklich abgebrochen. Andere noch nicht kompatible Intervalle bleiben ebenso blockiert. Die SQLite-Sicherung enthält sämtliche Web-Regeln vollständig. Der Rückimport der erzeugten Datei muss separat auf Android getestet werden.
+
+## Monatstag 29–31 (ab 1.9.58-dev.20)
+
+Wenn im Web eine Monatsregel bei kürzeren Monaten auf den letzten Kalendertag fällt, wird für den Financisto-Rückexport statt `MONTHLY:EVERY_NTH_DAY` das native `GEEKY`-Muster mit einer iCalendar-RRULE verwendet. Für den 30. wird beispielsweise `FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=30,-1;BYSETPOS=1` verwendet. Für den 29. gilt das entsprechende Muster, für den 31. `BYMONTHDAY=-1`. Bei Regeln mit Enddatum und/oder Wiederholungsanzahl wird die exakte Anzahl der zulässigen Termine als `COUNT` in der RRULE codiert, weil der GEEKY-Modus den normalen Financisto-Wiederholungszeitraum nicht verarbeitet.
+
+Das Muster wurde anhand des Original-Quellcodes von Financisto verifiziert und die generierten Termine mit einem iCalendar-Iterator gegenüber dem Web-Planungsalgorithmus getestet. Die tatsächliche Ausführung in der Original-Android-App muss vor produktiver Wiederherstellung in einer Testinstallation geprüft werden.

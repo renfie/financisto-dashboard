@@ -1,3 +1,180 @@
+## 1.9.58 – Sammelrelease: Dashboard, Datensicherung und Mobile-API (23.11.2026)
+
+Dieses Release bündelt **alle 21 Entwicklungsschritte von 1.9.58-dev.1 bis 1.9.58-dev.21** gegenüber v1.9.57. Vollständige Detailbeschreibungen der einzelnen Entwicklungsstände bleiben in den nachfolgenden Changelog-Abschnitten erhalten.
+
+### Wichtigste Neuerungen
+
+- **Buchungen und Darstellung:** Such- und Sortierfunktionen, CSV-Export, Notizspalte, überarbeitete mobile Buchungserfassung und farbige Kennzeichnung von Ausgaben, Einnahmen, Umbuchungen und wiederkehrenden Buchungen.
+- **Regelzuordnungen:** Echte automatisch/manuell durch eine Wiederholungsregel erzeugte Buchungen werden von bereits vorhandenen, lediglich einer Regel zugeordneten Buchungen unterschieden – auch bei Umbuchungen und in der Mobile-API.
+- **Kontostände:** Zukünftig datierte Buchungen bleiben sichtbar, werden aber für die heutigen Dashboard-Ist-Werte rechnerisch herausgenommen und als zusätzliche Prognose angezeigt; auch bei Umbuchungen und Kontostandsabgleichen.
+- **Sicherungen:** Tägliche und manuelle SQLite- sowie Financisto-`.backup`-Sicherungen in einer gemeinsamen Oberfläche, mit unabhängiger Fehlerbehandlung, Statusanzeige und den zwei letzten erfolgreichen Financisto-Downloads. Der manuelle Financisto-Import bleibt erhalten.
+- **Financisto-Rückexport:** Originale Dauerbuchungsvorlagen werden bewahrt, kompatible Web-Regeln eingeschlossen; Enddatum, maximale Wiederholungszahl und der 29.–31. Monatstag werden im nativen Format berücksichtigt. Nicht sicher übertragbare Regeln brechen mit konkreter Meldung ab, statt stillschweigend zu fehlen.
+- **Mobile-API:** Versionierte, durch API-Schlüssel geschützte Endpunkte zum Abrufen und Verwalten von Konten, Kategorien, Empfängern und Buchungen. Schreibzugriff nur mit passenden Rechten und führender Web-Verwaltung; Idempotenzschutz und Versionskonfliktprüfung. Schlüssel ohne automatisches Ablaufdatum können in der angemeldeten Admin-Sitzung erstellt, gesperrt und gelöscht werden.
+- **Pflege und Sicherheit:** Doppelten Import unter wiederkehrenden Buchungen und redundanten Testexport entfernt; Übersetzungen, Empfänger-Eingabe und Updateprüfungen verbessert. Bind-Mounts, Finanzdaten, Secrets und die bestehende Installation bleiben beim Update erhalten.
+
+### Entwicklungsverlauf – vollständig von dev.1 bis dev.21
+
+- **dev.1:** CSV-Export aller gefilterten/sortierten Dashboard-Buchungen (Excel-kompatibel, mit Schutz vor Tabellenformeln).
+- **dev.2:** Export-Schaltfläche platzsparend neben der Seitennavigation und fehlende englische Texte ergänzt.
+- **dev.3:** Zwei aktuelle Financisto-`.backup`-Sicherungsstände als Admin-Downloads, zusätzlich zu SQLite.
+- **dev.4:** Unabhängige manuelle Doppel-Sicherung; durchgehend farbige Zeilen für Umbuchungen und Wiederholungen; ausführbares Updateskript im ZIP.
+- **dev.5:** Bereits eingetragener Empfänger lässt sich beim Antippen direkt überschreiben.
+- **dev.6:** Wiederkehrend-Kennzeichnung unter dem Datum statt beim Buchungstyp.
+- **dev.7:** Wiederholungskennzeichnung anhand tatsächlicher Ausführungs-Audit-Ereignisse statt bloßer Zuordnung.
+- **dev.8:** Unterscheidung „Wiederkehrend“ und „Regel zugeordnet“, inklusive Umbuchungen und CSV-Ausgabe.
+- **dev.9:** Heutige Monats- und Kontosalden getrennt von Prognosen inklusive zukünftiger Buchungen.
+- **dev.10:** Volle Zeilenfarbmarkierungen auch unter „Buchung erfassen“.
+- **dev.11:** Einheitliche farbige Buchungstyp-Kennzeichen für Einnahme, Ausgabe, Umbuchung und Sonderbuchungen.
+- **dev.12:** Notizspalte und auf-/absteigende Spaltensortierung der 100 letzten Web-Buchungen.
+- **dev.13:** Bearbeiten größerer Einnahmen ohne fehlerhaftes Tausendertrennzeichen; Empfänger bei Wiederholungsregeln direkt überschreibbar.
+- **dev.14:** Versionierte Mobile-API-Erkennung vorbereitet; redundanten Backup-Import aus der Wiederholungsseite entfernt.
+- **dev.15:** Vollständige Mobile-API mit Geräte-Schlüsseln, paginiertem Abruf, Buchungsschreibrechten, Revisionen und Idempotenzschutz.
+- **dev.16:** API-Schlüssel ohne zeitlichen Ablauf; manuelle Sperrung und Sicherheitsprüfung bleiben.
+- **dev.17:** API-Schlüssel ohne erneutes Passwort/2FA erstellen oder sperren und dauerhaft löschen; Prüfung der Wiederholungsvorlagen bei Rückexporten.
+- **dev.18:** Automatische und manuelle SQLite-/Financisto-Sicherungen zusammengeführt, Status und Fehlermeldungen für Rückexporte sichtbar; separaten Testexport entfernt.
+- **dev.19:** Begrenzte Wiederholungen mit Enddatum, maximaler Anzahl oder beiden Begrenzungen im Financisto-Format.
+- **dev.20:** Wiederholungen am 29., 30. und 31. auch in kurzen Monaten über erweitertes Financisto-/iCalendar-Muster.
+- **dev.21:** Mobile-API-Felder `is_recurring` und `is_rule_matched` bei sämtlichen paginierten Buchungen.
+
+### Hinweise zum Update und Rückimport
+
+Das vollständige Docker-ZIP enthält `update.sh`. Direkte Aktualisierungen ohne Installation der einzelnen Entwicklungsstände sind vorgesehen; vorhandene SQLite-Daten, Bind-Mounts, Konfiguration und Secrets bleiben erhalten. Die SQLite-Sicherung ist die vollständige Wiederherstellung des Web-Dashboards. Der Rückimport neuer Financisto-`.backup`-Dateien in die originale Android-App ist **noch nicht vollständig produktiv geprüft**; insbesondere wiederkehrende Vorlagen vor einer produktiven Wiederherstellung zunächst in einer getrennten Testinstallation kontrollieren.
+
+## 1.9.58-dev.21 – Kennzeichen für wiederkehrende Buchungen in der Mobile-API (23.11.2026)
+- `GET /api/mobile/v1/bookings` liefert zusätzlich pro Buchung zwei echte JSON-Boolean-Felder: `is_recurring` (nachweislich durch die Ausführung einer Regel erzeugt) und `is_rule_matched` (bereits vorhandene Buchung wurde einem Regeltermin nur zugeordnet).
+- Die SQL-Erkennung entspricht der bestehenden Dashboard-Liste: `recurring_runs` mit den Audit-Ereignissen `recurring_posted_auto` und `recurring_posted_manual`. Nur eine Regelzuordnung ohne passendes Audit-Ereignis zählt nicht als echte Wiederholung.
+- Bei Mehrfachzuordnungen hat die nachweislich erfolgte Ausführung Vorrang; `is_rule_matched` wird dann als `false` ausgegeben.
+- Bestehende API-Felder, Paginierung (`before`/`next_before`), Authentifizierung, Schreibrechte, Buchungsrevisionen und Idempotenzschutz bleiben unverändert.
+- Zehn datenbankgestützte Regressionstests einschließlich aller sieben geforderten Fälle, mehrseitiger API-Listen und Zugriffsschutz. Nur Dashboard-Entwicklung; keine Android-Änderung und kein offizielles Release.
+
+## 1.9.58-dev.20 – Wiederholungen am 29., 30. oder 31. (23.11.2026)
+- Financisto-Rückexport unterstützt nun monatliche, vierteljährliche und jährliche Wiederholungen am 29.–31., deren Termine bei kurzen Monaten auf den Monatsletzten fallen. Dafür wird der native erweiterte GEEKY-/iCalendar-Modus verwendet (BYMONTHDAY mit BYSETPOS), nicht der fehlerhafte normale Monatstag-Modus.
+- Der Endtermin oder die maximale Anzahl der Wiederholungen wird beim erweiterten Format als COUNT in der tatsächlichen Terminfolge berücksichtigt. Auch zwei gleichzeitig gesetzte Grenzen begrenzen die Anzahl korrekt.
+- Datum und Terminabfolge werden über 2026–2033 mit Februar, Schaltjahren, unterschiedlichen Monatslängen, vierteljährlichen Intervallen und den Begrenzungsarten getestet. Bestehende Buchungen und Regeldefinitionen bleiben unverändert.
+- Exportprüfversion auf 20 erhöht: Die Tagesautomatik versucht nach Installation erneut ein aktuelles Financisto-Backup. Vorherige Erfolgsmeldungen werden nicht überschrieben, solange der neue Export fehlschlägt.
+- Die tatsächliche Ausführung des erweiterten Regeltyps auf einem Android-Gerät ist weiterhin gesondert zu überprüfen. Kein offizielles Release.
+
+## 1.9.58-dev.19 – Begrenzte Wiederholungen im Financisto-Export (23.11.2026)
+- Monatliche, vierteljährliche und jährliche Regeln mit **Enddatum** oder **maximaler Anzahl** werden jetzt im nativen Financisto-Format exportiert (`STOPS_ON_DATE:date@yyyyMMddT000000#` beziehungsweise `EXACTLY_TIMES:count@N#`). Dies beseitigt die pauschale Ablehnung der Regel „Samsung S26“ bei begrenzter Laufzeit.
+- Sind **beide Begrenzungen** gesetzt, gilt diejenige, die zuerst erreicht wird; die relevante Grenze wird sicher als ein einzelner nativer Zeitraum codiert.
+- Die Kodierung ist anhand des originalen Financisto-Quellcodes für `RecurrencePeriod` und `RecurrenceViewFactory` überprüft. Die Test-`.backup`-Datei wurde erneut eingelesen; die Originalvorlagen bleiben erhalten.
+- Monatsregeln für den **29.–31. Tag** werden aus Sicherheitsgründen derzeit abgewiesen, da das Web-Dashboard die Tage in kurzen Monaten auf den Monatsletzten legt, die native Android-Regel aber diese Monate überspringt. Andere nicht sicher übertragbare Regeln bleiben weiterhin explizit gesperrt.
+- Die interne Exportprüfversion wird erhöht, sodass beim Start nach dem Update trotz eines bereits vorhandenen Tagesstands ein neuer Financisto-Exportversuch erfolgt. Die bestehenden SQLite- und Buchungsdaten bleiben unverändert.
+- Der produktive Android-Rückimport ist weiterhin gesondert zu testen. Kein offizielles GitHub-Release.
+
+## 1.9.58-dev.18 – Vereinheitlichte tägliche SQLite-/Financisto-Sicherung (23.11.2026)
+- Doppelte „Rückexport nach Financisto (Testfunktion)“ aus Einstellungen entfernt. Admin erstellt beide Sicherungen über denselben Button ohne zusätzliche Passwort- oder 2FA-Abfrage; manueller Import bleibt erhalten.
+- Der automatische Sicherungsdienst prüft täglich **beide** Sicherungsformate, unabhängig voneinander. Alle neuen Financisto-Backups durchlaufen den prüfenden Wiederholungsregel-Export.
+- Der letzte Financisto-Erfolg und -Fehler wird in einem geschützten Statusprotokoll unter `data/financisto-backups/status.json` gespeichert und in Einstellungen angezeigt. Alte Dateien werden bei Exportfehlern nicht als aktuell deklariert.
+- Beim ersten Lauf nach dem Update wird wegen des neuen Exportprüfstands ein frischer `.backup`-Export versucht, auch wenn ältere Dateien vom selben Tag vorliegen. Maximal zwei erfolgreiche Dateien werden beibehalten.
+- Originalvorlagen und ausgeführte Buchungen bleiben erhalten; native Wiederholungsvorlagen werden zusätzlich gezählt und gegen das Ergebnis geprüft. Bei inkompatiblen Regeln Abbruch mit Fehlermeldung statt unvollständiger Datei.
+- Original-Exportgrundlage kann bei Bedarf innerhalb „Automatische Datensicherung“ durch eine bestehende Admin-Sitzung hinterlegt werden (SHA256-Abgleich, keine Datenüberschreibung).
+- Keine Android-Version, keine Änderung an gespeicherten Buchungen oder Bind-Mounts. SQLite-Sicherung bleibt vollständiger Wiederherstellungsweg.
+
+## 1.9.58-dev.17 – API-Schlüssel ohne erneute Anmeldung und vollständigerer Financisto-Rückexport (22.11.2026)
+- API-Schlüssel werden mit vorhandener Admin-Sitzung und CSRF-Schutz erstellt, gesperrt oder nach einer separaten Bestätigung dauerhaft gelöscht; kein zusätzliches Passwort und kein erneuter 2FA-Code. API-Wiederholungsnachweise des gelöschten Schlüssels werden zuvor entfernt, Audit-Ereignisse bleiben erhalten.
+- Automatische und manuelle Financisto-Backups sowie der Test-Rückexport verwenden nun stets den Wiederholungsregel-Export: Bereits bestehende originale Financisto-Vorlagen werden unverändert bewahrt; kompatible aktive automatische Web-Regeln werden in die .backup-Datei übernommen.
+- Original-Financisto-Vorlagen, die Web-seitig pausiert sind, behalten für den Rückimport ihre ursprüngliche Financisto-Definition (die Web-Pausierung lässt sich nicht automatisch auf Android übertragen).
+- Manuell ausgelöste, nur Web-seitig pausierte oder im nativen Format nicht unterstützte Regeln (u. a. tägliche/wöchentliche, Endtermin- oder Uhrzeit-Sonderregeln) werden **nicht stillschweigend ausgelassen**: Der neue Financisto-Export wird mit einer verständlichen Fehlermeldung abgebrochen. Das SQLite-Backup sichert weiterhin alle Web-Regeln vollständig.
+- Keine Finanzbuchungen, Kontostände oder Wiederholungsregeln werden durch diese Änderungen verändert; kein offizielles GitHub-Release.
+
+## 1.9.58-dev.16 – Dauerhafte, widerrufbare Mobile-API-Schlüssel (22.11.2026)
+- Neu erzeugte API-Schlüssel erhalten kein automatisches Ablaufdatum (Datenbankwert `expires_on=0`). Ein Ablaufdatum wird bei der API-Anmeldung nicht mehr geprüft.
+- Beim Upgrade werden bisherige noch gültige Schlüssel auf unbegrenzte Gültigkeit umgestellt; bereits abgelaufene Schlüssel werden aus Sicherheitsgründen nicht wieder aktiviert.
+- Schlüssel bleiben einzeln durch Administratoren sperrbar; Deaktivierung des Benutzers, fehlende 2FA oder Änderung seiner Sicherheitsversion machen sie weiterhin ungültig.
+- Die Schlüsselverwaltung zeigt „Unbegrenzt“ statt eines Ablaufdatums. Administratorpasswort und frischer 2FA-Code sind weiterhin Voraussetzung für Erstellung und Sperrung.
+- Ausschließlich Dashboard-Änderung. Keine neue Android-Version, keine Änderung an Konten, Buchungen, Bind-Mounts oder bestehenden Finanzdaten; nur API-Schlüsselmetadaten werden migriert.
+
+## 1.9.58-dev.15 – Vollständige Mobile-API für Online-Servermodus (22.11.2026)
+- API-Key-Verwaltung nach Admin-Passwort und frischem 2FA-Code; Geräte-Keys nur einmal angezeigt, gehasht in SQLite, 90 Tage gültig und jederzeit sperrbar.
+- Mobile-API: öffentliche Capabilities, authentisierte Sitzung, Konten, Kategorien, Empfänger, paginierte Buchungen, sowie Anlegen/Bearbeiten/Löschen von Web-Buchungen.
+- Schreibzugriff nur bei führender Web-Verwaltung, Editor/Admin und Schlüssel mit Schreibrecht; UUID-Idempotenz und If-Match-Konfliktprüfung bei Bearbeiten/Löschen.
+- Datenabgleich nur im Online-Modus, serverführend, kein Mischen mit lokalen Android-Daten; Android-Zugangsschlüssel wird im Android-Keystore verschlüsselt abgelegt.
+- Neues SQLite-Schema nur additiv, Bind-Mounts, bestehende Kontostände und Web-Sessions erhalten.
+- Beim Server-Import gibt es keinen automatischen Upload vorhandener Offline-Buchungen.
+
+## 1.9.58-dev.14 – Mobile-API-Erkennung und vereinfachte Wiederholungsseite (22.11.2026)
+- Öffentlicher, rein lesender JSON-Erkennungsendpunkt `/api/mobile/v1/status` (mit Alias `/api/mobile/v1`, `/api/v1/mobile/status`, `/api/v1/mobile`) für den Verbindungstest der Android-Alpha 18.
+- Der Endpunkt veröffentlicht keine Konten, Buchungen oder Benutzerdaten und meldet `server_mode_available=false`. Anmeldung, Kontenzugriff und Synchronisierung bleiben deaktiviert; die Android-App bleibt lokal führend.
+- Doppelter .backup-Upload aus „Wiederkehrende Buchungen“ entfernt. Der reguläre Financisto-Import unter Einstellungen bleibt unverändert; bestehende Regeln bleiben bestehen.
+- Kein Datenbank- oder Bind-Mount-Wechsel. Entwicklungsstand, kein offizielles Release.
+
+## 1.9.58-dev.13 – Einnahmen bearbeiten und Empfänger in Wiederholungsregeln (18.11.2026)
+- Beim Bearbeiten vorhandener Buchungen wird der Betrag ohne Tausendertrennzeichen im Eingabefeld vorbelegt. Dadurch werden auch Einnahmen ab 1.000,00 € unverändert akzeptiert; die eigentliche Buchungs- und Kontostandslogik bleibt erhalten.
+- Bei neuen und bearbeiteten wiederkehrenden Buchungen wird der vorhandene Empfänger beim Fokussieren/Antippen zum direkten Überschreiben markiert, während die Vorschläge weiter nutzbar bleiben.
+- Kein Datenbankschemawechsel; vorhandene Buchungen, Regeln und Bind-Mounts bleiben erhalten.
+
+## 1.9.58-dev.12 – Notiz und Sortierung bei Web-Buchungen (18.11.2026)
+- Unter „Buchung erfassen → Über die Webseite erfasste Buchungen“ ist die Notiz als eigene Spalte sichtbar.
+- Datum, Buchungstyp, Konto, Empfänger, Notiz und Betrag können per Klick auf die jeweilige Überschrift auf- oder absteigend sortiert werden.
+- Die Sortierung erfolgt innerhalb der zuletzt erfassten bzw. geänderten 100 Web-Buchungen; die Auswahl bleibt unverändert. Die Aktionen zum Klonen, Bearbeiten und Löschen bleiben verfügbar.
+- Keine Änderung von Buchungen, Salden, Datenbank oder Bind-Mounts.
+
+## 1.9.58-dev.11 – Buchungstypen auch unter „Buchung erfassen“ wie auf dem Dashboard (18.11.2026)
+- In „Über die Webseite erfasste Buchungen“ werden Buchungsarten wie im Dashboard als farbige Kennzeichen angezeigt: Ausgabe rot mit Pfeil nach unten, Einnahme grün mit Pfeil nach oben, Umbuchung und Saldoabgleich neutral, durchlaufende Posten separat.
+- Bisherige durchgehende Zeilenfarben und Kennzeichnungen für zukünftige beziehungsweise wiederkehrende Buchungen bleiben erhalten.
+- Nur Darstellungsanpassung; Finanzdaten, Kontostände und Bind-Mounts bleiben unverändert.
+
+## 1.9.58-dev.10 – Buchungsfarben auch unter „Buchung erfassen“ (18.11.2026)
+- Die Liste „Über die Webseite erfasste Buchungen“ verwendet dieselben vollständigen Zeilenfarben wie das Dashboard: Umbuchungen hellblau, wiederkehrende Buchungen mintgrün, wiederkehrende Umbuchungen violett und zukünftige Buchungen weiterhin gelb mit Vorrang.
+- „Wiederkehrend“ und „Regel zugeordnet“ stehen unter dem Buchungsdatum; die Regelzuordnung allein verursacht keine zusätzliche Zeilenfarbe.
+- Keine Änderung an Buchungslogik, Konto- oder Datenbankständen.
+
+## 1.9.58-dev.9 – Künftige Buchungen getrennt vom Ist-Stand anzeigen (18.11.2026)
+- Die Dashboard-Monatskarten berücksichtigen bei Einnahmen, Ausgaben und Saldo für die Ist-Zahlen nur Buchungen bis einschließlich heute. Soweit es künftige Buchungen gibt, wird der Gesamtwert einschließlich dieser Buchungen als Prognose in Klammern angezeigt.
+- Der angezeigte Gesamtkontostand und die einzelnen Kontostände ziehen bereits in gespeicherten Snapshots enthaltene zukünftige Buchungen für den Ist-Wert heraus; der bisher gespeicherte, zukunftsinklusive Wert ist separat als Prognose sichtbar.
+- Künftige Umbuchungen berücksichtigen Quell- und Zielkonto gegensätzlich. Der Kontostandsabgleich vergleicht mit dem Ist-Wert, ohne die Zukunftsprojektion zu verlieren. Die Kategorieauswertung berücksichtigt nur bis heute fällige Buchungen.
+- Buchungen bleiben sichtbar und werden nicht verändert; die SQLite-Snapshots und der Financisto-Rückexport bleiben unverändert. Die neue Ist-/Prognose-Trennung betrifft die Dashboard-Anzeige und den Kontostandsabgleich, nicht eine zeitversetzte physische Buchungsausführung.
+
+## 1.9.58-dev.8 – Wiederholungsbuchung und Regelzuordnung getrennt (18.11.2026)
+- „Wiederkehrend“ steht für Buchungen, die tatsächlich durch die Regel erstellt wurden; „Regel zugeordnet“ kennzeichnet eine bereits bestehende Buchung, die einen fälligen Termin abgedeckt hat.
+- Beide Kennzeichnungen erscheinen links unter dem Datum, auch bei Umbuchungen. Die farbliche Kennzeichnung tatsächlich wiederkehrender Umbuchungen bleibt violett; einer Regel nur zugeordnete Umbuchungen bleiben blau.
+- Die Buchungsübersicht, Buchungserfassung und der CSV-Export unterscheiden die beiden Fälle. Keine Finanzbuchungen oder Kontostände verändert.
+
+## 1.9.58-dev.7 – Wiederkehrend nur bei tatsächlich erzeugten Buchungen (18.11.2026)
+- „Wiederkehrend“ erscheint ausschließlich bei Buchungen, die eine Wiederholungsregel tatsächlich selbst erstellt hat.
+- Bereits manuell erfasste Buchungen, die zur Vermeidung von Doppelbuchungen einer Wiederholungsregel als erledigt zugeordnet wurden, werden nicht mehr fälschlich gekennzeichnet.
+- Die Prüfung erfolgt anhand des eindeutigen Ereignisprotokolls für tatsächlich ausgeführte wiederkehrende Buchungen; Dashboard und CSV-Export sowie Buchungserfassung nutzen dieselbe Erkennung.
+- Keine Veränderung gespeicherter Buchungen, Kontostände, Regeln oder Bind-Mounts.
+
+## 1.9.58-dev.6 – Wiederkehrend-Kennzeichnung in der Datumsspalte (18.11.2026)
+- „Wiederkehrend“ steht nun direkt unter dem Buchungsdatum, wie der Hinweis auf ein zukünftiges Buchungsdatum, statt neben dem Buchungstyp.
+- Bei zukünftigen wiederkehrenden Buchungen erscheinen beide Kennzeichnungen unter dem Datum.
+- Die durchgehenden Farbmarkierungen der Buchungszeilen bleiben bestehen.
+- Nur Darstellung; Buchungen, Kontostände und Bind-Mounts bleiben unverändert.
+
+## 1.9.58-dev.5 – Empfängerfeld bei neuen Buchungen (18.11.2026)
+- Vorhandener Empfänger wird beim Antippen/Fokussieren markiert und durch direkte Texteingabe ersetzt, wie bereits bei der Kategorie.
+- Bereits begonnene eigene Suchtexte bleiben während der Eingabe editierbar; die Empfänger-Vorschläge funktionieren weiterhin.
+- Keine Änderungen an Datenbank, gespeicherten Buchungen und Bind-Mounts.
+
+## 1.9.58-dev.4 – Buchungszeilen, manuelle Doppel-Sicherung und ausführbares Updatepaket (18.11.2026)
+- „Jetzt Sicherung erstellen“ erstellt unabhängig voneinander eine manuelle SQLite-Sicherung und einen neuen Financisto-Export des aktuellen Web-Datenbestands und meldet die beiden Resultate einzeln.
+- Umbuchungen über die gesamte Tabellenzeile hellblau hervorgehoben.
+- Wiederkehrende Buchungen über die gesamte Zeile mintgrün markiert; wiederkehrende Umbuchungen in einem eigenen Violettton.
+- Zukünftige Buchungen behalten ihre gelbe Markierung mit Vorrang vor anderen Kennzeichnungen.
+- Die Hervorhebung gilt auch für die kompakte Buchungsliste auf mobilen Geräten.
+- ZIP enthält `update.sh` mit ausführbaren Dateirechten, damit der gewohnte Update-Befehl funktioniert.
+- Keine Änderung an Buchungslogik, Kontoständen, Datenbank oder Bind-Mounts.
+
+## 1.9.58-dev.3 – Zwei aktuelle Financisto-Rückexport-Sicherungen (18.11.2026)
+- Täglich zusätzlich zur SQLite-Sicherung ein validierter Export des aktuellen Web-Datenbestandes als `.backup`.
+- Es bleiben die letzten zwei erfolgreichen Exportversionen unter `data/financisto-backups/`; Download nur durch Administratoren unter Einstellungen.
+- Nutzt den bestehenden Standard-Rückexport ohne optionale Web-Wiederholungsregeln; bei fehlender Exportgrundlage wird nichts Falsches gespeichert, die SQLite-Sicherung läuft unabhängig weiter.
+- Keine Löschung von Buchungen, keine Änderungen an den bestehenden Android-Importarchiven, Bind-Mounts oder Secrets.
+
+## 1.9.58-dev.2 – CSV-Export kompakt und englische Texte (18.11.2026)
+- CSV-Export-Schaltfläche direkt neben der Seitennavigation, ohne zusätzliche Zeile am Desktop.
+- Englische Übersetzungen für Seitenzählung, CSV-Export und Kontostand nach der Buchung ergänzt.
+- Weiterhin Entwicklungsstand ohne offizielles Release. Finanzdaten und Bind-Mounts bleiben unverändert.
+
+## 1.9.58-dev.1 – CSV-Export der Dashboard-Buchungsliste (Entwicklungsstand, 18.11.2026)
+- CSV-Export direkt unter der Dashboard-Buchungsliste, inkl. aller Seiten des aktuell gefilterten und sortierten Zeitraums.
+- Datum, Buchungsart, Quell-/Zielkonto, Kategorie, Empfänger, Notiz, Betrag, Währung, Wiederholung und Kontostand danach.
+- Excel-kompatibel: UTF-8-BOM, Semikolon und deutsches Dezimalkomma; Text wird gegen Formelausführung abgesichert.
+- Nur lesend, keine Änderung an Buchungen, Datenbank oder Bind-Mounts.
+- Kein offizielles Release: Entwicklungszweig, vorläufige Version.
+
 ## 1.9.57 – Wiederkehrende Buchungen und aufgeräumte Dokumentation (18.11.2026)
 - Bei neuen wiederkehrenden Regeln entspricht der vorausgefüllte „Tag im Monat“ automatisch dem Startdatum. Wird das Startdatum geändert, folgt der Monatstag, bis dieser bewusst separat verändert wird.
 - Bei täglicher und wöchentlicher Wiederholung ist das nicht benötigte Monatstagsfeld ausgeblendet; monatliche, vierteljährliche und jährliche Regeln lassen eine freie Abweichung zu.

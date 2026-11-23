@@ -32,6 +32,12 @@
   "Original-Financisto-Sicherung": "Original Financisto backup",
   "In Web-Datenführung:": "In web accounting:",
   "Automatische Datensicherung": "Automatic database backup",
+  "Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)": "Financisto backups from current web transactions (latest 2)",
+  "Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter": "In addition to the daily SQLite snapshot, a current Financisto export is created. The last two successful files are stored in",
+  "Die Sicherung nutzt den Standard-Rückexport aus dem aktuellen Web-Datenbestand. Wiederkehrende Web-Regeln werden dabei nicht automatisch übertragen. Bei fehlender Exportgrundlage bleibt die SQLite-Sicherung erhalten; der Fehler wird angezeigt bzw. protokolliert.": "This backup uses the standard return export of the current web ledger. Web recurring rules are not automatically transferred. If the source template is missing, the SQLite backup remains intact and the error is displayed or logged.",
+  "Noch kein erfolgreicher aktueller Financisto-Rückexport vorhanden.": "No successful current Financisto export is available yet.",
+  "Neueste": "Latest",
+  "Vorherige": "Previous",
   "Letzte automatische Sicherung:": "Last automatic backup:",
   "Noch keine": "None yet",
   "Einmal pro Kalendertag (Europe/Berlin). Die letzten 14 automatischen Sicherungen bleiben unter": "Once per calendar day (Europe/Berlin). The last 14 automatic backups are kept in",
@@ -46,7 +52,15 @@
   "Systemstatus & Hintergrunddienste": "System status & background services",
   "Systemstatus und Hintergrunddienste": "System status and background services",
   "Quellkonto danach": "Source-account balance after",
+  "mit künftigen Buchungen:": "including future transactions:",
+  "nach künftigen Buchungen:": "after future transactions:",
+  "Bis heute gebuchte Umsätze; Prognose einschließlich künftiger Buchungen in Klammern.": "Posted transactions through today; forecast including future transactions in parentheses.",
+  "Kontostände gelten bis heute; künftige Buchungen erscheinen separat als Prognose. Die gespeicherten Finanzdaten bleiben unverändert. Ein Monats-Saldo ist kein Kontostand. Fremdwährungen werden nicht umgerechnet.": "Account balances reflect transactions dated through today; future entries are shown separately as a forecast. Stored finance records are unchanged. Monthly net is not an account balance. Foreign currencies are not converted.",
+  "Quellkonto voraussichtlich danach": "Projected source-account balance after",
+  "Voraussichtlicher Kontostand danach": "Projected account balance after",
   "Kontostand danach": "Account balance after",
+  "CSV exportieren": "Export CSV",
+  "Buchungsseiten": "Transaction pages",
   "Die drei Bereiche werden": "The three sections are",
   "getrennt gespeichert": "saved separately",
   "Gespeicherte Telegram-Token entfernen": "Remove saved Telegram token",
@@ -233,6 +247,7 @@
   "Buchung": "Transaction",
   "Buchungsliste": "Transaction list",
   "Wiederkehrend": "Recurring",
+  "Regel zugeordnet": "Rule matched",
   "Wiederkehrende Buchungen": "Recurring transactions",
   "Historische Auswertung": "Historical analysis",
   "Monatsauswertung": "Monthly report",
@@ -288,6 +303,12 @@
   "Ausführungen": "executions",
   "Maximal so oft ausführen (optional)": "Maximum occurrences (optional)",
   "Unbegrenzt": "Unlimited",
+  "Schlüssel haben kein automatisches Ablaufdatum. Ein angemeldeter Administrator kann sie erstellen, sperren und endgültig löschen. Der Schlüssel wird nur einmal angezeigt; bitte sicher aufbewahren.": "Keys do not expire automatically. An authenticated administrator can create, revoke, or permanently delete them. Each key is displayed once; keep it safe.",
+  "Sperren": "Revoke",
+  "Geräte-API-Schlüssel dauerhaft gelöscht. Zugriff sofort beendet.": "Device API key deleted permanently. Access terminated immediately.",
+
+  "Gültigkeit": "Validity",
+  "Schlüssel haben kein automatisches Ablaufdatum und bleiben bis zur Sperrung oder einer sicherheitsbedingten Ungültigmachung aktiv. Die Ausgabe erfolgt genau einmal und erfordert dein Administratorpasswort und einen frischen 2FA-Code.": "Keys do not expire automatically and remain valid until revoked or invalidated for security reasons. Keys are displayed only once; creating a key requires the administrator password and a fresh 2FA code.",
   "Abgeschlossen": "Completed",
   "Ohne Enddatum und Anzahl wiederholt sich die Regel unbegrenzt. Werden beide Grenzen gesetzt, endet sie beim ersten erreichten Limit. Bereits ausgeführte Termine zählen mit; bestehende Buchungen bleiben erhalten.": "Without an end date or maximum number of runs, the rule repeats indefinitely. If both limits are set, the first reached limit ends the rule. Previous runs count toward the maximum; existing transactions are kept.",
 
@@ -1186,6 +1207,18 @@
     // Captions with variable counts, dates or protected confirmation words.
     const cashflowSummary = value.match(/^(\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · ([A-Z]{3}) · (\d+) Zeiträume$/);
     if (cashflowSummary) return `${cashflowSummary[1]} to ${cashflowSummary[2]} · ${cashflowSummary[3]} · ${cashflowSummary[4]} periods`;
+    let archiveButton = value.match(/^Financisto-Backup (\d+) herunterladen \(\.backup\)$/);
+    if (archiveButton) return `Download Financisto backup ${archiveButton[1]} (.backup)`;
+    let projected = value.match(/^\(mit künftigen Buchungen: (.+)\)$/);
+    if (projected) return `(including future transactions: ${projected[1]})`;
+    projected = value.match(/^\(nach künftigen Buchungen: (.+)\)$/);
+    if (projected) return `(after future transactions: ${projected[1]})`;
+    let ledger = value.match(/^Seite (\d+) von (\d+) · (\d+) je Seite$/);
+    if (ledger) return `Page ${ledger[1]} of ${ledger[2]} · ${ledger[3]} per page`;
+    ledger = value.match(/^CSV exportieren \((\d+)\)$/);
+    if (ledger) return `Export CSV (${ledger[1]})`;
+    ledger = value.match(/^(Kontostand danach|Quellkonto danach): (.+)$/);
+    if (ledger) return `${catalog[ledger[1]] || ledger[1]}: ${ledger[2]}`;
     // Account, payee, category and note values are never rewritten.
     let extra;
     extra = value.match(/^(\d+)(?: von (\d+))? Buchungen von (\d{4}-\d{2}-\d{2}) bis (\d{4}-\d{2}-\d{2}) · (\d+) pro Seite$/);

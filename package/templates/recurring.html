@@ -1,19 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}Wiederkehrende Buchungen · {{ app_title }} {{ app_subtitle }}{% endblock %}
 {% block content %}
-<div class="heading"><div><div class="eyebrow">Finanzverwaltung</div><h1>Wiederkehrende Buchungen</h1><p class="muted">Vorlagen aus Financisto übernehmen, prüfen und einzeln aktivieren. Keine automatische Rückbuchung vergangener Jahre.</p></div></div>
+<div class="heading"><div><div class="eyebrow">Finanzverwaltung</div><h1>Wiederkehrende Buchungen</h1><p class="muted">Wiederkehrende Regeln anlegen, bearbeiten und ausführen. Backups werden unter Einstellungen importiert.</p></div></div>
 {% if finance_mode!='web' %}
 <p class="notice"><strong>Financisto ist führend.</strong> Die Ausführung wiederkehrender Zahlungen liegt bei der Android-App, nicht beim Dashboard. Hier gespeicherte Vorlagen bleiben erhalten, sind aber für Web-Buchungen gesperrt. Neue oder im Web geänderte Vorlagen werden nicht allein durch die Umschaltung auf das Smartphone übertragen.</p>
-{% endif %}
-{% if viewer.role=='admin' %}
-<section class="panel" id="vorlagen-import"><div class="section-head"><div><h2>Vorlagen aus aktueller Financisto-Sicherung übernehmen</h2><p class="muted">Importiert nur Datensätze mit <code>is_template=2</code> und Wiederholungsregel. Konten, Buchungen und Salden werden nicht verändert.</p></div></div>
-<form class="formstack" method="post" action="{{ url_for('recurring_preview') }}" enctype="multipart/form-data">
-<input type="hidden" name="csrf" value="{{ csrf_token() }}">
-<label>Financisto-Backup (.backup)<input type="file" name="backup" accept=".backup" required></label>
-<button type="submit" class="secondary">Vorlagen prüfen – Vorschau öffnen</button>
-</form>
-<p class="muted small">Der automatische Financisto-Import bleibt unabhängig davon gesteuert. Die Vorschau speichert nur die erkannten Vorlagen für maximal eine Stunde.</p>
-</section>
 {% endif %}
 <section class="panel" id="regeln">
 <div class="section-head"><div><h2>Deine wiederkehrenden Regeln</h2><p class="muted">Manuell: Eine fällige Buchung wird erst nach deinem ausdrücklichen Klick eingetragen. Automatisch: Der Hintergrunddienst trägt sie bei Fälligkeit ein (kein Bank-Dauerauftrag). Pausiert: Es wird nichts gebucht.</p></div>{% if viewer.role in ('admin','editor') and finance_mode=='web' %}<a class="button secondary" href="#regel-formular" data-recurring-create>+ Neue Regel</a>{% endif %}</div>

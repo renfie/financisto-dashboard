@@ -963,3 +963,123 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 .recurring-payee-hint{margin-top:-7px}
 /* Popover entries share the normal compact picker styling while floating over the dialog. */
 .recurring-payee-suggestions:popover-open{margin:0;inset:auto;position:fixed;z-index:2147483647;box-sizing:border-box}
+
+/* Inline CSV export beside ledger pagination. */
+#buchungen .ledger-pagination{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#buchungen .ledger-pagination .pagination-pages{margin-left:auto}
+#buchungen .ledger-pagination .ledger-export-button{padding:8px 12px;font-size:.83rem;white-space:nowrap}
+@media(max-width:700px){
+ #buchungen .ledger-pagination{gap:8px}
+ #buchungen .ledger-pagination .pagination-pages{width:auto;justify-content:flex-start;margin-left:auto}
+ #buchungen .ledger-pagination .ledger-export-button{margin-left:auto}
+}
+
+/* v1.9.58-dev.4: consistent full-row highlighting; future dates take precedence.
+   Transfer: blue; recurring: turquoise; recurring transfer: lavender.
+   Only visual CSS, no changes to posting, filtering, or balances. */
+#buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking) > td{
+ background:#eaf4fb!important;
+}
+#buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking) > td{
+ background:#e6f6ef!important;
+}
+#buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking) > td{
+ background:#f0ecfc!important;
+}
+#buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking){
+ box-shadow:inset 3px 0 #65a3cf;
+}
+#buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){
+ box-shadow:inset 3px 0 #42a483;
+}
+#buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){
+ box-shadow:inset 3px 0 #9983c9;
+}
+#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking){
+ background:#eaf4fb;border-color:#a5cae3;
+}
+#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking){
+ background:#e6f6ef;border-color:#a1d9c5;
+}
+#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking){
+ background:#f0ecfc;border-color:#c6b9e5;
+}
+#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking) .compact-booking-details{background:#f5faff}
+#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking) .compact-booking-details{background:#f4fbf7}
+#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking) .compact-booking-details{background:#f8f6ff}
+@media screen and (max-width:760px){
+ #buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking){background:#eaf4fb!important}
+ #buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){background:#e6f6ef!important}
+ #buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){background:#f0ecfc!important}
+}
+
+/* dev.6: recurring indicator under date, matching the future booking marker. */
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .recurring-date-badge,
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .future-booking-badge{
+ display:table;
+ margin:3px 0 0 5px;
+}
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .recurring-date-badge{
+ border-color:#96c9c0;
+}
+
+/* v1.9.58-dev.8: a due date matched to an existing booking is NOT a newly
+   posted recurring transaction. Use a neutral label, retain transfer coloring. */
+.rule-matched-badge{display:inline-block;margin:3px 0 0 5px;padding:2px 7px;
+ border:1px solid #abb7bf;border-radius:5px;background:#f0f3f5;color:#425961;
+ font-size:.70rem;line-height:1.3;font-weight:750;vertical-align:middle;white-space:nowrap}
+#buchungen .dashboard-desktop-ledger td[data-label="Datum"] .rule-matched-badge{
+ display:table;margin:3px 0 0 5px}
+
+/* dev.9: as-of-today balance and separate future projections, without new card rows. */
+.monthly-metrics .metric-value,.balance-summary-total,.account-balance-value{min-width:0}
+.monthly-metrics .metric-value{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.future-projection{display:block;color:#60777b!important;font-size:.70rem!important;font-weight:540!important;letter-spacing:normal;white-space:normal;text-align:right;line-height:1.35}
+.future-projection-help{padding:6px 23px 0;margin:0;color:#61777d;font-size:.74rem;line-height:1.3}
+.balance-summary-total .future-projection{max-width:280px}
+.account-balance .future-projection{max-width:250px}
+@media(max-width:760px){.monthly-metrics .metric-value{align-items:flex-start}.future-projection{text-align:left}.future-projection-help{padding:6px 15px 0}}
+
+.account-balance-amount{display:flex;flex-direction:column;gap:3px;align-items:flex-end;min-width:0}
+.account-balance-amount .future-projection{text-align:right}
+
+/* 1.9.58-dev.10: same full-row status palette on "Buchungen erfassen"
+   as on the dashboard. Future dates always retain yellow precedence. */
+.mobile-web-booking-list tr.transfer-booking:not(.future-booking):not(.recurring-booking) > td{
+ background:#eaf4fb!important;
+}
+.mobile-web-booking-list tr.recurring-booking:not(.future-booking):not(.transfer-booking) > td{
+ background:#e6f6ef!important;
+}
+.mobile-web-booking-list tr.transfer-booking.recurring-booking:not(.future-booking) > td{
+ background:#f0ecfc!important;
+}
+.mobile-web-booking-list tr.future-booking > td{
+ background:#fff3c9!important;
+}
+.mobile-web-booking-list tr.transfer-booking:not(.future-booking):not(.recurring-booking){
+ box-shadow:inset 3px 0 #65a3cf;
+}
+.mobile-web-booking-list tr.recurring-booking:not(.future-booking):not(.transfer-booking){
+ box-shadow:inset 3px 0 #42a483;
+}
+.mobile-web-booking-list tr.transfer-booking.recurring-booking:not(.future-booking){
+ box-shadow:inset 3px 0 #9983c9;
+}
+.mobile-web-booking-list td[data-label="Datum"] .recurring-booking-badge,
+.mobile-web-booking-list td[data-label="Datum"] .rule-matched-badge,
+.mobile-web-booking-list td[data-label="Datum"] .future-booking-badge{
+ display:table;
+ margin:3px 0 0 5px;
+}
+
+/* dev.12: compact, accessible sortable web booking list with note column. */
+.mobile-web-booking-list th .booking-sort-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:inherit;white-space:nowrap}
+.mobile-web-booking-list th .booking-sort-link:hover{text-decoration:underline;text-underline-offset:3px}
+.mobile-web-booking-list th .booking-sort-link:focus-visible{outline:2px solid #0b6b79;outline-offset:3px;border-radius:3px}
+.mobile-web-booking-list td.note{max-width:230px;min-width:90px;overflow-wrap:anywhere;white-space:normal}
+
+/* Admin-only API key management, compact actions without repeated credentials. */
+.mobile-key-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mobile-key-actions form{margin:0}
+.mobile-key-actions button{white-space:nowrap}
