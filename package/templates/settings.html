@@ -341,7 +341,21 @@
  </div>
  <div class="financisto-current-backups">
   <h3>Financisto-Backups aus aktuellen Web-Buchungen (letzte 2)</h3>
-  <p class="muted">Zusätzlich zur täglichen SQLite-Sicherung wird ein aktueller Financisto-Rückexport erstellt. Die beiden letzten erfolgreichen Dateien liegen unter <code>data/financisto-backups/</code> und können hier heruntergeladen werden. Die Sicherung enthält auch unterstützte Wiederholungsregeln. Originale Financisto-Dauerbuchungen bleiben erhalten. Regeln, die sich im Android-Format nicht sicher abbilden lassen, verhindern einen neuen Rückexport mit einer Fehlermeldung; ältere erfolgreiche Dateien bleiben bestehen. Die SQLite-Sicherung läuft unabhängig weiter.</p>
+  <p class="muted">Täglich wird zusätzlich zur SQLite-Sicherung eine neue Financisto-<code>.backup</code>-Datei aus den aktuellen Buchungen und kompatiblen wiederkehrenden Vorlagen erstellt. Die beiden letzten erfolgreichen Dateien stehen zum Download bereit. „Jetzt Sicherung erstellen“ erzeugt beide Dateitypen unabhängig voneinander.</p>
+  {% if financisto_backup_status.last_attempt %}
+  <p class="{{ 'notice' if financisto_backup_status.ok == false else 'muted' }}">Letzter Financisto-Exportversuch: <strong>{{ financisto_backup_status.last_attempt }}</strong> –
+   {% if financisto_backup_status.ok %}<strong>Erfolgreich</strong> ({{ financisto_backup_status.transaction_count }} Buchungen einschließlich {{ financisto_backup_status.recurring_templates }} Wiederholungsvorlagen).
+   {% else %}<strong>Fehlgeschlagen:</strong> {{ financisto_backup_status.error }}. Die bereits vorhandenen Downloads sind ältere Sicherungsstände.{% endif %}</p>
+  {% else %}<p class="muted">Noch kein Financisto-Exportversuch mit der aktuellen Exportprüfung vorhanden. Nach dem Update wird bei aktivierter Tagesautomatik erneut geprüft.</p>{% endif %}
+  {% if not export_source_ready %}
+  <p class="notice">Die passende Original-Financisto-Sicherung als Exportgrundlage fehlt. Bitte die exakt zuletzt eingelesene Originaldatei hinterlegen. Dabei werden keine Buchungen importiert oder überschrieben.</p>
+  <form class="formstack compact-form" method="post" enctype="multipart/form-data" action="{{ url_for('settings_upload_export_source') }}">
+   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+   <label>Original-Financisto-Sicherung (.backup)<input type="file" name="export_source" accept=".backup" required></label>
+   <button type="submit" class="secondary">Nur Exportgrundlage hinterlegen</button>
+  </form>
+  {% endif %}
+  <p class="muted small">Kompatible Terminregeln werden als Financisto-Vorlagen gespeichert, bereits ausgeführte Buchungen als Buchungen. Nicht sicher übertragbare Regeltypen werden nicht stillschweigend ausgelassen: Die Financisto-Erstellung schlägt dann fehl und zeigt den Grund an. Sämtliche Web-Regeln bleiben im SQLite-Backup erhalten. Ein Android-Rückimport sollte zuerst in einer Testinstallation geprüft werden.</p>
   {% if financisto_current_backups %}
   <div class="settings-shortcuts">
    {% for backup in financisto_current_backups %}
@@ -364,33 +378,6 @@
   </form>
  </details>
  <p class="muted small">Wiederherstellung ausschließlich lokal auf dem Docker-Host mit <code>./restore.sh &lt;Datei.sqlite3&gt;</code>. Sie ersetzt auch Benutzer und 2FA-Daten. Bewahre <code>secrets/app_secret</code> gesondert auf; ohne dieses Secret sind die 2FA-Schlüssel nicht wiederherstellbar.</p>
-</section>
-
-<section class="panel" id="financisto-export">
- <div class="section-head"><div><h2>Rückexport nach Financisto (Testfunktion)</h2><p class="muted">Exportiert die aktuellen Konten, Stammdaten und Buchungen in eine komprimierte <code>.backup</code>-Datei. Nicht mit einem geprüften Android-Restore verwechseln.</p></div>
- <span class="pill-status {{ 'status-on' if export_source_ready else 'status-off' }}">{{ 'Originalgrundlage gesichert' if export_source_ready else 'Originalgrundlage fehlt' }}</span></div>
- <p class="notice"><strong>Wichtiger Sicherheitshinweis:</strong> Der Android-Rückimport ist noch nicht getestet. Verwende eine exportierte Datei zunächst nur auf einem getrennten Testgerät bzw. einem gesonderten Testprofil. Niemals die einzige produktive Financisto-Datenbank damit überschreiben.</p>
- {% if export_source_ready %}
- <form method="post" action="{{ url_for('settings_export_financisto') }}" class="formstack compact-form">
-  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-  <div class="recurring-export-option">
-   <p class="muted small"><strong>Wiederkehrende Regeln werden immer berücksichtigt.</strong> Ein Rückexport ohne die vorhandenen Wiederholungsregeln wird nicht mehr als vollständige Sicherung angeboten.</p>
-   <p class="muted small">In der Web-Verwaltung: <strong>{{ recurring_export_summary.automatic }} automatisch</strong>, {{ recurring_export_summary.manual }} manuell, {{ recurring_export_summary.paused }} pausiert, {{ recurring_export_summary.removed }} gelöscht/archiviert.</p>
-   <p class="muted small">Unterstützte aktive automatische Web-Regeln werden als Financisto-Vorlagen exportiert. Noch nicht importierte und pausierte <strong>Original-Financisto-Vorlagen</strong> behalten ihre ursprünglichen Definitionen (die Web-Pausierung wird nicht auf Android übertragen). Gelöschte Originalvorlagen bleiben gelöscht. Bei manuellen oder nicht sicher abbildbaren Web-Regeln, einschließlich pausierter Web-only-Regeln, wird der Export mit einer konkreten Fehlermeldung abgebrochen, statt eine unvollständige Datei auszugeben. Die vollständige Web-Regelverwaltung bleibt immer im SQLite-Backup erhalten.</p>
-  </div>
-  <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" required autocomplete="current-password"></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
-  <button type="submit" class="secondary">Financisto-Testexport herunterladen (.backup)</button>
- </form>
- {% else %}
- <p class="hint">Für einen rückwärtskompatiblen Export muss die ursprüngliche <code>.backup</code>-Datei <strong>exakt</strong> zum letzten eingelesenen Datenstand passen. Die Anmeldung kann sie hier nachträglich hinterlegen. Diese Aktion importiert nichts und verändert keine Buchungen.</p>
- <form method="post" enctype="multipart/form-data" action="{{ url_for('settings_upload_export_source') }}" class="formstack compact-form">
-  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-  <label>Original-Financisto-Sicherung<input type="file" name="export_source" accept=".backup" required></label>
-  <div class="formgrid"><label>Admin-Passwort<input type="password" name="admin_password" required autocomplete="current-password"></label><label>Frischer 2FA-Code<input name="admin_totp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required></label></div>
-  <button type="submit" class="secondary">Originaldatei nur als Exportgrundlage hinterlegen</button>
- </form>
- {% endif %}
- <p class="muted small">Die Originalgrundlage liegt innerhalb der SQLite-Datei als Binärdaten (nicht separat verschlüsselt). Schütze deshalb die Datei und alle heruntergeladenen Sicherungen sorgfältig. Die regulären täglichen SQLite-Sicherungen enthalten sie künftig mit. Der manuelle Android-Import bleibt unverändert verfügbar.</p>
 </section>
 
 <section class="panel" id="buchungseinstellungen">
