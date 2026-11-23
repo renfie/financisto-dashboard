@@ -1,3 +1,8 @@
+## 1.9.60 – Bereinigung öffentlicher Projektdokumentation (23.11.2026)
+
+- Interne Erläuterungen zur Zusammenarbeit mit ChatGPT und zum Veröffentlichungsprozess aus den öffentlichen README-Dateien entfernt.
+- README, Release-Hinweise und Versionsangaben redaktionell bereinigt; Anwendungsfunktionen, Lizenz, Copyright und gespeicherte Daten unverändert.
+
 ## 1.9.59 – Copyright, GPL-Kennzeichnung und vollständiger Änderungsverlauf (23.11.2026)
 
 - Lizenz- und Änderungsverlauf im Dashboard als deutsch/englische, offline verfügbare Seiten; Links im Desktop- und Mobilmenü.
