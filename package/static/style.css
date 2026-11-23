@@ -1083,3 +1083,43 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 .mobile-key-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mobile-key-actions form{margin:0}
 .mobile-key-actions button{white-space:nowrap}
+
+/* 1.9.59-dev.1: read-only bilingual licence and legal notices. */
+.license-page{max-width:1120px;margin-inline:auto}
+.license-heading{align-items:flex-start}
+.license-intro p:last-child,.license-section p:last-child{margin-bottom:0}
+.license-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;align-items:stretch}
+.license-section{margin:0;min-width:0}
+.license-section h2{margin-bottom:12px}
+.license-section ul{padding-left:23px;margin:0}
+.license-section li{margin:0 0 10px;line-height:1.55}
+.license-section li:last-child{margin-bottom:0}
+.license-page a{text-decoration:underline;text-underline-offset:2px;color:#096b77}
+.license-original{margin-top:19px}
+.license-original details{border:1px solid #d7e3e4;border-radius:10px;margin-top:12px;overflow:hidden}
+.license-original summary{padding:13px 16px;cursor:pointer;font-weight:650;background:#f4f8f8}
+.license-original summary:focus-visible{outline:2px solid #118f94;outline-offset:-3px}
+.license-verbatim{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:70vh;margin:0;padding:18px 20px;font-size:.78rem;line-height:1.55;color:#243c41;background:#fafcfc}
+@media(max-width:740px){.license-grid{grid-template-columns:1fr}.license-section{margin:0}.license-original{margin-top:16px}.license-verbatim{padding:12px 14px;font-size:.72rem}}
+
+/* 1.9.59-dev.1: complete bilingual changelog sourced from the bundled files. */
+.changelog-page{max-width:1120px;margin-inline:auto}
+.changelog-intro p{line-height:1.55}
+.changelog-links{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.changelog-links .button{font-size:.82rem;padding:9px 13px}
+.changelog-entries{display:grid;gap:12px}
+.changelog-entry{margin:0;padding:0}
+.changelog-entry summary{cursor:pointer;padding:18px 22px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px;font-weight:740;font-size:1rem}
+.changelog-entry summary::-webkit-details-marker{display:none}
+.changelog-entry summary:focus-visible{outline:2px solid #118f94;outline-offset:-3px}
+.changelog-expand{font-size:1.25rem;color:#508184;transition:transform .2s}
+.changelog-entry[open] .changelog-expand{transform:rotate(180deg)}
+.changelog-body{padding:0 22px 19px;border-top:1px solid #e3ecec;overflow-wrap:anywhere}
+.changelog-body h3{font-size:1.03rem;margin:17px 0 9px}
+.changelog-body h4{font-size:.94rem;margin:13px 0 6px}
+.changelog-body p{margin:10px 0 4px;line-height:1.55}
+.changelog-body ul{padding-left:22px;margin:11px 0 15px}
+.changelog-body li{margin:0 0 8px;line-height:1.55}
+.changelog-body code{font-size:.91em;background:#f1f5f5;padding:1px 4px;border-radius:4px}
+.changelog-code{white-space:pre-wrap;overflow:auto;padding:12px;background:#f5f8f8;border-radius:8px}
+@media(max-width:650px){.changelog-entry summary{padding:13px 15px;font-size:.91rem}.changelog-body{padding:0 14px 15px}.changelog-links{flex-direction:column}.changelog-links .button{width:100%}}
