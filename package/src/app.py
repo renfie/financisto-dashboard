@@ -3479,12 +3479,31 @@ def _mobile_booking(row):
             'currency_code':row['currency_code'], 'decimals':int(row['decimals']),
             'kind':'transfer' if row['to_account_id'] else 'income' if row['amount']>0 else 'expense',
             'payee':row['payee_title'] or '', 'account':row['account_title'],
+            # These are derived from recurring_runs and matching audit entries;
+            # never persist or modify transactions merely for a display label.
+            'is_recurring':bool(row['is_recurring']),
+            'is_rule_matched':bool(row['is_rule_matched']) and not bool(row['is_recurring']),
             'revision':_mobile_book_hash(row)}
 
 
 def _mobile_book_query():
+    # Match the Dashboard's existing recurring-post provenance checks.
+    # A linked run without its corresponding posted audit event means an
+    # existing booking merely satisfied the scheduled occurrence.
     return '''SELECT t.*,a.title account_title,c.code currency_code,c.decimals,
-              p.title payee_title FROM transactions t
+              p.title payee_title,
+              EXISTS(SELECT 1 FROM recurring_runs rr
+                     JOIN audit_events ev ON ev.event IN ('recurring_posted_auto','recurring_posted_manual')
+                       AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
+                     WHERE rr.booking_id=t.id) AS is_recurring,
+              EXISTS(SELECT 1 FROM recurring_runs rr
+                     WHERE rr.booking_id=t.id
+                       AND NOT EXISTS (
+                           SELECT 1 FROM audit_events ev
+                           WHERE ev.event IN ('recurring_posted_auto','recurring_posted_manual')
+                             AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
+                       )) AS is_rule_matched
+              FROM transactions t
               JOIN accounts a ON a.id=t.account_id
               JOIN currencies c ON c.id=a.currency_id
               LEFT JOIN payees p ON p.id=t.payee_id'''
