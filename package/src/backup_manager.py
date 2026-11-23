@@ -282,6 +282,7 @@ def export_current_financisto(db_path: Path = DB, *, day=None, force=False) -> s
         LOG.warning('Kein frisches Financisto-Backup erstellt: %s', error)
         raise
 
+
 def main():
     if sys.argv[1:] != ['--daemon']:
         raise SystemExit('Aufruf: python backup_manager.py --daemon')
