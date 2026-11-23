@@ -1,3 +1,12 @@
+## 1.9.58-dev.18 – Vereinheitlichte tägliche SQLite-/Financisto-Sicherung (23.11.2026)
+- Doppelte „Rückexport nach Financisto (Testfunktion)“ aus Einstellungen entfernt. Admin erstellt beide Sicherungen über denselben Button ohne zusätzliche Passwort- oder 2FA-Abfrage; manueller Import bleibt erhalten.
+- Der automatische Sicherungsdienst prüft täglich **beide** Sicherungsformate, unabhängig voneinander. Alle neuen Financisto-Backups durchlaufen den prüfenden Wiederholungsregel-Export.
+- Der letzte Financisto-Erfolg und -Fehler wird in einem geschützten Statusprotokoll unter `data/financisto-backups/status.json` gespeichert und in Einstellungen angezeigt. Alte Dateien werden bei Exportfehlern nicht als aktuell deklariert.
+- Beim ersten Lauf nach dem Update wird wegen des neuen Exportprüfstands ein frischer `.backup`-Export versucht, auch wenn ältere Dateien vom selben Tag vorliegen. Maximal zwei erfolgreiche Dateien werden beibehalten.
+- Originalvorlagen und ausgeführte Buchungen bleiben erhalten; native Wiederholungsvorlagen werden zusätzlich gezählt und gegen das Ergebnis geprüft. Bei inkompatiblen Regeln Abbruch mit Fehlermeldung statt unvollständiger Datei.
+- Original-Exportgrundlage kann bei Bedarf innerhalb „Automatische Datensicherung“ durch eine bestehende Admin-Sitzung hinterlegt werden (SHA256-Abgleich, keine Datenüberschreibung).
+- Keine Android-Version, keine Änderung an gespeicherten Buchungen oder Bind-Mounts. SQLite-Sicherung bleibt vollständiger Wiederherstellungsweg.
+
 ## 1.9.58-dev.17 – API-Schlüssel ohne erneute Anmeldung und vollständigerer Financisto-Rückexport (22.11.2026)
 - API-Schlüssel werden mit vorhandener Admin-Sitzung und CSRF-Schutz erstellt, gesperrt oder nach einer separaten Bestätigung dauerhaft gelöscht; kein zusätzliches Passwort und kein erneuter 2FA-Code. API-Wiederholungsnachweise des gelöschten Schlüssels werden zuvor entfernt, Audit-Ereignisse bleiben erhalten.
 - Automatische und manuelle Financisto-Backups sowie der Test-Rückexport verwenden nun stets den Wiederholungsregel-Export: Bereits bestehende originale Financisto-Vorlagen werden unverändert bewahrt; kompatible aktive automatische Web-Regeln werden in die .backup-Datei übernommen.
