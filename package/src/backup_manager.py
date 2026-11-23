@@ -119,14 +119,19 @@ def scan_once(db_path: Path = DB, today=None):
     directory = target_dir(db_path)
     prefix = f'automatisch-{day}-'
     sqlite_exists = any(p.is_file() and not p.is_symlink() and AUTO_NAME.fullmatch(p.name) and p.name.startswith(prefix) for p in directory.iterdir())
-    if not sqlite_exists:
-        create_backup(db_path, 'automatisch')
-    prune_automatic(directory)
+    sqlite_failed = False
+    try:
+        if not sqlite_exists:
+            create_backup(db_path, 'automatisch')
+        prune_automatic(directory)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
+        sqlite_failed = True
+        LOG.warning('Tägliche SQLite-Sicherung fehlgeschlagen (Financisto wird unabhängig versucht): %s', exc)
     try:
         export_current_financisto(db_path, day=day)
     except (ExportError, BackupError, sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
         LOG.warning('Aktuelle Financisto-Sicherung nicht erstellt: %s', exc)
-    return 'already_backed_up' if sqlite_exists else 'created'
+    return 'sqlite_failed' if sqlite_failed else 'already_backed_up' if sqlite_exists else 'created'
 
 
 def export_dir(db_path: Path, *, create=True) -> Path | None:
@@ -216,7 +221,10 @@ def export_current_financisto(db_path: Path = DB, *, day=None, force=False) -> s
     # Version migration: old .backup files from dev.17 can be incomplete.
     # A new dev.18 process must re-export even when such a file exists today.
     if (not force and former.get('format_revision') == FINANCISTO_FORMAT_REV
-            and former.get('last_day') == day and former.get('last_filename')
+            and former.get('last_day') == day
+            and isinstance(former.get('last_filename'), str)
+            and FINANCISTO_NAME.fullmatch(former['last_filename'])
+            and not (directory / former['last_filename']).is_symlink()
             and (directory / former['last_filename']).is_file()):
         return 'already_backed_up'
     attempt = now.isoformat(timespec='seconds')
