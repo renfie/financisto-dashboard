@@ -1,3 +1,10 @@
+## 1.9.58-dev.20 – Wiederholungen am 29., 30. oder 31. (23.11.2026)
+- Financisto-Rückexport unterstützt nun monatliche, vierteljährliche und jährliche Wiederholungen am 29.–31., deren Termine bei kurzen Monaten auf den Monatsletzten fallen. Dafür wird der native erweiterte GEEKY-/iCalendar-Modus verwendet (BYMONTHDAY mit BYSETPOS), nicht der fehlerhafte normale Monatstag-Modus.
+- Der Endtermin oder die maximale Anzahl der Wiederholungen wird beim erweiterten Format als COUNT in der tatsächlichen Terminfolge berücksichtigt. Auch zwei gleichzeitig gesetzte Grenzen begrenzen die Anzahl korrekt.
+- Datum und Terminabfolge werden über 2026–2033 mit Februar, Schaltjahren, unterschiedlichen Monatslängen, vierteljährlichen Intervallen und den Begrenzungsarten getestet. Bestehende Buchungen und Regeldefinitionen bleiben unverändert.
+- Exportprüfversion auf 20 erhöht: Die Tagesautomatik versucht nach Installation erneut ein aktuelles Financisto-Backup. Vorherige Erfolgsmeldungen werden nicht überschrieben, solange der neue Export fehlschlägt.
+- Die tatsächliche Ausführung des erweiterten Regeltyps auf einem Android-Gerät ist weiterhin gesondert zu überprüfen. Kein offizielles Release.
+
 ## 1.9.58-dev.19 – Begrenzte Wiederholungen im Financisto-Export (23.11.2026)
 - Monatliche, vierteljährliche und jährliche Regeln mit **Enddatum** oder **maximaler Anzahl** werden jetzt im nativen Financisto-Format exportiert (`STOPS_ON_DATE:date@yyyyMMddT000000#` beziehungsweise `EXACTLY_TIMES:count@N#`). Dies beseitigt die pauschale Ablehnung der Regel „Samsung S26“ bei begrenzter Laufzeit.
 - Sind **beide Begrenzungen** gesetzt, gilt diejenige, die zuerst erreicht wird; die relevante Grenze wird sicher als ein einzelner nativer Zeitraum codiert.
