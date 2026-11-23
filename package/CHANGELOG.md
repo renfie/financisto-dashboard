@@ -1,3 +1,10 @@
+## 1.9.59-dev.1 – Lizenzinformationen und vollständiger Änderungsverlauf im Menü (23.11.2026)
+- Neue Navigationspunkte „Lizenz & Rechtliches“ sowie „Änderungsverlauf“ (Desktop und Mobilansicht). Beide Seiten sind vollständig deutsch/englisch über die bestehende DE/EN-Umschaltung verfügbar, ohne Internetabfrage.
+- Übersicht zu GPL-2.0-only, Nutzungs-, Änderungs- und Weitergaberechten sowie Pflichten, Drittsoftware und Haftung. Vollständiger verbindlicher englischer GPL-v2-Lizenztext und bestehende originale NOTICE.md lokal einsehbar und als Datei verfügbar.
+- Vollständige deutsch- und englischsprachige Changelogs, einschließlich der 21 Entwicklungsstände des Releases v1.9.58, mit aufklappbaren Versionen und Downloads direkt in der Weboberfläche.
+- Auch im **Repository-Stammverzeichnis** liegen nun `CHANGELOG.md` (Deutsch) und `CHANGELOG.en.md` (Englisch). Die kanonischen Dateien unter `package/` und die offline ausgelieferten Web-Kopien haben denselben Inhalt.
+- Keine Änderungen an Buchungen, Datenbank, Finanzberichten, Rechten, API, Datenexport oder Sicherungen. Entwicklung ausschließlich in `develop`; kein offizielles Release.
+
 ## 1.9.58 – Sammelrelease: Dashboard, Datensicherung und Mobile-API (23.11.2026)
 
 Dieses Release bündelt **alle 21 Entwicklungsschritte von 1.9.58-dev.1 bis 1.9.58-dev.21** gegenüber v1.9.57. Vollständige Detailbeschreibungen der einzelnen Entwicklungsstände bleiben in den nachfolgenden Changelog-Abschnitten erhalten.
