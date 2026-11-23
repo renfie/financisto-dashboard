@@ -107,6 +107,10 @@ Quellcode **getrennt von der produktiven Installation** auschecken und im Reposi
 
 Produktive SQLite-Datenbanken, Finanztransaktionen, Backups, Passwörter, private Schlüssel, Tokens, befüllte `.env`-Dateien und andere Laufzeitdaten gehören **nicht** in Git. Die Regeln in [`.gitignore`](.gitignore) schließen diese typischen Dateien aus. Vor jeder Veröffentlichung von Quellcode oder Releases muss der Inhalt dennoch kontrolliert werden.
 
+## Änderungsverlauf
+
+Alle Veröffentlichungen und Entwicklungsschritte stehen vollständig im [deutschen Changelog](CHANGELOG.md) und [englischen Changelog](CHANGELOG.en.md). Im Dashboard sind sie unter **Änderungsverlauf** und die vollständigen GPLv2-Rechte und Pflichten unter **Lizenz & Rechtliches** verfügbar, jeweils über DE/EN umschaltbar.
+
 ## Lizenz
 
 Dieses Dashboard wird unter der **GNU General Public License, Version 2 (GPL-2.0-only)** angeboten. Die Lizenzbedingungen stehen in [LICENSE](LICENSE); Hinweise zu Projektzuordnung und Drittrechten in [NOTICE.md](NOTICE.md).
