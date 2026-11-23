@@ -30,7 +30,7 @@ AUTO_NAME = re.compile(r'^automatisch-\d{8}-\d{6}-[0-9a-f]{6}\.sqlite3$')
 FINANCISTO_KEEP = 2
 FINANCISTO_NAME = re.compile(r'^financisto-aktuell-\d{8}-\d{6}-[0-9a-f]{6}\.backup$')
 FINANCISTO_MAX_BYTES = 30 * 1024 * 1024
-FINANCISTO_FORMAT_REV = 18
+FINANCISTO_FORMAT_REV = 19
 
 
 def target_dir(db_path: Path) -> Path:
