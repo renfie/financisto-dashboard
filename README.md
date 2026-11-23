@@ -109,6 +109,10 @@ For additional details see the [English operations guide](package/README.en.md) 
 
 **Never commit or publish** production SQLite databases, `.backup` files containing financial information, filled-in `.env` configurations, passwords, keys, tokens or other runtime secrets. The repository [`.gitignore`](.gitignore) excludes typical sensitive files, but every public release still requires an explicit privacy check. Example domains and IP addresses use documentation-only placeholders rather than private deployment details.
 
+## Changelog / development history
+
+All German and English release histories are available in [German](CHANGELOG.md) and [English](CHANGELOG.en.md), and inside the app under **Changelog**. The **License & legal** menu item explains rights and duties with the original GPLv2 text. Both views follow the DE/EN setting.
+
 ## License
 
 Own dashboard components are distributed under the **GNU General Public License version 2 (GPL-2.0-only)**; see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Recipients may modify and redistribute their own copies subject to the GPL, but this **does not grant write permission** to this repository. The original Financisto Android app is also licensed under GPL v2; compatibility does not imply endorsement or transfer of third-party branding rights.
