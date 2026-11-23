@@ -1,3 +1,8 @@
+## 1.9.60 – Public documentation cleanup (2026-11-23)
+
+- Removed internal explanations about ChatGPT collaboration and release publishing procedures from public README files.
+- Cleaned up README files, release notes and version references; application features, licensing, copyright and stored data remain unchanged.
+
 ## 1.9.59 – Copyright attribution, GPL notices and complete changelog (2026-11-23)
 
 - Read-only, offline German/English license and version-history pages, linked from desktop and mobile navigation.
