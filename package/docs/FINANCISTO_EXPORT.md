@@ -25,3 +25,9 @@ Struktur, Pflichtfelder, Datensatz- und Wiederholungsvorlagenanzahl werden gepr�
 Financisto kennt `EXACTLY_TIMES:count@N#` für eine maximale Anzahl sowie `STOPS_ON_DATE:date@yyyyMMddT000000#` für ein Enddatum. Für Web-Monats-, Quartals- und Jahresregeln wird das jeweils zutreffende Format geschrieben; bei zwei Grenzen wird die **früher wirksame** Grenze verwendet. Das Schema wurde anhand der nativen Financisto-Java-Klassen `RecurrencePeriod` und `RecurrenceViewFactory` geprüft.
 
 **Achtung:** Web-Regeln für den 29., 30. oder 31. können nicht ohne Termindifferenz in das native `BYMONTHDAY`-Muster übertragen werden, da das Web die Termine in kurzen Monaten auf den letzten Tag verschiebt, Financisto aber überspringt. Ein solcher Export wird ausdrücklich abgebrochen. Andere noch nicht kompatible Intervalle bleiben ebenso blockiert. Die SQLite-Sicherung enthält sämtliche Web-Regeln vollständig. Der Rückimport der erzeugten Datei muss separat auf Android getestet werden.
+
+## Monatstag 29–31 (ab 1.9.58-dev.20)
+
+Wenn im Web eine Monatsregel bei kürzeren Monaten auf den letzten Kalendertag fällt, wird für den Financisto-Rückexport statt `MONTHLY:EVERY_NTH_DAY` das native `GEEKY`-Muster mit einer iCalendar-RRULE verwendet. Für den 30. wird beispielsweise `FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=30,-1;BYSETPOS=1` verwendet. Für den 29. gilt das entsprechende Muster, für den 31. `BYMONTHDAY=-1`. Bei Regeln mit Enddatum und/oder Wiederholungsanzahl wird die exakte Anzahl der zulässigen Termine als `COUNT` in der RRULE codiert, weil der GEEKY-Modus den normalen Financisto-Wiederholungszeitraum nicht verarbeitet.
+
+Das Muster wurde anhand des Original-Quellcodes von Financisto verifiziert und die generierten Termine mit einem iCalendar-Iterator gegenüber dem Web-Planungsalgorithmus getestet. Die tatsächliche Ausführung in der Original-Android-App muss vor produktiver Wiederherstellung in einer Testinstallation geprüft werden.
