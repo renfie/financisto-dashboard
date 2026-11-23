@@ -19,3 +19,9 @@ Ausgeführte Buchungen werden als Buchungsdatensätze exportiert. Wiederkehrende
 Die Quelle liegt in SQLite als originaler gzip-BLOB (keine zusätzliche Verschlüsselung). Die Verzeichnisse und heruntergeladenen Dateien sind vertraulich zu behandeln. Die Statusdatei `data/financisto-backups/status.json` enthält Erfolg/Fehler, Zeit und Vorlagenanzahl, keine Schlüssel. Ein Export greift nicht schreibend auf Buchungen oder Kontostände zu.
 
 Struktur, Pflichtfelder, Datensatz- und Wiederholungsvorlagenanzahl werden geprüft. Ein produktiver Android-Restore ist damit **nicht nachgewiesen**. Neue `.backup`-Dateien deshalb zuerst in einer separaten Financisto-Testinstallation importieren, Konten, Buchungen, Terminregeln und deren nächste Fälligkeiten kontrollieren und keinesfalls ungeprüft die einzige produktive Handy-Datenbank überschreiben.
+
+## Begrenzungen von wiederkehrenden Regeln (ab 1.9.58-dev.19)
+
+Financisto kennt `EXACTLY_TIMES:count@N#` für eine maximale Anzahl sowie `STOPS_ON_DATE:date@yyyyMMddT000000#` für ein Enddatum. Für Web-Monats-, Quartals- und Jahresregeln wird das jeweils zutreffende Format geschrieben; bei zwei Grenzen wird die **früher wirksame** Grenze verwendet. Das Schema wurde anhand der nativen Financisto-Java-Klassen `RecurrencePeriod` und `RecurrenceViewFactory` geprüft.
+
+**Achtung:** Web-Regeln für den 29., 30. oder 31. können nicht ohne Termindifferenz in das native `BYMONTHDAY`-Muster übertragen werden, da das Web die Termine in kurzen Monaten auf den letzten Tag verschiebt, Financisto aber überspringt. Ein solcher Export wird ausdrücklich abgebrochen. Andere noch nicht kompatible Intervalle bleiben ebenso blockiert. Die SQLite-Sicherung enthält sämtliche Web-Regeln vollständig. Der Rückimport der erzeugten Datei muss separat auf Android getestet werden.
