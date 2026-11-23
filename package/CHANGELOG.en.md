@@ -1,3 +1,10 @@
+## 1.9.58-dev.21 – Recurring provenance flags in the Mobile API (2026-11-23)
+- Add JSON booleans `is_recurring` (transaction actually posted by a recurring rule) and `is_rule_matched` (pre-existing transaction merely matched to a scheduled occurrence) to each record returned by `GET /api/mobile/v1/bookings`.
+- Match the existing dashboard SQL using `recurring_runs` and the `recurring_posted_auto`/`recurring_posted_manual` audit events. A verified posted event takes priority over a mere rule match.
+- Preserve all existing fields, cursor pagination, bearer-token checks, write permissions, revisions, idempotency protection and write endpoints.
+- Test normal expense, income and transfer, automatic and manual recurrence, mere rule association and multi-page results, plus negative audit and authorization cases.
+- Dashboard only, no Android changes and no official release.
+
 ## 1.9.58-dev.20 – Clipped recurring dates (29th–31st) (2026-11-23)
 - Export month-end-clipped recurring rules on the 29th–31st using Financisto's native GEEKY/iCalendar RRULE encoding with BYMONTHDAY and BYSETPOS. The standard MONTHLY mode silently skips missing dates.
 - Encode end dates and maximum counts inside GEEKY's native RRULE as an exact occurrence count, including when both termination limits are present.
