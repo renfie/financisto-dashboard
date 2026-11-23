@@ -1,3 +1,10 @@
+## 1.9.59-dev.1 – License information and complete changelog menu (2026-11-23)
+- Add “License & legal” and “Changelog” to desktop/mobile navigation, each fully bilingual through the existing DE/EN switch, working offline.
+- Explain GPL-2.0-only rights and duties for use, modification and distribution, third-party content, warranties and liability. Bundle the complete legally relevant English GPLv2 original and existing original NOTICE.md for local reading/download.
+- Expose complete German and English release histories, including all 21 v1.9.58 development stages, in collapsible sections with in-app downloads.
+- Add root-level `CHANGELOG.md` (German) and `CHANGELOG.en.md` (English) on GitHub, synchronized with the canonical `package/` changelogs and offline Web copies.
+- No changes to transactions, database, financial reporting, permissions, APIs or backups. Development only on `develop`; no official release.
+
 ## 1.9.58 – Consolidated release: dashboard, backups and Mobile API (2026-11-23)
 
 This release combines **all 21 development increments from 1.9.58-dev.1 through 1.9.58-dev.21** since v1.9.57. Detailed notes for each increment remain in the changelog below.
