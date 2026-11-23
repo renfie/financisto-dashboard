@@ -1127,3 +1127,9 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 .changelog-body code{font-size:.91em;background:#f1f5f5;padding:1px 4px;border-radius:4px}
 .changelog-code{white-space:pre-wrap;overflow:auto;padding:12px;background:#f5f8f8;border-radius:8px}
 @media(max-width:650px){.changelog-entry summary{padding:13px 15px;font-size:.91rem}.changelog-body{padding:0 14px 15px}.changelog-links{flex-direction:column}.changelog-links .button{width:100%}}
+
+/* Persistent, discreet GPL copyright attribution in desktop and mobile layouts. */
+.project-copyright{font-size:.72rem;line-height:1.4;opacity:.82;padding:6px 12px 12px;text-align:center}
+.project-copyright a,.footer-copyright a{color:inherit;text-decoration:none}
+.project-copyright a:hover,.footer-copyright a:hover{text-decoration:underline}
+.footer-copyright{display:block;font-size:.75rem;margin-top:5px;opacity:.8}
