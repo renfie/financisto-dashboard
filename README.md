@@ -19,8 +19,10 @@
 - **Manual `.backup` import remains available**; optional SFTP/FolderSync auto-import can be enabled and disabled in the web interface
 - Choose **Financisto or the web dashboard as the source of truth**, with safeguards against accidentally overwriting web-created transactions
 - Recurring transactions and transfers with optional end date or maximum number of runs; Web Push, Gotify and Telegram notifications
-- Future-dated transactions appear in yellow until their date is reached (display only; posting and balance calculations remain unchanged)
+- Future-dated transactions remain visible in yellow; today's displayed balances exclude their impact while future-inclusive projections remain available (stored ledger entries are not deferred)
 - Responsive layouts for desktop, tablet and smartphone, plus an installable Progressive Web App (PWA)
+- Combined daily and manual SQLite and Financisto-backup snapshots, with explicit export status and recurring-rule compatibility checks
+- Versioned bearer-token Mobile API for accounts and bookings; device keys are non-expiring, revocable and deletable by administrators
 - Docker Compose deployment, local HTTPS, backup/update scripts, and persistent bind-mounted data
 
 ## Guided introduction
@@ -38,7 +40,7 @@ All rights in third-party projects and names remain with their respective owners
 
 ## Screenshots
 
-These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.40.
+These screenshots show **real dashboard layouts with example data substituted for private account names and amounts**. Desktop and mobile images were captured from an earlier development version (v1.9.17); some UI elements may differ in v1.9.58.
 
 ### Desktop dashboard
 
@@ -99,7 +101,7 @@ Check out the new version **in a separate directory**. Run the update script as 
 ./update.sh /path/to/existing/financisto-dashboard
 ```
 
-Updates can be applied **directly from v1.9.35 to v1.9.40**; no intermediate v1.9.36/v1.9.37 update is necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
+Updates can be applied **directly to v1.9.58**, including from earlier development versions; intermediate installation steps are not necessary. The update script validates the layout and access rights and backs up the existing database and program files. It preserves configured domains in `.env`, existing secrets, and bind-mounted financial data. Do not copy release files indiscriminately over the production data directories.
 
 For additional details see the [English operations guide](package/README.en.md) and [backup/restore documentation](package/docs/BACKUP_RESTORE.md) (German).
 
