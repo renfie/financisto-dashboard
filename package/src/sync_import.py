@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2026 René Fieler (RenFie)
+# See LICENSE and NOTICE.md for terms and third-party notices.
+
 """Offline importer with bounded, post-commit retention of uploaded Financisto files.
 
 Only /data/inbox/*.backup are considered. No files on an Android device are touched.
