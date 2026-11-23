@@ -43,11 +43,12 @@ def recurrence_for(rule):
         raise ExportError(f'Regel {label}: ungültiges Startdatum.') from exc
     if date.year < 2000 or date.year > 2100:
         raise ExportError(f'Regel {label}: Startdatum außerhalb 2000–2100.')
-    # The Web scheduler clamps days 29-31 to the last calendar day, while
-    # Financisto's BYMONTHDAY simply skips months lacking that day.  Do not
-    # create schedules that could silently produce different payment dates.
-    if day > 28:
-        raise ExportError(f'Regel {label}: Monatstag {day} wird im Web in kurzen Monaten auf den Monatsletzten gelegt, in Financisto aber übersprungen. Kein verlustfreier Export möglich.')
+    # Web dates are min(requested_day, last_day_of_month). Financisto's
+    # ordinary EVERY_NTH_DAY skips invalid dates instead. Its GEEKY format
+    # accepts iCalendar RRULEs, so BYMONTHDAY=29,-1;BYSETPOS=1 yields
+    # 29 Jan, 28 Feb, 29 Mar, ... (likewise 30 and 31). The first candidate
+    # of the two sorted days is exactly the clipped Web date. Day 31 is the
+    # last day of each month and can be written as BYMONTHDAY=-1.
     if date.day > day:
         # On both systems the first recurrence is in the next interval; the
         # count-based ending below must account for the skipped start period.
@@ -83,6 +84,40 @@ def recurrence_for(rule):
             end = None
         else:
             count = None
+    if day > 28:
+        # For GEEKY, Financisto calls new RRule() directly with the embedded
+        # rule, bypassing RecurrencePeriod.updateRRule(). COUNT/UNTIL must
+        # therefore be written directly into that RRULE, not its period.
+        # To avoid differences between UNTIL time zones on Android, encode an
+        # inclusive end_on as the exact count of Web occurrences through that
+        # day. Never approximate a bounded Web rule with an unlimited schedule.
+        effective_count = count
+        if end is not None:
+            from recurring import planned_date
+            first = first_step
+            end_count = 0
+            for step in range(first, 10001 + first):
+                try:
+                    occurrence = planned_date(date, freq,
+                        int(rule['interval_count']), day, step)
+                except (ValueError, OverflowError) as exc:
+                    raise ExportError(f'Regel {label}: Enddatum außerhalb des unterstützten Zeitraums.') from exc
+                if occurrence > end:
+                    break
+                end_count += 1
+            else:
+                raise ExportError(f'Regel {label}: mehr als 10.000 Termine bis zum Enddatum.')
+            if end_count == 0:
+                raise ExportError(f'Regel {label}: Enddatum liegt vor dem ersten Termin.')
+            effective_count = min(count, end_count) if count is not None else end_count
+        if effective_count is not None and effective_count < 1:
+            raise ExportError(f'Regel {label}: Wiederholungsanzahl ungültig.')
+        days = '-1' if day == 31 else f'{day},-1'
+        position = '' if day == 31 else ';BYSETPOS=1'
+        rrule = f'FREQ=MONTHLY;INTERVAL={distance};BYMONTHDAY={days}{position}'
+        if effective_count is not None:
+            rrule += f';COUNT={effective_count}'
+        return f'{date.isoformat()}T12:00:00~GEEKY:interval@{rrule}#~INDEFINETELY:null'
     if count is not None:
         period = f'EXACTLY_TIMES:count@{count}#'
     elif end is not None:
