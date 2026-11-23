@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'License & legal notices' if ui_language == 'en' else 'Lizenz & Rechtliches' }} · {{ app_title }}{% endblock %}
+{% block content %}
+<div class="license-page" data-no-i18n>
+  <div class="heading license-heading">
+    <div>
+      <p class="eyebrow">{{ 'Open-source information' if ui_language == 'en' else 'Open-Source-Informationen' }}</p>
+      <h1>{{ 'License & legal notices' if ui_language == 'en' else 'Lizenz & Rechtliches' }}</h1>
+      <p class="muted">{{ 'Rights, obligations, authorship and the complete licence text for this project.' if ui_language == 'en' else 'Rechte, Pflichten, Urheberhinweise und der vollständige Lizenztext für dieses Projekt.' }}</p>
+    </div>
+  </div>
+  <section class="panel license-intro" aria-labelledby="license-project-title">
+    <h2 id="license-project-title">{{ 'Project and licence' if ui_language == 'en' else 'Projekt und Lizenz' }}</h2>
+    <p><strong>Financisto-Dashboard (FieLanzen)</strong> · Copyright © 2026 RenFie</p>
+    <p>{{ 'The dashboard’s own program components are licensed under the GNU General Public License, version 2 only (GPL-2.0-only). “Free software” refers to freedom of use and redistribution, not necessarily a zero price.' if ui_language == 'en' else 'Die eigenen Programmteile des Dashboards stehen unter der GNU General Public License, ausschließlich Version 2 (GPL-2.0-only). „Freie Software“ bedeutet Nutzungs- und Weitergabefreiheit, nicht zwingend einen Preis von null Euro.' }}</p>
+    <p class="muted small">{{ 'The legally relevant terms are the complete original licence below. This overview explains them but does not replace them or create additional restrictions.' if ui_language == 'en' else 'Maßgeblich ist der vollständige Original-Lizenztext weiter unten. Diese Übersicht erläutert ihn, ersetzt ihn aber nicht und führt keine zusätzlichen Einschränkungen ein.' }}</p>
+  </section>
+  <div class="license-grid">
+    <section class="panel license-section">
+      <h2>{{ 'Your rights' if ui_language == 'en' else 'Deine Rechte' }}</h2>
+      {% if ui_language == 'en' %}
+      <ul>
+        <li>Run and use the program for private, professional or commercial purposes.</li>
+        <li>Read, copy and study the available source code.</li>
+        <li>Modify the code and use your own versions privately.</li>
+        <li>Share original or modified copies, including for a fee, when the GPLv2 conditions are met.</li>
+      </ul>
+      {% else %}
+      <ul>
+        <li>Das Programm privat, beruflich oder gewerblich nutzen.</li>
+        <li>Den verfügbaren Quellcode lesen, kopieren und untersuchen.</li>
+        <li>Den Quellcode ändern und eigene Varianten privat verwenden.</li>
+        <li>Originale oder veränderte Kopien weitergeben, auch gegen Entgelt, wenn die GPLv2-Bedingungen eingehalten werden.</li>
+      </ul>
+      {% endif %}
+    </section>
+    <section class="panel license-section">
+      <h2>{{ 'Your obligations when distributing' if ui_language == 'en' else 'Deine Pflichten bei Weitergabe' }}</h2>
+      {% if ui_language == 'en' %}
+      <ul>
+        <li>Keep copyright notices, warranty disclaimers and existing licence notices, and provide recipients with a copy of GPLv2.</li>
+        <li>Clearly mark modified files and the dates of changes. Distribute covered derivative works as a whole under GPLv2, without additional restrictions on recipients’ GPL rights.</li>
+        <li>When distributing executables or object code, provide the complete corresponding source code, or one of the alternatives allowed by GPLv2 section 3 (including an eligible written offer valid for at least three years).</li>
+        <li>Do not claim rights to third-party logos, names or content that their owners have not granted.</li>
+      </ul>
+      {% else %}
+      <ul>
+        <li>Urheber-, Lizenz- und Gewährleistungshinweise beibehalten und Empfängern die GPLv2 mitgeben.</li>
+        <li>Geänderte Dateien und Änderungsdaten deutlich kennzeichnen. Erfasste abgeleitete Gesamtwerke nach GPLv2 lizenzieren und Empfängern keine zusätzlichen Einschränkungen ihrer GPL-Rechte auferlegen.</li>
+        <li>Bei Weitergabe ausführbarer Dateien den vollständigen zugehörigen Quellcode bereitstellen oder eine der Alternativen nach GPLv2 Abschnitt 3 einhalten (darunter gegebenenfalls ein mindestens drei Jahre gültiges schriftliches Angebot).</li>
+        <li>Keine Rechte an fremden Namen, Logos oder Inhalten behaupten, die deren Rechteinhaber nicht eingeräumt haben.</li>
+      </ul>
+      {% endif %}
+    </section>
+    <section class="panel license-section">
+      <h2>{{ 'Private operation and hosting' if ui_language == 'en' else 'Eigene Nutzung und Hosting' }}</h2>
+      <p>{{ 'Private changes do not have to be published merely because you made them. Merely making a GPLv2 program available as a web service generally does not itself count as distributing copies of that program to its visitors. Distribution to others triggers the GPLv2 duties above.' if ui_language == 'en' else 'Private Änderungen müssen nicht allein deshalb veröffentlicht werden, weil du sie vorgenommen hast. Die bloße Bereitstellung eines GPLv2-Programms als Webdienst gilt grundsätzlich nicht als Weitergabe von Programmkopien an die Besucher. Erst die tatsächliche Weitergabe von Kopien löst die oben genannten GPLv2-Pflichten aus.' }}</p>
+      <p>{{ 'Your financial records, passwords and private server settings are not automatically licensed as source code and must not be included in public source archives.' if ui_language == 'en' else 'Deine Finanzdaten, Passwörter und privaten Servereinstellungen werden dadurch nicht automatisch zu GPL-Quellcode und gehören nicht in öffentliche Quellarchive.' }}</p>
+    </section>
+    <section class="panel license-section">
+      <h2>{{ 'Warranty, liability and security' if ui_language == 'en' else 'Gewährleistung, Haftung und Sicherheit' }}</h2>
+      <p>{{ 'GPLv2 sections 11 and 12 contain warranty and liability disclaimers, to the extent permitted by applicable law. The software comes without any promise of uninterrupted operation, fitness for a particular purpose or correctness of financial calculations. Mandatory statutory rights remain unaffected.' if ui_language == 'en' else 'Die GPLv2 enthält in den Abschnitten 11 und 12 Gewährleistungs- und Haftungsausschlüsse, soweit das anwendbare Recht dies zulässt. Eine Zusage für unterbrechungsfreien Betrieb, Eignung für bestimmte Zwecke oder die Fehlerfreiheit finanzieller Berechnungen wird nicht erteilt. Zwingende gesetzliche Rechte bleiben unberührt.' }}</p>
+      <p>{{ 'Keep backups and protect access credentials. These are practical security recommendations, not additional licence requirements.' if ui_language == 'en' else 'Sichere deine Daten regelmäßig und schütze deine Zugangsdaten. Das sind praktische Sicherheitsempfehlungen, keine zusätzlichen Lizenzpflichten.' }}</p>
+    </section>
+    <section class="panel license-section">
+      <h2>{{ 'Third-party rights and project independence' if ui_language == 'en' else 'Drittrechte und Projektzuordnung' }}</h2>
+      <p>{{ 'This is an independent self-hosted dashboard, not an official product or an endorsed fork of the original Financisto Android project. The original Financisto project was developed by Denis Solonenko and contributors and is separately licensed under GPLv2. Third-party libraries, images, logos and trademarks may have their own terms.' if ui_language == 'en' else 'Dies ist ein eigenständiges, selbst gehostetes Dashboard, kein offizielles Produkt und kein autorisierter Fork der ursprünglichen Financisto-Android-App. Das Originalprojekt stammt von Denis Solonenko und weiteren Mitwirkenden und steht gesondert unter GPLv2. Bibliotheken, Bilder, Logos und Marken Dritter können eigenen Bedingungen unterliegen.' }}</p>
+      <p>{{ 'Your right to modify your own GPL-licensed copy does not grant write or administration privileges in the upstream GitHub repository.' if ui_language == 'en' else 'Das Recht, deine eigene GPL-lizenzierte Kopie zu ändern, verleiht keine Schreib- oder Administratorrechte am ursprünglichen GitHub-Repository.' }}</p>
+    </section>
+    <section class="panel license-section">
+      <h2>{{ 'Source code and notices' if ui_language == 'en' else 'Quellcode und Hinweise' }}</h2>
+      <ul>
+        <li><a href="https://github.com/renfie/financisto-dashboard" target="_blank" rel="noopener noreferrer">{{ 'Dashboard source code on GitHub' if ui_language == 'en' else 'Dashboard-Quellcode auf GitHub' }}</a></li>
+        <li><a href="https://github.com/dsolonenko/financisto" target="_blank" rel="noopener noreferrer">{{ 'Original Financisto Android project' if ui_language == 'en' else 'Originalprojekt Financisto für Android' }}</a></li>
+        <li><a href="{{ url_for('static',filename='legal/GPL-2.0.txt') }}" download="GPL-2.0.txt">{{ 'Download complete GPLv2 licence (English)' if ui_language == 'en' else 'GPLv2 vollständig herunterladen (englisch)' }}</a></li>
+        <li><a href="{{ url_for('static',filename='legal/NOTICE.md') }}" download="NOTICE.md">{{ 'Download project and third-party notices (NOTICE.md)' if ui_language == 'en' else 'Projekt- und Drittrechte-Hinweise herunterladen (NOTICE.md)' }}</a></li>
+      </ul>
+    </section>
+  </div>
+  <section class="panel license-original" aria-labelledby="complete-license-title">
+    <h2 id="complete-license-title">{{ 'Complete original licence and notices' if ui_language == 'en' else 'Vollständiger Original-Lizenztext und Hinweise' }}</h2>
+    <p class="muted">{{ 'The following English original is provided verbatim, not translated. It is authoritative for the terms of GPLv2.' if ui_language == 'en' else 'Der nachfolgende englische Originaltext ist unverändert und nicht übersetzt. Für die GPLv2-Bedingungen ist dieser vollständige Text maßgeblich.' }}</p>
+    <details>
+      <summary>{{ 'Show full GNU GPL version 2 (English)' if ui_language == 'en' else 'Vollständige GNU GPL Version 2 anzeigen (Englisch)' }}</summary>
+      <pre class="license-verbatim">{{ full_gpl_text }}</pre>
+    </details>
+    <details>
+      <summary>{{ 'Show full project NOTICE.md (original German)' if ui_language == 'en' else 'Vollständige Projekt- und Drittrechte-Hinweise (NOTICE.md) anzeigen' }}</summary>
+      <pre class="license-verbatim">{{ full_notice_text }}</pre>
+    </details>
+    <p class="muted small">{{ 'Informational overview only; not individual legal advice. The underlying licence and applicable law govern.' if ui_language == 'en' else 'Allgemeine Information, keine individuelle Rechtsberatung. Es gelten die Lizenzbedingungen und das anwendbare Recht.' }}</p>
+  </section>
+</div>
+{% endblock %}
