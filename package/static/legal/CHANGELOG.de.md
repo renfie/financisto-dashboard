@@ -1,3 +1,10 @@
+## 1.9.61-dev.3 – Mobile Buchungsliste identisch zur Startseite (25.11.2026)
+
+- Buchungskarten auf der Erfassungsseite verwenden jetzt dieselben HTML-Strukturen und die gemeinsamen CSS-Regeln wie auf der Startseite statt einer separaten Nachbildung.
+- Dieselbe farbliche Kennzeichnung: Umbuchungen blau, wiederkehrende Buchungen grün, Kombinationen violett und zukünftige Buchungen gelb; dieselben Abzeichen für Wiederholungen und Regelzuordnungen.
+- Standardmäßig geschlossene Karten mit Empfänger bzw. Buchungsart, Datum, Konto/Zielkonto, Betrag und aufklappbaren Details inklusive Kategorie und Aktionen.
+- Keine Änderungen an Finanzdaten oder Datenbankschema. Nur Entwicklungszweig `develop`.
+
 ## 1.9.61-dev.2 – Mobile Buchungskarten wieder einklappbar (25.11.2026)
 
 - Fehlerhafte mobile Darstellung nach Ergänzung der Kategorie-Spalte korrigiert: feste Spaltenpositionen aus der Desktop-Tabelle werden für Handykarten nicht mehr verwendet.
