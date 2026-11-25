@@ -1,3 +1,10 @@
+## 1.9.61-dev.1 – Kategorie in der Web-Buchungsliste (25.11.2026)
+
+- Die Tabelle „Über die Webseite erfasste Buchungen“ zeigt die Kategorie direkt zwischen Konto und Empfänger, wie die Buchungsliste der Startseite.
+- Vollständige Kategorienamen einschließlich Unterkategorien; Einträge ohne Kategorie erhalten einen Gedankenstrich.
+- Kategorie ist auf- und absteigend sortierbar. Mobile Tabellenkennzeichnung und Leerzustand wurden angepasst.
+- Keine Änderung an Buchungen, Finanzdaten, Datenbankschema oder API. Entwicklungsstand ausschließlich auf `develop`, kein offizielles Release.
+
 ## 1.9.60 – Bereinigung öffentlicher Projektdokumentation (23.11.2026)
 
 - Interne Prozesshinweise aus den öffentlichen README-Dateien entfernt.
