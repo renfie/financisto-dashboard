@@ -1,3 +1,10 @@
+## 1.9.61-dev.3 – Mobile booking list matches dashboard cards (2026-11-25)
+
+- Booking-entry cards now reuse dashboard markup conventions and shared CSS rules instead of separately maintained copies.
+- Same colors: blue transfers, green recurring entries, purple combinations and yellow future bookings; identical recurring and rule-matched badges.
+- Collapsed by default; show payee/type, date, source/target account and amount, with expandable category, details and actions.
+- No change to financial data or schema. Development branch `develop` only.
+
 ## 1.9.61-dev.2 – Restore collapsible mobile booking cards (2026-11-25)
 
 - Fix broken phone layout after adding a category column: mobile cards no longer rely on desktop table column positions.
