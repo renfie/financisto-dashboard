@@ -17,7 +17,15 @@ class MobileBookingLayoutTests(unittest.TestCase):
         self.assertIn('category_names.get(t.category_id', template)
         self.assertIn('.web-bookings-desktop{display:none!important}', css)
         self.assertIn('.web-bookings-compact{display:grid;', css)
-        self.assertIn('.web-bookings-compact .compact-booking-summary', css)
+        self.assertIn(':is(#buchungen,.web-bookings-compact) .compact-booking-summary', css)
+        self.assertIn('transfer-booking', template)
+        self.assertIn('recurring-booking', template)
+        self.assertIn('future-booking', template)
+        self.assertIn('name="web-booking-details"', template)
+        colors=(ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
+        self.assertIn(':is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking', colors)
+        self.assertIn(':is(#buchungen,.web-bookings-compact) .compact-booking.recurring-booking', colors)
+        self.assertIn(':is(#buchungen,.web-bookings-compact) .compact-booking.future-booking', colors)
         self.assertNotIn('<details class="compact-booking" open', template)
 
     def test_category_sorting_remains_available(self):
