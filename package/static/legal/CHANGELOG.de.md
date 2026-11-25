@@ -1,3 +1,9 @@
+## 1.9.61-dev.4 – Einheitliche Desktop-Aktionsbuttons (25.11.2026)
+
+- Die Schaltflächen Klonen, Bearbeiten und Löschen der Web-Buchungstabelle verwenden nun exakt die gemeinsamen Klassen und Maße der Desktop-Buchungstabelle auf der Startseite: Schriftgröße, Höhe, Innen- und Außenabstände, Ausrichtung und Zeilenumbruch.
+- Gemeinsame CSS-Regeln verhindern abweichende Button-Größen; die kompakte mobile Ansicht und Kategorie-Spalte bleiben unverändert.
+- Regressionstest zur Konsistenz beider Tabellen ergänzt. Entwicklung ausschließlich in `develop`.
+
 ## 1.9.61-dev.3 – Mobile Buchungsliste identisch zur Startseite (25.11.2026)
 
 - Buchungskarten auf der Erfassungsseite verwenden jetzt dieselben HTML-Strukturen und die gemeinsamen CSS-Regeln wie auf der Startseite statt einer separaten Nachbildung.
