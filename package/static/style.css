@@ -755,8 +755,8 @@
 #buchungen .dashboard-desktop-ledger tr.future-booking td,
 .mobile-web-booking-list tr.future-booking td{background:#fff3c9!important}
 #buchungen .dashboard-desktop-ledger tr.future-booking{box-shadow:inset 3px 0 #c19a30}
-#buchungen .compact-booking.future-booking{background:#fff3cd;border-color:#d9b857}
-#buchungen .compact-booking.future-booking .compact-booking-details{background:#fff9e8}
+:is(#buchungen,.web-bookings-compact) .compact-booking.future-booking{background:#fff3cd;border-color:#d9b857}
+:is(#buchungen,.web-bookings-compact) .compact-booking.future-booking .compact-booking-details{background:#fff9e8}
 @media screen and (max-width:760px){
  .mobile-web-booking-list tr.mobile-booking-card.future-booking{background:#fff3cd!important;border-color:#d9b857!important}
 }
@@ -999,18 +999,18 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 #buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){
  box-shadow:inset 3px 0 #9983c9;
 }
-#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking){
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking){
  background:#eaf4fb;border-color:#a5cae3;
 }
-#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking){
+:is(#buchungen,.web-bookings-compact) .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking){
  background:#e6f6ef;border-color:#a1d9c5;
 }
-#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking){
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking.recurring-booking:not(.future-booking){
  background:#f0ecfc;border-color:#c6b9e5;
 }
-#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking) .compact-booking-details{background:#f5faff}
-#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking) .compact-booking-details{background:#f4fbf7}
-#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking) .compact-booking-details{background:#f8f6ff}
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking) .compact-booking-details{background:#f5faff}
+:is(#buchungen,.web-bookings-compact) .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking) .compact-booking-details{background:#f4fbf7}
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking.recurring-booking:not(.future-booking) .compact-booking-details{background:#f8f6ff}
 @media screen and (max-width:760px){
  #buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking){background:#eaf4fb!important}
  #buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){background:#e6f6ef!important}
