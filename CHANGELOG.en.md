@@ -1,3 +1,10 @@
+## 1.9.61-dev.1 – Category in web booking list (2026-11-25)
+
+- Show category between account and payee in the “Bookings entered through the website” table, consistent with the dashboard booking list.
+- Display full category paths, including subcategories, with a dash for uncategorized transactions.
+- Enable ascending and descending category sorting; adapt mobile table labels and empty-state colspan.
+- No changes to transactions, financial records, database schema or API. Development branch only; no official release.
+
 ## 1.9.60 – Public documentation cleanup (2026-11-23)
 
 - Removed internal process commentary from the public README files.
