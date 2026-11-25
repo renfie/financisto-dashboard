@@ -1,3 +1,10 @@
+## 1.9.61-dev.2 – Restore collapsible mobile booking cards (2026-11-25)
+
+- Fix broken phone layout after adding a category column: mobile cards no longer rely on desktop table column positions.
+- Individual bookings are compact and collapsed by default, just like dashboard entries. Tap to reveal account, full category, payee, type, note and action buttons.
+- Preserve the desktop category table and sortable columns; add a sort menu for compact mobile view.
+- Add regression tests for collapsed cards, layout and category sorting. Development branch only; no official release.
+
 ## 1.9.61-dev.1 – Category in web booking list (2026-11-25)
 
 - Show category between account and payee in the “Bookings entered through the website” table, consistent with the dashboard booking list.
