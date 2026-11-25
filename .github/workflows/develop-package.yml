@@ -38,7 +38,7 @@ jobs:
           assert 'data-label="Kategorie"' in t
           assert 'colspan="8"' in t
           assert "if sort_key == 'category':" in s
-          assert Path('package/VERSION').read_text().strip() == '1.9.61-dev.3'
+          assert Path('package/VERSION').read_text().strip() == '1.9.61-dev.4'
           print('Category list and sorting checks passed')
           PY
       - name: Build full development update ZIP
@@ -54,9 +54,9 @@ jobs:
           unzip -tq "financisto-dashboard-v$VERSION.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: financisto-dashboard-v1.9.61-dev.3
+          name: financisto-dashboard-v1.9.61-dev.4
           path: |
-            financisto-dashboard-v1.9.61-dev.3.zip
-            financisto-dashboard-v1.9.61-dev.3.zip.sha256
+            financisto-dashboard-v1.9.61-dev.4.zip
+            financisto-dashboard-v1.9.61-dev.4.zip.sha256
           retention-days: 14
           if-no-files-found: error
