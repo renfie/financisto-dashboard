@@ -2306,10 +2306,11 @@ def booking_list():
                                   WHERE ev.event IN ('recurring_posted_auto','recurring_posted_manual')
                                     AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
                               )) AS is_rule_matched,
-                          c.symbol,c.decimals,p.title payee_title
+                          c.symbol,c.decimals,p.title payee_title,target.title target_account_title
                           FROM transactions t JOIN accounts a ON a.id=t.account_id
                           JOIN currencies c ON c.id=a.currency_id
                           LEFT JOIN payees p ON p.id=t.payee_id
+                          LEFT JOIN accounts target ON target.id=t.to_account_id
                           WHERE t.origin IN ('web','financisto_edited') ORDER BY t.day DESC,t.id DESC LIMIT 100''').fetchall()
         # Always select the last 100 web transactions first; column sorting
         # affects this fixed set rather than silently changing which rows exist.
