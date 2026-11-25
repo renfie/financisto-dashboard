@@ -44,7 +44,7 @@
 </dialog>
 <details class="booking-help"><summary>Hinweise zur Buchung</summary><p class="hint">Klonen übernimmt Konto, Empfänger, Kategorie, Notiz und Buchungsart – nicht den Betrag. Durchlaufende Posten haben keine Auswirkung auf die Haushaltsstatistik dieses Dashboards; in den Auswertungen der Android-App können sie weiterhin als Einnahmen/Ausgaben erscheinen.</p><p class="hint">Umbuchungen sind nur zwischen Konten derselben Währung möglich. Beträge werden exakt in der jeweiligen Währung gespeichert und Kontostände atomar aktualisiert. Auch importierte Buchungen lassen sich bei führendem Web-Dashboard bearbeiten; die Original-Sicherung bleibt als Exportgrundlage erhalten.</p></details></section>
 <section class="panel"><h2>Über die Webseite erfasste Buchungen</h2><p class="muted">Die letzten 100 neu erfassten oder geänderten Web-Buchungen. Auf dem Dashboard kannst du alle Buchungen bearbeiten, löschen oder klonen, sofern die Web-Verwaltung führend ist.</p>
-<div class="table-wrap mobile-web-booking-list" id="web-buchungen"><table><thead><tr>
+<div class="table-wrap mobile-web-booking-list web-bookings-desktop" id="web-buchungen"><table><thead><tr>
 {% for key,label in [('date','Datum'),('type','Typ'),('account','Konto'),('category','Kategorie'),('payee','Empfänger'),('note','Notiz'),('amount','Betrag')] %}
 <th><a class="booking-sort-link" href="{{ url_for('booking_list',sort=key,dir='asc' if booking_sort==key and booking_direction=='desc' else 'desc') }}#web-buchungen">{{ label }}{% if booking_sort==key %}<span class="sorticon" aria-hidden="true">{{ '▲' if booking_direction=='asc' else '▼' }}</span>{% endif %}</a></th>
 {% endfor %}
@@ -53,6 +53,44 @@
 <tr class="mobile-booking-card{% if t.day > today %} future-booking{% endif %}{% if t.to_account_id %} transfer-booking{% endif %}{% if t.is_recurring %} recurring-booking{% elif t.is_rule_matched %} rule-matched-booking{% endif %}"><td data-label="Datum">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }}{% if t.day > today %}<span class="future-booking-badge">Zukünftiges Buchungsdatum</span>{% endif %}{% if t.is_recurring %}<span class="recurring-booking-badge">Wiederkehrend</span>{% elif t.is_rule_matched %}<span class="rule-matched-badge">Regel zugeordnet</span>{% endif %}</td><td class="booking-kind" data-label="Typ">{% if t.to_account_id %}<span class="booking-type booking-neutral">Umbuchung</span>{% elif t.category_id in adjustment_ids %}<span class="booking-type booking-neutral">Saldoabgleich</span>{% elif t.category_id in neutral_ids %}<span class="booking-type booking-neutral">Durchlaufend</span>{% elif t.amount < 0 %}<span class="booking-type booking-expense"><span aria-hidden="true">↓</span> Ausgabe</span>{% elif t.amount > 0 %}<span class="booking-type booking-income"><span aria-hidden="true">↑</span> Einnahme</span>{% else %}<span class="booking-type booking-neutral">Ohne Betrag</span>{% endif %}</td><td data-label="Konto">{{ t.account_title }}</td><td data-label="Kategorie">{{ category_names.get(t.category_id, "–") }}</td><td data-label="Empfänger">{{ t.payee_title or '–' }}</td><td data-label="Notiz" class="note" {% if not t.note %}data-empty="true"{% endif %}>{{ t.note or '–' }}</td><td data-label="Betrag">{{ (t.amount / (10 ** t.decimals))|money(t.decimals) }} {{ t.symbol or t.currency_code }}</td>
 <td class="finance-row-actions" data-label="Aktionen"><a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a><a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a><form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung löschen und Kontostand zurückrechnen?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN"><button class="secondary" type="submit">Löschen</button></form></td></tr>
 {% else %}<tr class="mobile-booking-empty"><td colspan="8">Noch keine Web-Buchungen erfasst.</td></tr>{% endfor %}
-</tbody></table></div></section>
+</tbody></table></div>
+<div class="web-bookings-compact" aria-label="Buchungen in kompakter Mobilansicht">
+  <details class="mobile-sort-menu">
+    <summary>Sortierung: {{ {'date':'Datum','type':'Typ','account':'Konto','category':'Kategorie','payee':'Empfänger','note':'Notiz','amount':'Betrag'}.get(booking_sort,'Datum') }} {{ 'aufsteigend' if booking_direction=='asc' else 'absteigend' }}</summary>
+    <div class="mobile-sort-links">
+      {% for key,label in [('date','Datum'),('type','Typ'),('account','Konto'),('category','Kategorie'),('payee','Empfänger'),('note','Notiz'),('amount','Betrag')] %}
+      <a href="{{ url_for('booking_list',sort=key,dir='asc' if booking_sort==key and booking_direction=='desc' else 'desc') }}#web-buchungen"{% if booking_sort==key %} aria-current="true"{% endif %}>{{ label }}{% if booking_sort==key %} {{ '▲' if booking_direction=='asc' else '▼' }}{% endif %}</a>
+      {% endfor %}
+    </div>
+  </details>
+  {% for t in rows %}
+  <details class="compact-booking">
+    <summary class="compact-booking-summary">
+      <span class="compact-booking-heading">
+        <span class="compact-booking-title">{{ t.payee_title or category_names.get(t.category_id, 'Buchung') }}</span>
+        <span class="compact-booking-subtitle">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }} · {{ 'Umbuchung' if t.to_account_id else 'Ausgabe' if t.amount < 0 else 'Einnahme' if t.amount > 0 else 'Buchung' }}{% if t.is_recurring %} · Wiederkehrend{% elif t.is_rule_matched %} · Regel zugeordnet{% endif %}</span>
+      </span>
+      <span class="compact-booking-amount {{ 'booking-expense' if t.amount < 0 else 'booking-income' if t.amount > 0 else 'booking-neutral' }}">{{ (t.amount / (10 ** t.decimals))|money(t.decimals) }} {{ t.symbol or t.currency_code }}</span>
+      <span class="compact-booking-chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="compact-booking-details">
+      <dl class="compact-booking-fields">
+        <div><dt>Konto</dt><dd>{{ t.account_title }}</dd></div>
+        <div><dt>Kategorie</dt><dd>{{ category_names.get(t.category_id, '–') }}</dd></div>
+        <div><dt>Empfänger</dt><dd>{{ t.payee_title or '–' }}</dd></div>
+        <div><dt>Typ</dt><dd>{{ 'Umbuchung' if t.to_account_id else 'Saldoabgleich' if t.category_id in adjustment_ids else 'Durchlaufend' if t.category_id in neutral_ids else 'Ausgabe' if t.amount < 0 else 'Einnahme' if t.amount > 0 else 'Ohne Betrag' }}</dd></div>
+        {% if t.note %}<div class="compact-booking-note"><dt>Notiz</dt><dd>{{ t.note }}</dd></div>{% endif %}
+      </dl>
+      <div class="compact-booking-actions">
+        <a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a>
+        <a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a>
+        <form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung löschen und Kontostand zurückrechnen?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN"><button class="secondary danger-action" type="submit">Löschen</button></form>
+      </div>
+    </div>
+  </details>
+  {% else %}
+  <p class="compact-booking-empty">Noch keine Web-Buchungen erfasst.</p>
+  {% endfor %}
+</div></section>
 {% endif %}
 {% endblock %}
