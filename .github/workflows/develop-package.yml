@@ -7,6 +7,9 @@ on:
       - 'package/VERSION'
       - 'package/src/app.py'
       - 'package/templates/bookings.html'
+      - 'package/static/mobile.css'
+      - 'package/static/style.css'
+      - 'package/tests/test_mobile_booking_layout.py'
       - '.github/workflows/develop-package.yml'
   workflow_dispatch:
 
