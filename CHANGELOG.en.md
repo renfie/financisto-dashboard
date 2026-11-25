@@ -1,3 +1,9 @@
+## 1.9.61-dev.4 – Consistent desktop booking action buttons (2026-11-25)
+
+- Clone, Edit and Delete buttons in the web booking table now use the same classes and dimensions as the dashboard desktop ledger, including font size, height, padding, spacing, alignment and wrapping.
+- Shared CSS avoids inconsistent action sizing; compact mobile cards and category column remain unchanged.
+- Added regression test covering both tables. Development branch `develop` only.
+
 ## 1.9.61-dev.3 – Mobile booking list matches dashboard cards (2026-11-25)
 
 - Booking-entry cards now reuse dashboard markup conventions and shared CSS rules instead of separately maintained copies.
