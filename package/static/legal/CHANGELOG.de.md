@@ -1,3 +1,10 @@
+## 1.9.61-dev.2 – Mobile Buchungskarten wieder einklappbar (25.11.2026)
+
+- Fehlerhafte mobile Darstellung nach Ergänzung der Kategorie-Spalte korrigiert: feste Spaltenpositionen aus der Desktop-Tabelle werden für Handykarten nicht mehr verwendet.
+- Buchungen werden auf Smartphones wie auf der Hauptseite als kompakte, standardmäßig geschlossene Einträge angezeigt. Antippen öffnet Konto, vollständige Kategorie, Empfänger, Typ, Notiz und Aktionen.
+- Desktop-Tabelle mit Kategorie und Spaltensortierung bleibt erhalten; eigene Sortierauswahl für die kompakte Mobilansicht.
+- Regressionstest für Standardzustand, Kartenstruktur und Kategorie-Sortierung ergänzt. Nur `develop`, kein offizielles Release.
+
 ## 1.9.61-dev.1 – Kategorie in der Web-Buchungsliste (25.11.2026)
 
 - Die Tabelle „Über die Webseite erfasste Buchungen“ zeigt die Kategorie direkt zwischen Konto und Empfänger, wie die Buchungsliste der Startseite.
