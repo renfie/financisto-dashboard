@@ -10,6 +10,8 @@ on:
       - 'package/static/mobile.css'
       - 'package/static/style.css'
       - 'package/tests/test_mobile_booking_layout.py'
+      - 'package/CHANGELOG.md'
+      - 'package/CHANGELOG.en.md'
       - '.github/workflows/develop-package.yml'
   workflow_dispatch:
 
