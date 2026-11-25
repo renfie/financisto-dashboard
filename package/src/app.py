@@ -2315,7 +2315,7 @@ def booking_list():
         # affects this fixed set rather than silently changing which rows exist.
         sort_key = request.args.get('sort', 'date')
         sort_direction = request.args.get('dir', 'desc')
-        if sort_key not in ('date', 'type', 'account', 'payee', 'note', 'amount'):
+        if sort_key not in ('date', 'type', 'account', 'category', 'payee', 'note', 'amount'):
             sort_key = 'date'
         if sort_direction not in ('asc', 'desc'):
             sort_direction = 'desc'
@@ -2332,6 +2332,8 @@ def booking_list():
                         'Einnahme' if row['amount'] > 0 else 'Ohne Betrag').casefold()
             if sort_key == 'account':
                 return (row['account_title'] or '').casefold()
+            if sort_key == 'category':
+                return (category_names.get(row['category_id'], '') or '').casefold()
             if sort_key == 'payee':
                 return (row['payee_title'] or '').casefold()
             if sort_key == 'note':
