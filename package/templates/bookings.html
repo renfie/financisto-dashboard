@@ -64,27 +64,34 @@
     </div>
   </details>
   {% for t in rows %}
-  <details class="compact-booking">
+  <details class="compact-booking{% if t.day > today %} future-booking{% endif %}{% if t.to_account_id %} transfer-booking{% endif %}{% if t.is_recurring %} recurring-booking{% elif t.is_rule_matched %} rule-matched-booking{% endif %}" name="web-booking-details">
     <summary class="compact-booking-summary">
       <span class="compact-booking-heading">
-        <span class="compact-booking-title">{{ t.payee_title or category_names.get(t.category_id, 'Buchung') }}</span>
-        <span class="compact-booking-subtitle">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }} · {{ 'Umbuchung' if t.to_account_id else 'Ausgabe' if t.amount < 0 else 'Einnahme' if t.amount > 0 else 'Buchung' }}{% if t.is_recurring %} · Wiederkehrend{% elif t.is_rule_matched %} · Regel zugeordnet{% endif %}</span>
+        <span class="compact-booking-title">
+          {% if t.to_account_id %}Umbuchung{% elif t.payee_title %}{{ t.payee_title }}{% elif t.note %}{{ t.note }}{% elif t.category_id in adjustment_ids %}Saldoabgleich{% elif t.category_id %}{{ category_names.get(t.category_id, 'Buchung') }}{% else %}{{ 'Ausgabe' if t.amount < 0 else 'Einnahme' if t.amount > 0 else 'Buchung' }}{% endif %}
+        </span>
+        <span class="compact-booking-subtitle">{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }}{% if t.day > today %} · <span class="future-booking-badge">Zukünftiges Buchungsdatum</span>{% endif %}{% if t.is_recurring %} · <span class="recurring-booking-badge">Wiederkehrend</span>{% elif t.is_rule_matched %} · <span class="rule-matched-badge">Regel zugeordnet</span>{% endif %} · {{ t.account_title }}{% if t.to_account_id %} → {{ t.target_account_title or 'Zielkonto' }}{% endif %}</span>
       </span>
-      <span class="compact-booking-amount {{ 'booking-expense' if t.amount < 0 else 'booking-income' if t.amount > 0 else 'booking-neutral' }}">{{ (t.amount / (10 ** t.decimals))|money(t.decimals) }} {{ t.symbol or t.currency_code }}</span>
+      <span class="compact-booking-amount {% if t.to_account_id %}booking-neutral{% elif t.amount < 0 %}expense{% else %}income{% endif %}">{{ (t.amount / (10 ** t.decimals))|money(t.decimals) }} {{ t.symbol or t.currency_code }}</span>
       <span class="compact-booking-chevron" aria-hidden="true"></span>
     </summary>
     <div class="compact-booking-details">
       <dl class="compact-booking-fields">
-        <div><dt>Konto</dt><dd>{{ t.account_title }}</dd></div>
-        <div><dt>Kategorie</dt><dd>{{ category_names.get(t.category_id, '–') }}</dd></div>
+        <div><dt>Art</dt><dd>{% if t.to_account_id %}Umbuchung{% elif t.category_id in adjustment_ids %}Saldoabgleich{% elif t.category_id in neutral_ids %}Durchlaufender Posten{% elif t.amount < 0 %}Ausgabe{% elif t.amount > 0 %}Einnahme{% else %}Ohne Betrag{% endif %}</dd></div>
+        <div><dt>Datum</dt><dd>{{ t.day[8:10] }}.{{ t.day[5:7] }}.{{ t.day[:4] }}</dd></div>
+        <div><dt>{{ 'Quellkonto' if t.to_account_id else 'Konto' }}</dt><dd>{{ t.account_title }}</dd></div>
+        {% if t.to_account_id %}<div><dt>Zielkonto</dt><dd>{{ t.target_account_title or 'Zielkonto unbekannt' }}</dd></div>{% endif %}
+        <div><dt>Kategorie</dt><dd>{{ '–' if t.to_account_id else category_names.get(t.category_id, 'Ohne Kategorie') }}</dd></div>
         <div><dt>Empfänger</dt><dd>{{ t.payee_title or '–' }}</dd></div>
-        <div><dt>Typ</dt><dd>{{ 'Umbuchung' if t.to_account_id else 'Saldoabgleich' if t.category_id in adjustment_ids else 'Durchlaufend' if t.category_id in neutral_ids else 'Ausgabe' if t.amount < 0 else 'Einnahme' if t.amount > 0 else 'Ohne Betrag' }}</dd></div>
         {% if t.note %}<div class="compact-booking-note"><dt>Notiz</dt><dd>{{ t.note }}</dd></div>{% endif %}
       </dl>
-      <div class="compact-booking-actions">
+      <div class="compact-booking-actions" aria-label="Aktionen für diese Buchung">
         <a class="button secondary" href="{{ url_for('booking_list',clone=t.id) }}#buchungseingabe">Klonen</a>
         <a class="button secondary" href="{{ url_for('booking_list',edit=t.id) }}#buchungseingabe">Bearbeiten</a>
-        <form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung löschen und Kontostand zurückrechnen?"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN"><button class="secondary danger-action" type="submit">Löschen</button></form>
+        <form method="post" action="{{ url_for('booking_delete',booking_id=t.id) }}" data-confirm="Buchung dauerhaft löschen und den Kontostand entsprechend korrigieren?">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="confirm" value="LOESCHEN">
+          <button class="secondary danger-action" type="submit">Löschen</button>
+        </form>
       </div>
     </div>
   </details>
