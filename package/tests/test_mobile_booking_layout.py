@@ -12,7 +12,7 @@ class MobileBookingLayoutTests(unittest.TestCase):
         css = (ROOT / "static" / "mobile.css").read_text(encoding="utf-8")
         self.assertIn('class="table-wrap mobile-web-booking-list web-bookings-desktop"', template)
         self.assertIn('class="web-bookings-compact"', template)
-        self.assertIn('<details class="compact-booking">', template)
+        self.assertIn('<details class="compact-booking{% if t.day > today %}', template)
         self.assertIn('<summary class="compact-booking-summary">', template)
         self.assertIn('category_names.get(t.category_id', template)
         self.assertIn('.web-bookings-desktop{display:none!important}', css)
