@@ -37,7 +37,7 @@ from backup_manager import (create_backup as create_verified_backup, status as s
                             current_financisto_backups, financisto_status, export_dir as financisto_export_dir,
                             export_current_financisto)
 from job_monitor import ensure_schema as ensure_monitor_schema, dashboard_status
-from monthly_reports import summarize_months, attach_categories, months_between
+from monthly_reports import summarize_months, attach_categories, months_between, largest_bookings, serialize_highlights
 from recurring import (ensure_schema as ensure_recurring_schema, preview_from_backup,
                        save_import_preview, confirm_import, validate_rule,
                        on_or_after, post_one, today as recurring_today)
@@ -3266,8 +3266,6 @@ def historical_analysis():
         income_groups = defaultdict(int)
         expense_counts = defaultdict(int)
         income_counts = defaultdict(int)
-        biggest_expense = None
-        biggest_income = None
         expense_count = income_count = total_expenses = total_income = 0
         for t in tx:
             m=t['day'][:7]
@@ -3283,8 +3281,6 @@ def historical_analysis():
                 expense_counts[category_title] += 1
                 total_expenses += amt
                 expense_count += 1
-                if biggest_expense is None or amt > -biggest_expense['amount']:
-                    biggest_expense = dict(t)
             elif t['amount'] > 0:
                 amt = t['amount']
                 month_row['income'] += amt
@@ -3292,8 +3288,13 @@ def historical_analysis():
                 income_counts[category_title] += 1
                 total_income += amt
                 income_count += 1
-                if biggest_income is None or amt > biggest_income['amount']:
-                    biggest_income = dict(t)
+        # Web highlights and Mobile API now share the same top-entry query.
+        history_highlights=largest_bookings(db,first=start,last=end,currency_id=int(currency),
+            today=datetime.now(MONTH_TZ).date().isoformat(),neutral_ids=neutral_ids,
+            categories=categories,account_id=int(account) if account else None,
+            category_id=int(category) if category else None,search=search or None)
+        biggest_expense=history_highlights['largest_expense']
+        biggest_income=history_highlights['largest_income']
         # Full history timeline uses the same booked-only aggregate as the
         # dashboard comparison and the Mobile API, not a paged transaction set.
         month_data,_,_=summarize_months(
@@ -3620,7 +3621,7 @@ def mobile_api_capabilities():
        'features':{'accounts':True,'categories':True,'payees':True,'bookings':True,
                    'create_booking':True,'update_booking':True,'delete_booking':True,
                    'server_authoritative':True,'offline_conflict_merge':False,
-                   'recurring_rules':True,'monthly_reports':True},
+                   'recurring_rules':True,'monthly_reports':True,'history_highlights':True},
        'server_base_path':'/api/mobile/v1',
        'message':'Online-Servermodus verfügbar. Kein automatischer Import lokaler Android-Daten.'})
 
@@ -4087,7 +4088,7 @@ def mobile_api_monthly_reports():
     user,error=_mobile_require()
     if error:return error
     query=request.args
-    if any(key not in ('from','to','currency','account_id','category_id') for key in query):
+    if any(key not in ('from','to','currency','account_id','category_id','q') for key in query):
         return _mobile_denied(400,'Unbekannter Berichtsparameter.')
     first=query.get('from')
     last=query.get('to')
@@ -4101,6 +4102,9 @@ def mobile_api_monthly_reports():
     span=(int(last[:4])-int(first[:4]))*12+int(last[5:])-int(first[5:])+1
     if not 1<=span<=36:
         return _mobile_denied(400,'Monatsbereich muss 1 bis 36 Monate umfassen.')
+    search=query.get('q')
+    if search is not None and (len(search)>100 or any(ord(ch)<32 for ch in search)):
+        return _mobile_denied(400,'Suchtext ist ungültig (maximal 100 Zeichen).')
     code=query.get('currency')
     if code is not None and (not re.fullmatch(r'[A-Z]{3}',code)):
         return _mobile_denied(400,'Währung muss als ISO-Code angegeben werden.')
@@ -4125,13 +4129,20 @@ def mobile_api_monthly_reports():
             categories,names,_=category_tree(db)
             if 'category_id' in identifiers and identifiers['category_id'] not in {c['id'] for c in categories}:
                 return _mobile_denied(400,'Kategorie ist unbekannt.')
+            report_today=datetime.now(MONTH_TZ).date().isoformat()
+            neutral_ids=pass_through_category_ids(db)
             results,_,groups=summarize_months(db,first=first,last=last,
-                currency_id=currency['id'],today=datetime.now(MONTH_TZ).date().isoformat(),
-                neutral_ids=pass_through_category_ids(db),categories=categories,
+                currency_id=currency['id'],today=report_today,
+                neutral_ids=neutral_ids,categories=categories,
                 account_id=identifiers.get('account_id'),
-                category_id=identifiers.get('category_id'))
+                category_id=identifiers.get('category_id'),search=search or None)
             attach_categories(results,groups,names)
+            highlights=largest_bookings(db,first=first,last=last,currency_id=currency['id'],
+                today=report_today,neutral_ids=neutral_ids,categories=categories,
+                account_id=identifiers.get('account_id'),category_id=identifiers.get('category_id'),
+                search=search or None)
         return _mobile_json_response(dict(currency=code,decimals=max(0,min(int(currency['decimals'] if currency['decimals'] is not None else 2),6)),
-            **{'from':first,'to':last},complete=True,months=list(results.values())))
+            **{'from':first,'to':last},complete=True,months=list(results.values()),
+            highlights=serialize_highlights(highlights,names)))
     except sqlite3.Error:
         return _mobile_denied(500,'Monatsbericht konnte nicht gelesen werden.')

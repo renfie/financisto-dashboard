@@ -17,17 +17,8 @@ def months_between(first, last):
     return [f'{i // 12:04d}-{i % 12 + 1:02d}' for i in range(start, end+1)]
 
 
-def summarize_months(db, *, first, last, currency_id, today, neutral_ids,
-                     categories, account_id=None, category_id=None, search=None):
-    """Calculate booked totals and (separately) all-dated projected totals.
-
-    Income and expenses match the dashboard comparison: internal transfers and
-    neutral/pass-through/adjustment categories are excluded. Booking counts
-    count only non-neutral, non-transfer, nonzero-value bookings. Transfers
-    have their own absolute source amount and count, and never affect balance.
-    A filtered transfer is visible if the account is source OR destination.
-    """
-    months=months_between(first,last)
+def ledger_filter(*,first,last,currency_id,categories,account_id=None,category_id=None,search=None):
+    """The single read-only filter shared by monthly totals and top transactions."""
     selected=set()
     if category_id is not None:
         parent=next(c for c in categories if int(c['id'])==int(category_id))
@@ -51,6 +42,58 @@ def summarize_months(db, *, first, last, currency_id, today, neutral_ids,
         pattern='%'+escaped+'%'
         conditions.append("(p.title LIKE ? ESCAPE '\\' OR t.note LIKE ? ESCAPE '\\' OR c.title LIKE ? ESCAPE '\\')")
         params.extend([pattern]*3)
+    return conditions,params
+
+
+def largest_bookings(db, *, first,last,currency_id,today,neutral_ids,categories,
+                     account_id=None,category_id=None,search=None):
+    """Return the same largest real, non-neutral entries used by web history.
+
+    Read two indexed/limited SQL result sets; do not download raw transactions.
+    Tie-breaking by ascending booking ID makes results stable across clients.
+    """
+    conditions,params=ledger_filter(first=first,last=last,currency_id=currency_id,
+        categories=categories,account_id=account_id,category_id=category_id,search=search)
+    conditions.extend(['t.day<=?', 'COALESCE(t.to_account_id,0)=0'])
+    params.append(today)
+    if neutral_ids:
+        conditions.append('(t.category_id IS NULL OR t.category_id NOT IN ('+
+                          ','.join('?' for _ in neutral_ids)+'))')
+        params.extend(sorted(neutral_ids))
+    common="""SELECT t.id,t.day,t.amount,t.category_id,p.title AS payee_title,
+            c.title AS category_title FROM transactions t
+            JOIN accounts a ON a.id=t.account_id
+            LEFT JOIN payees p ON p.id=t.payee_id
+            LEFT JOIN categories c ON c.id=t.category_id
+            WHERE """+' AND '.join(conditions)
+    found={}
+    for key,sign,order in (('largest_expense','<','ASC'),('largest_income','>','DESC')):
+        row=db.execute(common+f' AND t.amount {sign} 0 ORDER BY t.amount {order},t.id ASC LIMIT 1',params).fetchone()
+        found[key]=dict(row) if row is not None else None
+    return found
+
+
+def serialize_highlights(highlights,names):
+    """API-only JSON projection; web history uses the exact same source rows."""
+    return {key:({'date':r['day'],'amount_minor':abs(int(r['amount'])),
+                  'payee':r['payee_title'] or '',
+                  'category':names.get(r['category_id'],'Ohne Kategorie')}
+                 if r is not None else None) for key,r in highlights.items()}
+
+
+def summarize_months(db, *, first, last, currency_id, today, neutral_ids,
+                     categories, account_id=None, category_id=None, search=None):
+    """Calculate booked totals and (separately) all-dated projected totals.
+
+    Income and expenses match the dashboard comparison: internal transfers and
+    neutral/pass-through/adjustment categories are excluded. Booking counts
+    count only non-neutral, non-transfer, nonzero-value bookings. Transfers
+    have their own absolute source amount and count, and never affect balance.
+    A filtered transfer is visible if the account is source OR destination.
+    """
+    months=months_between(first,last)
+    conditions, params = ledger_filter(first=first,last=last,currency_id=currency_id,
+        categories=categories,account_id=account_id,category_id=category_id,search=search)
     # Aggregation stays inside SQLite: at most a few thousand month/category
     # groups cross into Python even for very large transaction histories.
     sql='''SELECT substr(t.day,1,7) AS month,t.category_id AS category_id,

@@ -14,7 +14,7 @@ from types import SimpleNamespace
 
 BASE=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(BASE/'src'))
-from monthly_reports import months_between, summarize_months, attach_categories
+from monthly_reports import months_between, summarize_months, attach_categories, largest_bookings, serialize_highlights
 
 
 class MonthlyReportsTests(unittest.TestCase):
@@ -127,6 +127,10 @@ class MonthlyReportsTests(unittest.TestCase):
             self.assertTrue(any(isinstance(n,ast.Call) and isinstance(n.func,ast.Name)
                                 and n.func.id=='summarize_months' for n in ast.walk(method)),name)
         self.assertIn("'monthly_reports':True", text)
+        self.assertIn("'history_highlights':True", text)
+        web=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='historical_analysis')
+        self.assertTrue(any(isinstance(n,ast.Call) and isinstance(n.func,ast.Name)
+                            and n.func.id=='largest_bookings' for n in ast.walk(web)))
         # The categorised expense breakdown is the exact source for the
         # dashboard comparison chart; it has no second monetary aggregation.
         values,_=self.calculate()
@@ -149,13 +153,17 @@ class MonthlyReportsTests(unittest.TestCase):
                'get_db':self.db,'finance_setting':lambda db,key,default:db.execute('SELECT value FROM meta WHERE key=?',(key,)).fetchone()[0],
                'category_tree':lambda db:(self.cats,self.names,{}),
                'pass_through_category_ids':lambda db:{30,40},
-               'summarize_months':summarize_months,'attach_categories':attach_categories}
+               'summarize_months':summarize_months,'attach_categories':attach_categories,
+               'largest_bookings':largest_bookings,'serialize_highlights':serialize_highlights}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),'app.py','exec'),scope)
         run=scope['mobile_api_monthly_reports']
         scope['request'].args=Query({'from':'2026-09','to':'2026-11','currency':'EUR'})
         response=run()
         self.assertEqual(len(response['months']),3)
         self.assertTrue(response['complete'])
+        self.assertEqual(response['highlights']['largest_expense'],dict(
+            date='2026-10-03',amount_minor=8000,payee='Markt',category='Einkauf / Lebensmittel'))
+        self.assertEqual(response['highlights']['largest_income']['amount_minor'],90000)
         scope['request'].args=Query()
         default=run()
         self.assertEqual((default['from'],default['to'],len(default['months'])),('2025-12','2026-11',12))
@@ -165,6 +173,18 @@ class MonthlyReportsTests(unittest.TestCase):
         self.assertEqual(response['months'][0]['income_minor'],90000)
         self.assertEqual(response['months'][2]['expense_minor'],400)
         self.assertNotIn('projected',response['months'][2])
+        scope['request'].args=Query({'from':'2026-09','to':'2026-11','currency':'EUR','q':'Essen'})
+        searched=run()
+        self.assertEqual(searched['highlights']['largest_expense']['amount_minor'],8000)
+        self.assertIsNone(searched['highlights']['largest_income'])
+        self.assertEqual(searched['months'][0]['expense_minor'],5000)
+        scope['request'].args=Query({'from':'2026-09','to':'2026-11','currency':'EUR','category_id':'12'})
+        scoped=run()
+        self.assertEqual(scoped['highlights']['largest_expense']['amount_minor'],2000)
+        scope['request'].args=Query({'from':'2026-09','to':'2026-11','currency':'USD'})
+        dollar=run()
+        self.assertEqual(dollar['highlights']['largest_expense']['amount_minor'],12345)
+        self.assertIsNone(dollar['highlights']['largest_income'])
         for args in ({'from':'2023-01','to':'2026-12','currency':'EUR'},
                      {'from':'2026-13','to':'2026-11','currency':'EUR'},
                      {'from':'2026-11','to':'2026-10','currency':'EUR'},
@@ -173,11 +193,81 @@ class MonthlyReportsTests(unittest.TestCase):
                      {'currency':'EUR','account_id':'3'},
                      {'currency':'EUR','account_id':'invalid'},
                      {'currency':'EUR','injection':'1'},
+                     {'currency':'EUR','q':'a'*101},
+                     {'currency':'EUR','q':'bad\nquery'},
                      {'currency':'EUR','category_id':'11 OR 1=1'}):
             scope['request'].args=Query(args)
             self.assertEqual(run()['status'],400,args)
         scope['_mobile_require']=lambda:(None,dict(status=401,error='Unauthorized'))
         self.assertEqual(run()['status'],401)
+
+    def highlights(self,first='2026-09',last='2026-11',currency_id=1,**kwargs):
+        with self.db() as db:
+            raw=largest_bookings(db,first=first,last=last,currency_id=currency_id,
+                today='2026-11-26',neutral_ids={30,40},categories=self.cats,**kwargs)
+            return serialize_highlights(raw,self.names)
+
+    def test_largest_income_expense_and_historical_web_parity(self):
+        result=self.highlights()
+        self.assertEqual(result['largest_income'],{
+            'date':'2026-09-10','amount_minor':90000,'payee':'Arbeitgeber','category':'Gehalt'})
+        self.assertEqual(result['largest_expense'],{
+            'date':'2026-10-03','amount_minor':8000,'payee':'Markt',
+            'category':'Einkauf / Lebensmittel'})
+        # Same selection as the old web history scan with the historical filters.
+        with self.db() as db:
+            rows=db.execute("""SELECT t.day,t.amount,t.category_id,p.title payee_title
+               FROM transactions t JOIN accounts a ON a.id=t.account_id
+               LEFT JOIN payees p ON p.id=t.payee_id
+               WHERE t.day>='2026-09-01' AND t.day<'2026-12-01'
+                 AND a.currency_id=1 AND t.is_template=0 AND t.to_account_id=0
+                 AND t.day<='2026-11-26' ORDER BY t.id""").fetchall()
+        candidates=[r for r in rows if r['category_id'] not in {30,40}]
+        expense=min((r for r in candidates if r['amount']<0),key=lambda r:r['amount'])
+        income=max((r for r in candidates if r['amount']>0),key=lambda r:r['amount'])
+        self.assertEqual((result['largest_expense']['date'],result['largest_expense']['amount_minor']),
+                         (expense['day'],-expense['amount']))
+        self.assertEqual((result['largest_income']['date'],result['largest_income']['amount_minor']),
+                         (income['day'],income['amount']))
+
+    def test_highlight_filters_months_category_descendants_account_currency(self):
+        self.assertEqual(self.highlights(first='2026-10',last='2026-10')['largest_income'],None)
+        self.assertEqual(self.highlights(first='2026-10',last='2026-10')['largest_expense']['amount_minor'],8000)
+        scoped=self.highlights(category_id=10)
+        self.assertIsNone(scoped['largest_income'])
+        self.assertEqual(scoped['largest_expense']['amount_minor'],8000)
+        self.assertEqual(self.highlights(category_id=12)['largest_expense']['amount_minor'],2000)
+        self.assertEqual(self.highlights(account_id=2)['largest_expense']['amount_minor'],400)
+        self.assertIsNone(self.highlights(account_id=2)['largest_income'])
+        self.assertEqual(self.highlights(currency_id=2)['largest_expense']['amount_minor'],12345)
+        self.assertIsNone(self.highlights(currency_id=2)['largest_income'])
+
+    def test_highlight_exclusions_future_nulls_and_search(self):
+        self.assertEqual(self.highlights(first='2026-08',last='2026-08'),{
+            'largest_expense':None,'largest_income':None})
+        self.assertEqual(self.highlights(category_id=30)['largest_expense'],None)
+        self.assertEqual(self.highlights(category_id=40)['largest_expense'],None)
+        # The future -7777 entry must not overtake today's -400 entry in November.
+        self.assertEqual(self.highlights(first='2026-11',last='2026-11')['largest_expense']['amount_minor'],400)
+        self.assertEqual(self.highlights(search='Essen')['largest_expense']['amount_minor'],8000)
+        self.assertIsNone(self.highlights(search='Essen')['largest_income'])
+        self.assertEqual(self.highlights(search='Arbeitgeber')['largest_income']['amount_minor'],90000)
+        self.assertEqual(self.highlights(search='nicht vorhanden'),{
+            'largest_expense':None,'largest_income':None})
+        with self.db() as db:
+            db.execute('PRAGMA query_only=ON')
+            largest_bookings(db,first='2026-09',last='2026-11',currency_id=1,
+                today='2026-11-26',neutral_ids={30,40},categories=self.cats)
+            with self.assertRaises(sqlite3.OperationalError):
+                db.execute("INSERT INTO payees VALUES (55,'Write disabled')")
+
+    def test_highlight_tie_is_deterministic(self):
+        with self.db() as db:
+            db.execute("""INSERT INTO transactions
+                (day,account_id,to_account_id,category_id,payee_id,amount,note,is_template)
+                VALUES ('2026-10-09',1,0,11,1,-8000,'Gleicher Betrag',0)""")
+        self.assertEqual(self.highlights(first='2026-10',last='2026-10')['largest_expense']['date'],
+                         '2026-10-03')
 
     def test_large_ledger_and_query_plan_index(self):
         with self.db() as db:

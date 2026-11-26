@@ -1,3 +1,10 @@
+## 1.9.62-dev.3 – Historische Spitzenbuchungen für die Mobile-API (26.11.2026)
+
+- Die bestehende Monats-API ergänzt optional `highlights.largest_expense` und `highlights.largest_income` (Datum, Einzelbetrag, Empfänger und vollständiger Kategorienpfad; `null` ohne Treffer).
+- Web-Historie und Mobile-API nutzen denselben schreibgeschützten Abfragehelfer; identische Zeitraum-, Konto-, Währungs-, Unterkategorie- und optionale Suchfilter `q`.
+- Umbuchungen, durchlaufende Posten, Saldoabgleiche, Vorlagen und zukünftige Buchungen werden ausgeschlossen. Historische Monatswerte und `monthly_reports: true` bleiben erhalten.
+- `history_highlights: true` als optionale Capability; Regressionstests und API-Dokumentation DE/EN erweitert. Keine Änderungen an Daten, Schema, Sicherungen oder Android-App.
+
 ## 1.9.62-dev.2 – Vollständige Monatsauswertungen der Mobile-API (26.11.2026)
 
 - Neuer, schreibgeschützter GET-Endpunkt `/api/mobile/v1/reports/monthly` für vollständige serverseitige 12–36-Monatswerte einschließlich Nullmonaten und Kategorie-Unterstrukturen.

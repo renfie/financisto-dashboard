@@ -1,3 +1,10 @@
+## 1.9.62-dev.3 – Historical highlights in Mobile API (2026-11-26)
+
+- Add optional `highlights.largest_expense` / `highlights.largest_income` with date, absolute minor-unit amount, payee and full category path (`null` when absent).
+- Web historical highlight panels and Mobile API reuse one read-only query; same date, account, currency, descendant category and optional `q` search filters.
+- Exclude internal transfers, pass-throughs, balance corrections, templates and future entries; preserve all monthly fields and `monthly_reports: true`.
+- Optional `history_highlights: true` capability, expanded tests and bilingual API docs; no changes to finance data, backups, Android or schema.
+
 ## 1.9.62-dev.2 – Complete Mobile API monthly reports (2026-11-26)
 
 - New read-only `GET /api/mobile/v1/reports/monthly` for complete server-side 12–36-month reports, including zero months and nested category paths.

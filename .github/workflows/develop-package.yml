@@ -10,6 +10,8 @@ on:
       - 'package/tests/test_mobile_recurring_rules.py'
       - 'package/src/monthly_reports.py'
       - 'package/tests/test_monthly_mobile_reports.py'
+      - 'package/docs/MOBILE_MONTHLY_REPORTS.de.md'
+      - 'package/docs/MOBILE_MONTHLY_REPORTS.en.md'
       - 'package/templates/bookings.html'
       - 'package/static/mobile.css'
       - 'package/static/style.css'
@@ -47,6 +49,8 @@ jobs:
           import re
           assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+-dev\.[0-9]+',Path('package/VERSION').read_text().strip())
           assert "'recurring_rules':True" in s
+          assert "'monthly_reports':True" in s
+          assert "'history_highlights':True" in s
           assert Path('package/docs/MOBILE_RECURRING_API.de.md').is_file()
           assert Path('package/docs/MOBILE_RECURRING_API.en.md').is_file()
           assert 'def mobile_api_recurring_list():' in s

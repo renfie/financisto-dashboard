@@ -1,6 +1,6 @@
 # Mobile-API: vollständige Monatsauswertungen
 
-**Entwicklungsstand `1.9.62-dev.2` auf `develop`.** Datum: 26.11.2026.
+**Entwicklungsstand `1.9.62-dev.3` auf `develop`.** Datum: 26.11.2026.
 
 ## Zweck
 
@@ -8,7 +8,7 @@
 
 ## Berechtigung und Capability
 
-Wie die übrige Mobile-API: `Authorization: Bearer <API-Key>`. Bereits ein Read-Key genügt. Nach erfolgreichem Test meldet `GET /api/mobile/v1/capabilities` in `features` **`"monthly_reports": true`** liefern. Das Flag ist im Entwicklungszweig aktiviert.
+Wie die übrige Mobile-API: `Authorization: Bearer <API-Key>`. Bereits ein Read-Key genügt. `GET /api/mobile/v1/capabilities` meldet bereits **`"monthly_reports": true`** im Basisstand.
 
 ## Abfrage
 
@@ -21,6 +21,7 @@ Wie die übrige Mobile-API: `Authorization: Bearer <API-Key>`. Bereits ein Read-
 | `currency` | ISO-Währungscode mit drei Großbuchstaben, z. B. EUR; Standard: Dashboard-Standardwährung |
 | `account_id` | Optional: vorhandenes Konto **in der gewählten Währung** |
 | `category_id` | Optional: Kategorien-ID einschließlich aller Unterkategorien nach vorhandenen Nested-Set-Grenzen (`lft`/`rgt`) |
+| `q` | Optional: Suche in Empfänger, Notiz und Kategoriename, maximal 100 Zeichen |
 
 Ohne `from` und `to`: zwölf Monate einschließlich des aktuellen Monats. Werden Monatsgrenzen angegeben, sind **beide** erforderlich. Erlaubt sind 1 bis 36 Monate; rückwärts gerichtete und ungültige Bereiche werden zurückgewiesen. Alle Parameter werden validiert, die SQL-Abfragen parametrisiert.
 
@@ -85,3 +86,18 @@ Fehler erscheinen im JSON-Objekt `{"error":"..."}`. Alte Server ohne `monthly_re
 ## Unverändert
 
 Kein Schreibendpunkt; keine Änderung an SQLite-Schema, Kontoständen, Buchungen, wiederkehrenden Regeln, Importen oder Backupformaten. Finanzdaten werden nicht in öffentlichen Caches gespeichert. Die bisherige Einzelbuchungs-API bleibt paginiert.
+
+## Historische Spitzenbuchungen (Entwicklungsstand)
+
+Das zusätzliche optionale Objekt `highlights` enthält die höchste **einzelne** gebuchte Ausgabe und Einnahme im gewählten Zeitraum. Es nutzt dieselben serverseitigen Filter (`from`, `to`, `currency`, `account_id`, `category_id`, optional `q`) wie `months[]` und die Webansicht **Historische Auswertung**. Umbuchungen, durchlaufende Posten und Saldoabgleiche einschließlich Unterkategorien, Vorlagen und künftige Buchungen sind ausgeschlossen. Gibt es keinen Treffer, ist der jeweilige Wert `null`. Die Beträge sind positive Integer in kleinsten Währungseinheiten; enthalten sind Buchungsdatum, Empfänger und vollständiger Kategorienpfad. `months[]` und `complete: true` bleiben unverändert.
+
+Die Capabilities enthalten zusätzlich `features.history_highlights: true`, während `monthly_reports: true` erhalten bleibt. Ältere Clients dürfen das neue Feld ignorieren. Vorhandene Bearer-Read-Keys genügen; die API schreibt keine Daten. Der optionale Suchparameter `q` durchsucht Empfänger, Notiz und Kategoriebezeichnung (maximal 100 Zeichen; Steuerzeichen → HTTP 400). Der Suchtext wirkt gleichermaßen auf Monatswerte und Spitzenbuchungen.
+
+```json
+"highlights": {
+  "largest_expense": {"date":"2026-11-12","amount_minor":12500,"payee":"Beispiel","category":"Haushalt / Einkauf"},
+  "largest_income": null
+}
+```
+
+Die Beispielbeträge sind keine echten Buchungswerte. Bei Betragsgleichheit entscheidet die kleinste Buchungs-ID. Web-Historie und Mobile-API verwenden dieselbe Funktion `largest_bookings` für die Spitzenwerte.

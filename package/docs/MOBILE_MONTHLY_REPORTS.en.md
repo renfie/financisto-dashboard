@@ -1,12 +1,12 @@
 # Mobile API: complete monthly financial reports
 
-**Draft for `develop`, not yet published to GitHub.** 2026-11-26.
+**Development version `1.9.62-dev.3` on `develop`.** 2026-11-26.
 
 ## Endpoint, access and capability
 
 `GET /api/mobile/v1/reports/monthly` calculates all selected months from the **complete server-side transaction database**, independently of the paged bookings API. It is read-only and accepts the existing `Authorization: Bearer <API-Key>` credential, including read-only keys. Replies carry `Cache-Control: private, no-store`.
 
-Once reviewed, tested and approved, `/api/mobile/v1/capabilities` should advertise `features.monthly_reports: true`. The draft does **not** enable it until approval.
+`/api/mobile/v1/capabilities` already advertises `features.monthly_reports: true` in the baseline.
 
 Example: `/api/mobile/v1/reports/monthly?from=2025-12&to=2026-11&currency=EUR`.
 
@@ -16,6 +16,7 @@ Example: `/api/mobile/v1/reports/monthly?from=2025-12&to=2026-11&currency=EUR`.
 | `currency` | Uppercase three-letter ISO currency code; default is dashboard currency |
 | `account_id` | Optional existing account within selected currency |
 | `category_id` | Optional category ID including descendants according to nested set hierarchy |
+| `q` | Optional text search in payee, note and category title, max. 100 characters |
 
 With neither month set, the default is 12 months including the current one. Inclusive range limit is 1–36 months; invalid or reversed ranges, invalid filters and unknown arguments return 400.
 
@@ -47,3 +48,18 @@ The web dashboard month comparison, historical timeline and this API all use `su
 - `500`: SQL read error; internal diagnostics are not exposed.
 
 Error JSON is `{ "error": "..." }`. Older servers without `features.monthly_reports` and failed API requests must never cause Android to present a partially downloaded booking set as a complete report. No database mutations, ledger or balance writes, schema upgrades, changes to recurring rules, backup formats or existing paginated booking endpoints are introduced.
+
+## Historical highlights (development)
+
+The optional top-level `highlights` object returns the largest **individual** booked expense and income in the selected interval. It uses exactly the same server-side ledger filters (`from`, `to`, `currency`, `account_id`, `category_id`, optional `q`) as `months[]` and the web **Historical analysis**. Internal transfers, pass-through and balance-adjustment categories (including descendants), templates and future-dated entries are excluded. Both values are `null` when no qualifying entry exists. The amounts are positive integer minor units, with the original date and full category path. The rest of `months[]` and `complete: true` are unchanged.
+
+`GET /api/mobile/v1/capabilities` advertises `features.history_highlights: true` in addition to the unchanged `monthly_reports: true`. Older clients can safely ignore the extra object/flag. Existing Bearer read keys are sufficient; the endpoint performs no writes. `q` searches payee, note and category title; it is capped at 100 characters and rejects control characters (HTTP 400). The search is applied to both the monthly totals and highlights.
+
+```json
+"highlights": {
+  "largest_expense": {"date":"2026-11-12","amount_minor":12500,"payee":"Example","category":"Household / Shopping"},
+  "largest_income": null
+}
+```
+
+The sample amount is illustrative, not live financial data. In case of equal amounts the transaction with the lowest ID is used, ensuring deterministic results. The dashboard historical highlight panels and the mobile highlights now use the same `largest_bookings` query.
