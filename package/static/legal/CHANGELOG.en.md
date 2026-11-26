@@ -1,3 +1,12 @@
+## 1.9.62-dev.4 – Account reconciliation through the Mobile API (2026-11-26)
+
+- New `POST /api/mobile/v1/accounts/{account_id}/reconcile` accepts actual and previously displayed balances as signed integer minor units with an optional note.
+- Web form and Mobile API now reuse one transaction-safe helper for future-dated entries, existing correction categories, snapshot updates and final verification.
+- Detect stale balances under SQLite `BEGIN IMMEDIATE` (HTTP 409), persist UUID idempotency receipts atomically with corrections, and create no booking on zero difference.
+- Require an authenticated write key, admin/editor role and authoritative web finance mode; retain audit logging.
+- Advertise `account_reconciliation: true` without changing existing capabilities. Regression tests cover Web/Mobile parity, negative balances, currencies, future dates, replay and full rollback.
+- Bilingual API documentation and separate Android integration instructions. No schema, backup-format, Android or `main` changes.
+
 ## 1.9.62-dev.3 – Historical highlights in Mobile API (2026-11-26)
 
 - Add optional `highlights.largest_expense` / `highlights.largest_income` with date, absolute minor-unit amount, payee and full category path (`null` when absent).
