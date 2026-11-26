@@ -3620,7 +3620,8 @@ def mobile_api_capabilities():
        'status':'available','authentication':'api_key_bearer',
        'features':{'accounts':True,'categories':True,'payees':True,'bookings':True,
                    'create_booking':True,'update_booking':True,'delete_booking':True,
-                   'server_authoritative':True,'offline_conflict_merge':False},
+                   'server_authoritative':True,'offline_conflict_merge':False,
+                   'recurring_rules':True},
        'server_base_path':'/api/mobile/v1',
        'message':'Online-Servermodus verfügbar. Kein automatischer Import lokaler Android-Daten.'})
 
@@ -3917,6 +3918,9 @@ def _mobile_recurring_writer():
     if error:return None,error
     if user['access']!='write' or user['role'] not in ('admin','editor'):
         return None,_mobile_denied(403,'API-Schlüssel hat keine Schreibberechtigung.')
+    # Reuse the existing write authorization after the explicit 403 distinction.
+    user,error=_mobile_require(write=True)
+    if error:return None,error
     with get_db() as db:
         if finance_setting(db,'finance_mode','import')!='web':
             return None,_mobile_denied(409,'Web-Verwaltung ist nicht führend.')
