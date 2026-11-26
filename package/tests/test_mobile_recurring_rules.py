@@ -41,6 +41,7 @@ def stub_app():
                entry_payee=lambda db,title: get_payee(db,title),
                _MobileUUID=uuid.UUID,
                recurring_today=lambda:date(2026,11,26),date=date,
+               finance_setting=lambda db,key,default: (db.execute('SELECT value FROM meta WHERE key=?',(key,)).fetchone() or [default])[0],
                on_or_after=recurring.on_or_after,validate_rule=recurring.validate_rule,
                post_one=recurring.post_one,
                _mobile_json_response=lambda body,status=200:dict(body,status=status),
