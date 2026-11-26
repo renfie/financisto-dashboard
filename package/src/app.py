@@ -1544,10 +1544,10 @@ def finance_editor_required(f):
     return wrapped
 
 
-def mark_finance_edit(db, event, detail=''):
+def mark_finance_edit(db, event, detail='', actor_id=None):
     db.execute('''UPDATE meta SET value=CAST(value AS INTEGER)+1
                   WHERE key='ledger_web_writes' ''')
-    audit(db, event, detail)
+    audit(db, event, detail, actor_id=actor_id)
 
 
 def minor_amount(text, decimals=2):
@@ -2054,11 +2054,59 @@ def settings_default_currency():
     return redirect(url_for('settings')+'#stammdaten')
 
 
+class ReconciliationConflict(ValueError):
+    """The account's effective balance changed since the mobile preview."""
+
+
+def reconcile_account_balance(db, account_id, actual_balance_minor, note='', *,
+                              expected_balance_minor=None, actor_id=None):
+    """Shared Web/Mobile reconciliation. Caller MUST hold BEGIN IMMEDIATE.
+
+    SQLite snapshots include future-dated transactions; a bank statement does not.
+    Only the effective balance as of today is compared or corrected. The projected
+    snapshot stays projected by the existing future delta.
+    """
+    account = existing_account(db, account_id)
+    ahead = future_account_deltas(db, datetime.now(MONTH_TZ).date().isoformat()).get(account_id, 0)
+    effective = int(account['balance_minor']) - ahead
+    if expected_balance_minor is not None and effective != expected_balance_minor:
+        raise ReconciliationConflict(
+            'Der Kontostand hat sich inzwischen verändert. Bitte aktualisiere die Daten und prüfe den Abgleich erneut.')
+    change = actual_balance_minor - effective
+    booking_id = None
+    if change:
+        # Exactly the same special categories as the original Web form.
+        action = 'income' if change > 0 else 'expense'
+        title, kind = ADJUSTMENT_CATEGORIES[('reconciliation', action)]
+        found = db.execute('SELECT id FROM categories WHERE title=? COLLATE NOCASE AND kind=?',
+                           (title, kind)).fetchone()
+        category_id = int(found['id']) if found else insert_category(db, title, kind)
+        row = dict(day=datetime.now(MONTH_TZ).date().isoformat(), account_id=account_id,
+                   to_account_id=0, category_id=category_id, payee_id=0,
+                   amount=change, note=note.strip() or 'Kontostand abgeglichen', is_template=0)
+        cur = db.execute("""INSERT INTO transactions
+                    (day,account_id,to_account_id,category_id,payee_id,amount,note,is_template,origin)
+                    VALUES (:day,:account_id,:to_account_id,:category_id,:payee_id,:amount,:note,:is_template,'web')""", row)
+        booking_id = cur.lastrowid
+        apply_balance_delta(db, row, +1)
+    final = db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=?',
+                       (account_id,)).fetchone()[0]
+    if final != actual_balance_minor + ahead:
+        raise ValueError('Saldoabgleich konnte nicht verifiziert werden.')
+    if change:
+        mark_finance_edit(db, 'account_reconciled', f'{account_id}: {change:+d} {account["code"]}',
+                          actor_id=actor_id)
+    return {'success': True, 'account_id': account_id, 'currency': account['code'],
+            'decimals': int(account['decimals']), 'previous_balance_minor': effective,
+            'actual_balance_minor': actual_balance_minor, 'change_minor': change,
+            'booking_id': booking_id, 'unchanged': not bool(change),
+            'balance_minor': final - ahead, 'projected_balance_minor': final}
+
+
 @app.post('/settings/accounts/reconcile')
 @finance_editor_required
 def settings_reconcile_account():
     if not csrf_ok(): abort(400)
-    # A fixed destination prevents open redirects from form fields.
     source = request.form.get('return_to', 'settings')
     if source not in ('settings', 'dashboard'): abort(400)
     destination = (url_for('dashboard') + '#kontostaende' if source == 'dashboard'
@@ -2073,34 +2121,12 @@ def settings_reconcile_account():
             if not request.form.get('actual_balance', '').strip():
                 raise ValueError('Bitte den tatsächlichen Kontostand eingeben.')
             actual = opening_amount(request.form.get('actual_balance', ''), int(account['decimals']))
-            # A current bank statement excludes future-dated ledger entries;
-            # compensate the projected SQLite snapshot when reconciling today.
-            ahead = future_account_deltas(db, datetime.now(MONTH_TZ).date().isoformat()).get(int(account_id), 0)
-            effective = int(account['balance_minor']) - ahead
-            change = actual - effective
-            if not change:
-                flash('Kontostand bereits korrekt – keine Buchung angelegt.', 'success')
-                return redirect(destination)
-            # Single correction type for every account, including cash and depots.
-            # Existing historical depot categories remain recognized as adjustments.
-            action = 'income' if change > 0 else 'expense'
-            title, kind = ADJUSTMENT_CATEGORIES[('reconciliation', action)]
-            found = db.execute('SELECT id FROM categories WHERE title=? COLLATE NOCASE AND kind=?',
-                               (title, kind)).fetchone()
-            category_id = int(found['id']) if found else insert_category(db, title, kind)
-            note = request.form.get('note', '').strip()[:500] or 'Kontostand abgeglichen'
-            today = datetime.now(MONTH_TZ).date().isoformat()
-            row = dict(day=today, account_id=int(account_id), to_account_id=0, category_id=category_id,
-                       payee_id=0, amount=change, note=note, is_template=0)
-            db.execute("""INSERT INTO transactions
-                      (day,account_id,to_account_id,category_id,payee_id,amount,note,is_template,origin)
-                      VALUES (:day,:account_id,:to_account_id,:category_id,:payee_id,:amount,:note,:is_template,'web')""", row)
-            apply_balance_delta(db, row, +1)
-            final = db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=?',
-                               (int(account_id),)).fetchone()[0]
-            if final != actual + ahead: raise ValueError('Saldoabgleich konnte nicht verifiziert werden.')
-            mark_finance_edit(db, 'account_reconciled', f'{account_id}: {change:+d} {account["code"]}')
-        flash('Saldoabgleich als eigene Buchung erfasst. Der Kontostand wurde auf den eingegebenen Wert gesetzt.', 'success')
+            note = request.form.get('note', '').strip()[:500]
+            result = reconcile_account_balance(db, int(account_id), actual, note)
+        if result['unchanged']:
+            flash('Kontostand bereits korrekt – keine Buchung angelegt.', 'success')
+        else:
+            flash('Saldoabgleich als eigene Buchung erfasst. Der Kontostand wurde auf den eingegebenen Wert gesetzt.', 'success')
     except (ValueError, sqlite3.Error) as exc:
         flash('Kontostand nicht geändert: ' + str(exc), 'error')
     return redirect(destination)
@@ -3621,7 +3647,8 @@ def mobile_api_capabilities():
        'features':{'accounts':True,'categories':True,'payees':True,'bookings':True,
                    'create_booking':True,'update_booking':True,'delete_booking':True,
                    'server_authoritative':True,'offline_conflict_merge':False,
-                   'recurring_rules':True,'monthly_reports':True,'history_highlights':True},
+                   'recurring_rules':True,'monthly_reports':True,'history_highlights':True,
+                   'account_reconciliation':True},
        'server_base_path':'/api/mobile/v1',
        'message':'Online-Servermodus verfügbar. Kein automatischer Import lokaler Android-Daten.'})
 
@@ -3711,6 +3738,52 @@ def mobile_api_accounts():
          'balance_minor':r['balance_minor']-future.get(r['id'],0) if r['balance_minor'] is not None else None,
          'projected_balance_minor':r['balance_minor'],'active':bool(r['is_active']),
          'included_in_total':bool(r['include_in_totals'])} for r in rows]})
+
+
+@app.post('/api/mobile/v1/accounts/<int:account_id>/reconcile')
+def mobile_api_reconcile_account(account_id):
+    user,error=_mobile_require(write=True)
+    if error:return error
+    try:
+        data,rid=_mobile_body_and_request_id()
+        if set(data) != {'actual_balance_minor','expected_balance_minor','note'}:
+            raise ValueError('actual_balance_minor, expected_balance_minor und note erforderlich.')
+        actual=data['actual_balance_minor']
+        expected=data['expected_balance_minor']
+        if (type(actual) is not int or type(expected) is not int or
+                abs(actual)>10**15 or abs(expected)>10**15):
+            raise ValueError('Kontostände müssen gültige ganzzahlige Minor Units sein.')
+        note=data['note']
+        if not isinstance(note,str) or len(note)>500 or any(ord(ch)<32 and ch not in '\\t\\n' for ch in note):
+            raise ValueError('Ungültige Notiz (maximal 500 Zeichen).')
+    except ValueError as exc:
+        return _mobile_denied(400,str(exc))
+    try:
+        with get_db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            # Recheck authoritative mode under the same lock as the ledger write.
+            if finance_setting(db,'finance_mode','import')!='web':
+                raise ReconciliationConflict('Web-Verwaltung ist nicht führend. Kein Schreibzugriff.')
+            payload={'account_id':account_id,'data':data}
+            previous,fingerprint=_mobile_receipt(db,user,rid,'account_reconcile',payload)
+            if previous is not None:
+                return _mobile_json_response(previous)
+            if not db.execute('SELECT 1 FROM accounts WHERE id=?',(account_id,)).fetchone():
+                raise LookupError('Konto nicht gefunden.')
+            result=reconcile_account_balance(db,account_id,actual,note,
+                    expected_balance_minor=expected,actor_id=user['user_id'])
+            # Same transaction: transaction, snapshot, audit, and replay receipt.
+            _mobile_save_receipt(db,user,rid,'account_reconcile',fingerprint,result)
+        return _mobile_json_response(result)
+    except LookupError as exc:
+        return _mobile_denied(404,str(exc))
+    except ReconciliationConflict as exc:
+        return _mobile_denied(409,str(exc))
+    except ValueError as exc:
+        # A conflicting Idempotency-Key must never trigger any additional write.
+        return _mobile_denied(409,str(exc))
+    except sqlite3.Error:
+        return _mobile_denied(500,'Kontostandsabgleich konnte nicht abgeschlossen werden.')
 
 
 @app.get('/api/mobile/v1/categories')
