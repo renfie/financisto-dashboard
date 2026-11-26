@@ -37,6 +37,7 @@ from backup_manager import (create_backup as create_verified_backup, status as s
                             current_financisto_backups, financisto_status, export_dir as financisto_export_dir,
                             export_current_financisto)
 from job_monitor import ensure_schema as ensure_monitor_schema, dashboard_status
+from monthly_reports import summarize_months, attach_categories, months_between, largest_bookings, serialize_highlights
 from recurring import (ensure_schema as ensure_recurring_schema, preview_from_backup,
                        save_import_preview, confirm_import, validate_rule,
                        on_or_after, post_one, today as recurring_today)
@@ -1543,10 +1544,10 @@ def finance_editor_required(f):
     return wrapped
 
 
-def mark_finance_edit(db, event, detail=''):
+def mark_finance_edit(db, event, detail='', actor_id=None):
     db.execute('''UPDATE meta SET value=CAST(value AS INTEGER)+1
                   WHERE key='ledger_web_writes' ''')
-    audit(db, event, detail)
+    audit(db, event, detail, actor_id=actor_id)
 
 
 def minor_amount(text, decimals=2):
@@ -2053,11 +2054,59 @@ def settings_default_currency():
     return redirect(url_for('settings')+'#stammdaten')
 
 
+class ReconciliationConflict(ValueError):
+    """The account's effective balance changed since the mobile preview."""
+
+
+def reconcile_account_balance(db, account_id, actual_balance_minor, note='', *,
+                              expected_balance_minor=None, actor_id=None):
+    """Shared Web/Mobile reconciliation. Caller MUST hold BEGIN IMMEDIATE.
+
+    SQLite snapshots include future-dated transactions; a bank statement does not.
+    Only the effective balance as of today is compared or corrected. The projected
+    snapshot stays projected by the existing future delta.
+    """
+    account = existing_account(db, account_id)
+    ahead = future_account_deltas(db, datetime.now(MONTH_TZ).date().isoformat()).get(account_id, 0)
+    effective = int(account['balance_minor']) - ahead
+    if expected_balance_minor is not None and effective != expected_balance_minor:
+        raise ReconciliationConflict(
+            'Der Kontostand hat sich inzwischen verändert. Bitte aktualisiere die Daten und prüfe den Abgleich erneut.')
+    change = actual_balance_minor - effective
+    booking_id = None
+    if change:
+        # Exactly the same special categories as the original Web form.
+        action = 'income' if change > 0 else 'expense'
+        title, kind = ADJUSTMENT_CATEGORIES[('reconciliation', action)]
+        found = db.execute('SELECT id FROM categories WHERE title=? COLLATE NOCASE AND kind=?',
+                           (title, kind)).fetchone()
+        category_id = int(found['id']) if found else insert_category(db, title, kind)
+        row = dict(day=datetime.now(MONTH_TZ).date().isoformat(), account_id=account_id,
+                   to_account_id=0, category_id=category_id, payee_id=0,
+                   amount=change, note=note.strip() or 'Kontostand abgeglichen', is_template=0)
+        cur = db.execute("""INSERT INTO transactions
+                    (day,account_id,to_account_id,category_id,payee_id,amount,note,is_template,origin)
+                    VALUES (:day,:account_id,:to_account_id,:category_id,:payee_id,:amount,:note,:is_template,'web')""", row)
+        booking_id = cur.lastrowid
+        apply_balance_delta(db, row, +1)
+    final = db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=?',
+                       (account_id,)).fetchone()[0]
+    if final != actual_balance_minor + ahead:
+        raise ValueError('Saldoabgleich konnte nicht verifiziert werden.')
+    if change:
+        mark_finance_edit(db, 'account_reconciled', f'{account_id}: {change:+d} {account["code"]}',
+                          actor_id=actor_id)
+    return {'success': True, 'account_id': account_id, 'currency': account['code'],
+            'decimals': int(account['decimals']), 'previous_balance_minor': effective,
+            'actual_balance_minor': actual_balance_minor, 'change_minor': change,
+            'booking_id': booking_id, 'unchanged': not bool(change),
+            'balance_minor': final - ahead, 'projected_balance_minor': final}
+
+
 @app.post('/settings/accounts/reconcile')
 @finance_editor_required
 def settings_reconcile_account():
     if not csrf_ok(): abort(400)
-    # A fixed destination prevents open redirects from form fields.
     source = request.form.get('return_to', 'settings')
     if source not in ('settings', 'dashboard'): abort(400)
     destination = (url_for('dashboard') + '#kontostaende' if source == 'dashboard'
@@ -2072,34 +2121,12 @@ def settings_reconcile_account():
             if not request.form.get('actual_balance', '').strip():
                 raise ValueError('Bitte den tatsächlichen Kontostand eingeben.')
             actual = opening_amount(request.form.get('actual_balance', ''), int(account['decimals']))
-            # A current bank statement excludes future-dated ledger entries;
-            # compensate the projected SQLite snapshot when reconciling today.
-            ahead = future_account_deltas(db, datetime.now(MONTH_TZ).date().isoformat()).get(int(account_id), 0)
-            effective = int(account['balance_minor']) - ahead
-            change = actual - effective
-            if not change:
-                flash('Kontostand bereits korrekt – keine Buchung angelegt.', 'success')
-                return redirect(destination)
-            # Single correction type for every account, including cash and depots.
-            # Existing historical depot categories remain recognized as adjustments.
-            action = 'income' if change > 0 else 'expense'
-            title, kind = ADJUSTMENT_CATEGORIES[('reconciliation', action)]
-            found = db.execute('SELECT id FROM categories WHERE title=? COLLATE NOCASE AND kind=?',
-                               (title, kind)).fetchone()
-            category_id = int(found['id']) if found else insert_category(db, title, kind)
-            note = request.form.get('note', '').strip()[:500] or 'Kontostand abgeglichen'
-            today = datetime.now(MONTH_TZ).date().isoformat()
-            row = dict(day=today, account_id=int(account_id), to_account_id=0, category_id=category_id,
-                       payee_id=0, amount=change, note=note, is_template=0)
-            db.execute("""INSERT INTO transactions
-                      (day,account_id,to_account_id,category_id,payee_id,amount,note,is_template,origin)
-                      VALUES (:day,:account_id,:to_account_id,:category_id,:payee_id,:amount,:note,:is_template,'web')""", row)
-            apply_balance_delta(db, row, +1)
-            final = db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=?',
-                               (int(account_id),)).fetchone()[0]
-            if final != actual + ahead: raise ValueError('Saldoabgleich konnte nicht verifiziert werden.')
-            mark_finance_edit(db, 'account_reconciled', f'{account_id}: {change:+d} {account["code"]}')
-        flash('Saldoabgleich als eigene Buchung erfasst. Der Kontostand wurde auf den eingegebenen Wert gesetzt.', 'success')
+            note = request.form.get('note', '').strip()[:500]
+            result = reconcile_account_balance(db, int(account_id), actual, note)
+        if result['unchanged']:
+            flash('Kontostand bereits korrekt – keine Buchung angelegt.', 'success')
+        else:
+            flash('Saldoabgleich als eigene Buchung erfasst. Der Kontostand wurde auf den eingegebenen Wert gesetzt.', 'success')
     except (ValueError, sqlite3.Error) as exc:
         flash('Kontostand nicht geändert: ' + str(exc), 'error')
     return redirect(destination)
@@ -2306,16 +2333,17 @@ def booking_list():
                                   WHERE ev.event IN ('recurring_posted_auto','recurring_posted_manual')
                                     AND ev.detail = CAST(rr.rule_id AS TEXT) || ':' || rr.due_on || ':' || CAST(rr.booking_id AS TEXT)
                               )) AS is_rule_matched,
-                          c.symbol,c.decimals,p.title payee_title
+                          c.symbol,c.decimals,p.title payee_title,target.title target_account_title
                           FROM transactions t JOIN accounts a ON a.id=t.account_id
                           JOIN currencies c ON c.id=a.currency_id
                           LEFT JOIN payees p ON p.id=t.payee_id
+                          LEFT JOIN accounts target ON target.id=t.to_account_id
                           WHERE t.origin IN ('web','financisto_edited') ORDER BY t.day DESC,t.id DESC LIMIT 100''').fetchall()
         # Always select the last 100 web transactions first; column sorting
         # affects this fixed set rather than silently changing which rows exist.
         sort_key = request.args.get('sort', 'date')
         sort_direction = request.args.get('dir', 'desc')
-        if sort_key not in ('date', 'type', 'account', 'payee', 'note', 'amount'):
+        if sort_key not in ('date', 'type', 'account', 'category', 'payee', 'note', 'amount'):
             sort_key = 'date'
         if sort_direction not in ('asc', 'desc'):
             sort_direction = 'desc'
@@ -2332,6 +2360,8 @@ def booking_list():
                         'Einnahme' if row['amount'] > 0 else 'Ohne Betrag').casefold()
             if sort_key == 'account':
                 return (row['account_title'] or '').casefold()
+            if sort_key == 'category':
+                return (category_names.get(row['category_id'], '') or '').casefold()
             if sort_key == 'payee':
                 return (row['payee_title'] or '').casefold()
             if sort_key == 'note':
@@ -2976,52 +3006,27 @@ def dashboard():
         category=filters.get('category','')
         if category not in {str(c['id']) for c in categories}: category=''
         search=filters.get('q','').strip()[:100]
-        where=['substr(t.day,1,7) BETWEEN ? AND ?','a.currency_id=?','t.is_template=0','t.to_account_id=0']
-        params=[range_start,range_end,currency]
-        if account:
-            where.append('t.account_id=?');params.append(account)
+        # The dashboard and Mobile API share one SQL aggregation (actual vs.
+        # separately projected). Account/category/search selection is identical.
+        descendants=[]
         if category:
             selected=next(c for c in categories if str(c['id'])==category)
             descendants=[c['id'] for c in categories if c['lft']>=selected['lft'] and c['rgt']<=selected['rgt']]
-            where.append('t.category_id IN ('+','.join('?' for _ in descendants)+')')
-            params.extend(descendants)
-        if search:
-            match=like_match(search)
-            where.append("(p.title LIKE ? ESCAPE '\\' OR t.note LIKE ? ESCAPE '\\' OR c.title LIKE ? ESCAPE '\\')")
-            params.extend([match,match,match])
-        sql='''SELECT t.id,t.day,t.origin,t.category_id,t.amount,t.note,a.title account_title,
-                         c.title category_title,p.title payee_title
-                 FROM transactions t JOIN accounts a ON a.id=t.account_id
-                 LEFT JOIN categories c ON c.id=t.category_id
-                 LEFT JOIN payees p ON p.id=t.payee_id
-                 WHERE '''+' AND '.join(where)
-        transactions=[dict(r)|{'source':'Financisto','group_key':r['category_id'],
-                               'pass_through': r['category_id'] in neutral_ids,
-                               'adjustment': r['category_id'] in adjustment_ids}
-                      for r in db.execute(sql,params)]
+        match=like_match(search) if search else ''
+        month_data,projection,category_groups=summarize_months(
+            db,first=range_start,last=range_end,currency_id=int(currency),
+            today=today_period.isoformat(),neutral_ids=neutral_ids,categories=categories,
+            account_id=int(account) if account else None,
+            category_id=int(category) if category else None,search=search or None)
         months={month_a,month_b}
-        totals={m:{'expenses':0,'income':0,'balance':0} for m in months}
-        projected_totals={m:{'expenses':0,'income':0,'balance':0} for m in months}
+        totals={m:dict(income=month_data[m]['income_minor'],
+                       expenses=month_data[m]['expense_minor'],
+                       balance=month_data[m]['balance_minor']) for m in months}
+        projected_totals={m:projection[m] for m in months}
         grouped=defaultdict(lambda:{m:0 for m in months})
-        for t in transactions:
-            month=t['day'][:7]
-            if t['category_id'] in neutral_ids or month not in totals:
-                continue  # Transfers/pass-through excluded in both calculations.
-            forecast = projected_totals[month]
-            actual = totals[month] if t['day'] <= today_period.isoformat() else None
-            if t['amount'] < 0:
-                amount = -t['amount']
-                forecast['expenses'] += amount
-                if actual is not None:
-                    actual['expenses'] += amount
-                    grouped[t['group_key']][month] += amount
-            else:
-                forecast['income'] += t['amount']
-                if actual is not None:
-                    actual['income'] += t['amount']
-        for m in months:
-            totals[m]['balance'] = totals[m]['income'] - totals[m]['expenses']
-            projected_totals[m]['balance'] = (projected_totals[m]['income'] - projected_totals[m]['expenses'])
+        for (m,kind,cat),(amount,count) in category_groups.items():
+            if m in months and kind=='expense':
+                grouped[cat][m]+=amount
         rows=[]
         for key,values in grouped.items():
             name=cat_names.get(key,'Ohne Kategorie')
@@ -3287,14 +3292,12 @@ def historical_analysis():
         income_groups = defaultdict(int)
         expense_counts = defaultdict(int)
         income_counts = defaultdict(int)
-        biggest_expense = None
-        biggest_income = None
         expense_count = income_count = total_expenses = total_income = 0
         for t in tx:
             m=t['day'][:7]
             month_row=monthly[m]
-            if t['category_id'] in neutral_ids:
-                continue  # Exclude third-party funds from averages and diagrams.
+            if t['category_id'] in neutral_ids or t['day']>datetime.now(MONTH_TZ).date().isoformat():
+                continue  # Only realized, non-neutral data in historical statistics.
             month_row['count']+=1
             category_title=names.get(t['category_id'],'Ohne Kategorie')
             if t['amount'] < 0:
@@ -3304,8 +3307,6 @@ def historical_analysis():
                 expense_counts[category_title] += 1
                 total_expenses += amt
                 expense_count += 1
-                if biggest_expense is None or amt > -biggest_expense['amount']:
-                    biggest_expense = dict(t)
             elif t['amount'] > 0:
                 amt = t['amount']
                 month_row['income'] += amt
@@ -3313,8 +3314,27 @@ def historical_analysis():
                 income_counts[category_title] += 1
                 total_income += amt
                 income_count += 1
-                if biggest_income is None or amt > biggest_income['amount']:
-                    biggest_income = dict(t)
+        # Web highlights and Mobile API now share the same top-entry query.
+        history_highlights=largest_bookings(db,first=start,last=end,currency_id=int(currency),
+            today=datetime.now(MONTH_TZ).date().isoformat(),neutral_ids=neutral_ids,
+            categories=categories,account_id=int(account) if account else None,
+            category_id=int(category) if category else None,search=search or None)
+        biggest_expense=history_highlights['largest_expense']
+        biggest_income=history_highlights['largest_income']
+        # Full history timeline uses the same booked-only aggregate as the
+        # dashboard comparison and the Mobile API, not a paged transaction set.
+        month_data,_,_=summarize_months(
+            db,first=start,last=end,currency_id=int(currency),
+            today=datetime.now(MONTH_TZ).date().isoformat(),
+            neutral_ids=neutral_ids,categories=categories,
+            account_id=int(account) if account else None,
+            category_id=int(category) if category else None,search=search or None)
+        for m,row in monthly.items():
+            row['income']=month_data[m]['income_minor']
+            row['expenses']=month_data[m]['expense_minor']
+            row['count']=month_data[m]['booking_count']
+        total_income=sum(row['income_minor'] for row in month_data.values())
+        total_expenses=sum(row['expense_minor'] for row in month_data.values())
         timeline = list(monthly.values())
         for month_row in timeline:
             month_row['balance'] = month_row['income'] - month_row['expenses']
@@ -3404,8 +3424,8 @@ def monthly_report_context():
         if group_by not in ('category', 'payee'):
             group_by = 'category'
 
-        where = ['substr(t.day,1,7)=?', 'a.currency_id=?', 't.is_template=0', 't.to_account_id=0']
-        args = [month, currency]
+        where = ['substr(t.day,1,7)=?', 'a.currency_id=?', 't.is_template=0', 't.to_account_id=0', 't.day<=?']
+        args = [month, currency, datetime.now(MONTH_TZ).date().isoformat()]
         if account:
             where.append('t.account_id=?')
             args.append(account)
@@ -3472,6 +3492,15 @@ def monthly_report_context():
                 income_total += minor_abs
                 incomes.append(item)
 
+        common,_,_=summarize_months(db,first=month,last=month,
+            currency_id=int(currency),today=datetime.now(MONTH_TZ).date().isoformat(),
+            neutral_ids=neutral_ids,categories=db.execute('SELECT * FROM categories ORDER BY lft').fetchall(),
+            account_id=int(account) if account else None)
+        expense_total_all=common[month]['expense_minor']
+        income_total_all=common[month]['income_minor']
+        if not hidden:
+            expense_total=expense_total_all
+            income_total=income_total_all
         ordered_groups = sorted(groups.values(), key=lambda x: (x['name'].casefold()))
         for group in ordered_groups:
             group['amount'] = group['amount_minor']/divisor
@@ -3617,7 +3646,9 @@ def mobile_api_capabilities():
        'status':'available','authentication':'api_key_bearer',
        'features':{'accounts':True,'categories':True,'payees':True,'bookings':True,
                    'create_booking':True,'update_booking':True,'delete_booking':True,
-                   'server_authoritative':True,'offline_conflict_merge':False},
+                   'server_authoritative':True,'offline_conflict_merge':False,
+                   'recurring_rules':True,'monthly_reports':True,'history_highlights':True,
+                   'account_reconciliation':True},
        'server_base_path':'/api/mobile/v1',
        'message':'Online-Servermodus verfügbar. Kein automatischer Import lokaler Android-Daten.'})
 
@@ -3707,6 +3738,52 @@ def mobile_api_accounts():
          'balance_minor':r['balance_minor']-future.get(r['id'],0) if r['balance_minor'] is not None else None,
          'projected_balance_minor':r['balance_minor'],'active':bool(r['is_active']),
          'included_in_total':bool(r['include_in_totals'])} for r in rows]})
+
+
+@app.post('/api/mobile/v1/accounts/<int:account_id>/reconcile')
+def mobile_api_reconcile_account(account_id):
+    user,error=_mobile_require(write=True)
+    if error:return error
+    try:
+        data,rid=_mobile_body_and_request_id()
+        if set(data) != {'actual_balance_minor','expected_balance_minor','note'}:
+            raise ValueError('actual_balance_minor, expected_balance_minor und note erforderlich.')
+        actual=data['actual_balance_minor']
+        expected=data['expected_balance_minor']
+        if (type(actual) is not int or type(expected) is not int or
+                abs(actual)>10**15 or abs(expected)>10**15):
+            raise ValueError('Kontostände müssen gültige ganzzahlige Minor Units sein.')
+        note=data['note']
+        if not isinstance(note,str) or len(note)>500 or any(ord(ch)<32 and ch not in '\\t\\n' for ch in note):
+            raise ValueError('Ungültige Notiz (maximal 500 Zeichen).')
+    except ValueError as exc:
+        return _mobile_denied(400,str(exc))
+    try:
+        with get_db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            # Recheck authoritative mode under the same lock as the ledger write.
+            if finance_setting(db,'finance_mode','import')!='web':
+                raise ReconciliationConflict('Web-Verwaltung ist nicht führend. Kein Schreibzugriff.')
+            payload={'account_id':account_id,'data':data}
+            previous,fingerprint=_mobile_receipt(db,user,rid,'account_reconcile',payload)
+            if previous is not None:
+                return _mobile_json_response(previous)
+            if not db.execute('SELECT 1 FROM accounts WHERE id=?',(account_id,)).fetchone():
+                raise LookupError('Konto nicht gefunden.')
+            result=reconcile_account_balance(db,account_id,actual,note,
+                    expected_balance_minor=expected,actor_id=user['user_id'])
+            # Same transaction: transaction, snapshot, audit, and replay receipt.
+            _mobile_save_receipt(db,user,rid,'account_reconcile',fingerprint,result)
+        return _mobile_json_response(result)
+    except LookupError as exc:
+        return _mobile_denied(404,str(exc))
+    except ReconciliationConflict as exc:
+        return _mobile_denied(409,str(exc))
+    except ValueError as exc:
+        # A conflicting Idempotency-Key must never trigger any additional write.
+        return _mobile_denied(409,str(exc))
+    except sqlite3.Error:
+        return _mobile_denied(500,'Kontostandsabgleich konnte nicht abgeschlossen werden.')
 
 
 @app.get('/api/mobile/v1/categories')
@@ -3899,3 +3976,246 @@ def mobile_api_update_booking(booking_id):
 @app.delete('/api/mobile/v1/bookings/<int:booking_id>')
 def mobile_api_delete_booking(booking_id):
     return _mobile_edit_booking(booking_id,delete=True)
+
+# Mobile API for recurring server rules. No Android-local state is read or written.
+from mobile_recurring_api import (
+    read_rule as _mobile_rule_read,
+    serialize as _mobile_rule_json,
+    revision as _mobile_rule_revision,
+    parse_payload as _mobile_rule_payload,
+)
+
+
+def _mobile_recurring_writer():
+    user,error=_mobile_require()
+    if error:return None,error
+    if user['access']!='write' or user['role'] not in ('admin','editor'):
+        return None,_mobile_denied(403,'API-Schlüssel hat keine Schreibberechtigung.')
+    # Reuse the existing write authorization after the explicit 403 distinction.
+    user,error=_mobile_require(write=True)
+    if error:return None,error
+    with get_db() as db:
+        if finance_setting(db,'finance_mode','import')!='web':
+            return None,_mobile_denied(409,'Web-Verwaltung ist nicht führend.')
+    return user,None
+
+
+@app.get('/api/mobile/v1/recurring')
+def mobile_api_recurring_list():
+    user,error=_mobile_require()
+    if error:return error
+    with get_db() as db:
+        rows=db.execute("""SELECT r.*,p.title payee_title,
+            (SELECT COUNT(*) FROM recurring_runs x WHERE x.rule_id=r.id) completed_count
+            FROM recurring_rules r LEFT JOIN payees p ON p.id=r.payee_id
+            WHERE r.deleted_on IS NULL ORDER BY r.id""").fetchall()
+    return _mobile_json_response({'items':[_mobile_rule_json(row) for row in rows]})
+
+
+def _mobile_recurring_mutate(operation, rule_id=None):
+    user,error=_mobile_recurring_writer()
+    if error:return error
+    try:
+        data,rid=_mobile_body_and_request_id()
+    except ValueError as exc:
+        return _mobile_denied(400,str(exc))
+    expected=None
+    if rule_id is not None:
+        expected=request.headers.get('If-Match','')
+        if not re.fullmatch(r'[0-9a-f]{32}',expected):
+            return _mobile_denied(428,'If-Match mit 32-stelliger Regelrevision erforderlich.')
+    payload={'rule_id':rule_id,'revision':expected,'data':data}
+    try:
+        with get_db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            # Recheck server ownership while holding the write lock.
+            if finance_setting(db,'finance_mode','import')!='web':
+                return _mobile_denied(409,'Web-Verwaltung ist nicht führend.')
+            cached,fingerprint=_mobile_receipt(db,user,rid,'recurring:'+operation,payload)
+            if cached is not None:
+                return _mobile_json_response(cached,201 if operation=='create' else 200)
+            old=_mobile_rule_read(db,rule_id) if rule_id is not None else None
+            if rule_id is not None:
+                if old is None:
+                    return _mobile_denied(404,'Wiederholungsregel nicht vorhanden.')
+                if _mobile_rule_revision(old,int(old['completed_count']))!=expected:
+                    return _mobile_denied(409,'Regel wurde inzwischen geändert. Bitte neu laden.')
+
+            if operation in ('create','update'):
+                values=_mobile_rule_payload(db,data,entry_payee)
+                if operation=='create':
+                    cur=db.execute("""INSERT INTO recurring_rules
+                      (title,kind,account_id,to_account_id,category_id,payee_id,
+                       amount_minor,note,frequency,interval_count,day_of_month,
+                       start_on,run_at,end_on,max_occurrences,active,auto_post)
+                      VALUES(:title,:kind,:account_id,:to_account_id,:category_id,:payee_id,
+                       :amount_minor,:note,:frequency,:interval_count,:day_of_month,
+                       :start_on,:run_at,:end_on,:max_occurrences,0,0)""",values)
+                    rule_id=cur.lastrowid
+                else:
+                    db.execute("""UPDATE recurring_rules SET title=:title,kind=:kind,
+                      account_id=:account_id,to_account_id=:to_account_id,
+                      category_id=:category_id,payee_id=:payee_id,amount_minor=:amount_minor,
+                      note=:note,frequency=:frequency,interval_count=:interval_count,
+                      day_of_month=:day_of_month,start_on=:start_on,run_at=:run_at,
+                      end_on=:end_on,max_occurrences=:max_occurrences,
+                      active=0,auto_post=0,next_on=NULL,completed_on=NULL,
+                      needs_review='',updated_on=CURRENT_TIMESTAMP WHERE id=:id""",
+                      {**values,'id':rule_id})
+                audit(db,'mobile_recurring_saved',str(rule_id),actor_id=user['user_id'])
+
+            elif operation=='mode':
+                if set(data)!={'mode'} or data['mode'] not in ('paused','manual','auto'):
+                    return _mobile_denied(400,'Modus muss paused, manual oder auto sein.')
+                mode=data['mode']
+                if mode=='auto' and user['role']!='admin':
+                    return _mobile_denied(403,'Automatische Ausführung nur für Administratoren.')
+                if mode=='paused':
+                    db.execute("""UPDATE recurring_rules SET active=0,auto_post=0,
+                       updated_on=CURRENT_TIMESTAMP WHERE id=?""",(rule_id,))
+                else:
+                    from recurring import is_finished, completed_runs
+                    validate_rule(db,old)
+                    next_on=on_or_after(date.fromisoformat(old['start_on']),
+                        old['frequency'],int(old['interval_count']),
+                        int(old['day_of_month']),recurring_today()).isoformat()
+                    if is_finished(old,next_on,completed_runs(db,rule_id)):
+                        return _mobile_denied(409,'Enddatum oder maximale Ausführungszahl erreicht.')
+                    db.execute("""UPDATE recurring_rules SET active=1,auto_post=?,next_on=?,
+                        needs_review='',completed_on=NULL,updated_on=CURRENT_TIMESTAMP
+                        WHERE id=?""",(int(mode=='auto'),next_on,rule_id))
+                audit(db,'mobile_recurring_mode',f'{rule_id}:{mode}',actor_id=user['user_id'])
+
+            elif operation=='post':
+                if set(data)!={'confirm'} or data['confirm']!='BUCHEN':
+                    return _mobile_denied(400,'Zur Bestätigung BUCHEN erforderlich.')
+                if not old['active'] or old['auto_post']:
+                    return _mobile_denied(409,'Nur aktive manuelle Regeln können gebucht werden.')
+                if not old['next_on'] or old['next_on']>recurring_today().isoformat():
+                    return _mobile_denied(409,'Regel ist nicht fällig.')
+                # Never let a fresh idempotency key post multiple backlog dates
+                # for the same rule on the same calendar day after an uncertain reply.
+                recent=db.execute("""SELECT created_on FROM recurring_runs
+                                   WHERE rule_id=? ORDER BY id DESC LIMIT 1""",
+                                  (rule_id,)).fetchone()
+                if recent:
+                    from datetime import datetime as _RecDateTime, timezone as _RecTimezone
+                    from zoneinfo import ZoneInfo as _RecZoneInfo
+                    stamp=_RecDateTime.fromisoformat(recent['created_on']).replace(tzinfo=_RecTimezone.utc)
+                    if stamp.astimezone(_RecZoneInfo('Europe/Berlin')).date()>=recurring_today():
+                        return _mobile_denied(409,'Für diese Regel wurde heute bereits ein Termin verarbeitet.')
+                booking_id=post_one(db,rule_id,automatic=False)
+                audit(db,'mobile_recurring_post',f'{rule_id}:{booking_id}',actor_id=user['user_id'])
+
+            elif operation=='delete':
+                if set(data)!={'confirm_title'} or data['confirm_title']!=old['title']:
+                    return _mobile_denied(400,'Exakten Regelnamen zur Archivierung bestätigen.')
+                db.execute("""UPDATE recurring_rules SET deleted_on=CURRENT_TIMESTAMP,
+                    active=0,auto_post=0,next_on=NULL,updated_on=CURRENT_TIMESTAMP
+                    WHERE id=? AND deleted_on IS NULL""",(rule_id,))
+                audit(db,'mobile_recurring_deleted',f'{rule_id}:{old["title"]}',actor_id=user['user_id'])
+            else:
+                return _mobile_denied(400,'Unbekannte Regeloperation.')
+
+            current=_mobile_rule_read(db,rule_id)
+            result=({'id':rule_id,'archived':True} if operation=='delete'
+                    else {'id':rule_id,'booking_id':booking_id,'saved':True,
+                          'rule':_mobile_rule_json(current)} if operation=='post'
+                    else {'id':rule_id,'saved':True,'rule':_mobile_rule_json(current)})
+            _mobile_save_receipt(db,user,rid,'recurring:'+operation,fingerprint,result)
+        return _mobile_json_response(result,201 if operation=='create' else 200)
+    except ValueError as exc:
+        return _mobile_denied(400 if operation in ('create','update') else 409,str(exc))
+    except sqlite3.Error:
+        return _mobile_denied(409,'Regeländerung konnte nicht sicher abgeschlossen werden.')
+
+
+@app.post('/api/mobile/v1/recurring')
+def mobile_api_recurring_create():
+    return _mobile_recurring_mutate('create')
+
+
+@app.put('/api/mobile/v1/recurring/<int:rule_id>')
+def mobile_api_recurring_update(rule_id):
+    return _mobile_recurring_mutate('update',rule_id)
+
+
+@app.put('/api/mobile/v1/recurring/<int:rule_id>/mode')
+def mobile_api_recurring_mode(rule_id):
+    return _mobile_recurring_mutate('mode',rule_id)
+
+
+@app.post('/api/mobile/v1/recurring/<int:rule_id>/post')
+def mobile_api_recurring_post(rule_id):
+    return _mobile_recurring_mutate('post',rule_id)
+
+
+@app.delete('/api/mobile/v1/recurring/<int:rule_id>')
+def mobile_api_recurring_delete(rule_id):
+    return _mobile_recurring_mutate('delete',rule_id)
+
+
+@app.get('/api/mobile/v1/reports/monthly')
+def mobile_api_monthly_reports():
+    """Authenticated, complete monthly aggregates, independent of paging."""
+    user,error=_mobile_require()
+    if error:return error
+    query=request.args
+    if any(key not in ('from','to','currency','account_id','category_id','q') for key in query):
+        return _mobile_denied(400,'Unbekannter Berichtsparameter.')
+    first=query.get('from')
+    last=query.get('to')
+    current=datetime.now(MONTH_TZ).strftime('%Y-%m')
+    if first is None and last is None:
+        last=current
+        index=int(current[:4])*12+int(current[5:7])-1-11
+        first=f'{index//12:04d}-{index%12+1:02d}'
+    if not first or not last or not re.fullmatch(r'(?:19|20|21)[0-9]{2}-(?:0[1-9]|1[0-2])',first) or not re.fullmatch(r'(?:19|20|21)[0-9]{2}-(?:0[1-9]|1[0-2])',last):
+        return _mobile_denied(400,'from und to müssen gültige Monate YYYY-MM sein.')
+    span=(int(last[:4])-int(first[:4]))*12+int(last[5:])-int(first[5:])+1
+    if not 1<=span<=36:
+        return _mobile_denied(400,'Monatsbereich muss 1 bis 36 Monate umfassen.')
+    search=query.get('q')
+    if search is not None and (len(search)>100 or any(ord(ch)<32 for ch in search)):
+        return _mobile_denied(400,'Suchtext ist ungültig (maximal 100 Zeichen).')
+    code=query.get('currency')
+    if code is not None and (not re.fullmatch(r'[A-Z]{3}',code)):
+        return _mobile_denied(400,'Währung muss als ISO-Code angegeben werden.')
+    identifiers={}
+    for name in ('account_id','category_id'):
+        raw=query.get(name)
+        if raw is not None:
+            if not re.fullmatch(r'[1-9][0-9]{0,18}',raw) or int(raw)>9223372036854775807:
+                return _mobile_denied(400,name+' ist ungültig.')
+            identifiers[name]=int(raw)
+    try:
+        with get_db() as db:
+            if code is None:
+                code=finance_setting(db,'default_currency_code','EUR')
+            currency=db.execute('SELECT id,code,decimals FROM currencies WHERE code=?',(code,)).fetchone()
+            if currency is None:
+                return _mobile_denied(400,'Währung ist nicht vorhanden.')
+            if 'account_id' in identifiers and not db.execute(
+                    'SELECT 1 FROM accounts WHERE id=? AND currency_id=?',
+                    (identifiers['account_id'],currency['id'])).fetchone():
+                return _mobile_denied(400,'Konto gehört nicht zur ausgewählten Währung.')
+            categories,names,_=category_tree(db)
+            if 'category_id' in identifiers and identifiers['category_id'] not in {c['id'] for c in categories}:
+                return _mobile_denied(400,'Kategorie ist unbekannt.')
+            report_today=datetime.now(MONTH_TZ).date().isoformat()
+            neutral_ids=pass_through_category_ids(db)
+            results,_,groups=summarize_months(db,first=first,last=last,
+                currency_id=currency['id'],today=report_today,
+                neutral_ids=neutral_ids,categories=categories,
+                account_id=identifiers.get('account_id'),
+                category_id=identifiers.get('category_id'),search=search or None)
+            attach_categories(results,groups,names)
+            highlights=largest_bookings(db,first=first,last=last,currency_id=currency['id'],
+                today=report_today,neutral_ids=neutral_ids,categories=categories,
+                account_id=identifiers.get('account_id'),category_id=identifiers.get('category_id'),
+                search=search or None)
+        return _mobile_json_response(dict(currency=code,decimals=max(0,min(int(currency['decimals'] if currency['decimals'] is not None else 2),6)),
+            **{'from':first,'to':last},complete=True,months=list(results.values()),
+            highlights=serialize_highlights(highlights,names)))
+    except sqlite3.Error:
+        return _mobile_denied(500,'Monatsbericht konnte nicht gelesen werden.')

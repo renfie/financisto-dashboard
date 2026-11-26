@@ -755,8 +755,8 @@
 #buchungen .dashboard-desktop-ledger tr.future-booking td,
 .mobile-web-booking-list tr.future-booking td{background:#fff3c9!important}
 #buchungen .dashboard-desktop-ledger tr.future-booking{box-shadow:inset 3px 0 #c19a30}
-#buchungen .compact-booking.future-booking{background:#fff3cd;border-color:#d9b857}
-#buchungen .compact-booking.future-booking .compact-booking-details{background:#fff9e8}
+:is(#buchungen,.web-bookings-compact) .compact-booking.future-booking{background:#fff3cd;border-color:#d9b857}
+:is(#buchungen,.web-bookings-compact) .compact-booking.future-booking .compact-booking-details{background:#fff9e8}
 @media screen and (max-width:760px){
  .mobile-web-booking-list tr.mobile-booking-card.future-booking{background:#fff3cd!important;border-color:#d9b857!important}
 }
@@ -999,18 +999,18 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 #buchungen .dashboard-desktop-ledger tr.transfer-booking.recurring-booking:not(.future-booking){
  box-shadow:inset 3px 0 #9983c9;
 }
-#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking){
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking){
  background:#eaf4fb;border-color:#a5cae3;
 }
-#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking){
+:is(#buchungen,.web-bookings-compact) .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking){
  background:#e6f6ef;border-color:#a1d9c5;
 }
-#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking){
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking.recurring-booking:not(.future-booking){
  background:#f0ecfc;border-color:#c6b9e5;
 }
-#buchungen .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking) .compact-booking-details{background:#f5faff}
-#buchungen .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking) .compact-booking-details{background:#f4fbf7}
-#buchungen .compact-booking.transfer-booking.recurring-booking:not(.future-booking) .compact-booking-details{background:#f8f6ff}
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking:not(.future-booking):not(.recurring-booking) .compact-booking-details{background:#f5faff}
+:is(#buchungen,.web-bookings-compact) .compact-booking.recurring-booking:not(.future-booking):not(.transfer-booking) .compact-booking-details{background:#f4fbf7}
+:is(#buchungen,.web-bookings-compact) .compact-booking.transfer-booking.recurring-booking:not(.future-booking) .compact-booking-details{background:#f8f6ff}
 @media screen and (max-width:760px){
  #buchungen .dashboard-desktop-ledger tr.transfer-booking:not(.future-booking):not(.recurring-booking){background:#eaf4fb!important}
  #buchungen .dashboard-desktop-ledger tr.recurring-booking:not(.future-booking):not(.transfer-booking){background:#e6f6ef!important}
@@ -1133,3 +1133,21 @@ html[lang="en"] .dashboard-disclosure[open] .disclosure-state::after{content:"Co
 .project-copyright a,.footer-copyright a{color:inherit;text-decoration:none}
 .project-copyright a:hover,.footer-copyright a:hover{text-decoration:underline}
 .footer-copyright{display:block;font-size:.75rem;margin-top:5px;opacity:.8}
+
+/* Shared compact desktop actions: dashboard ledger and web booking history. */
+@media screen and (min-width:761px){
+  .container :is(#buchungen .dashboard-desktop-ledger,.web-bookings-desktop) td.dashboard-row-actions{
+    display:table-cell!important;vertical-align:middle;white-space:nowrap;
+    width:1%;min-width:0;padding:8px 6px;
+  }
+  .container :is(#buchungen .dashboard-desktop-ledger,.web-bookings-desktop) td.dashboard-row-actions :is(a.button,button.secondary){
+    display:inline-flex;align-items:center;justify-content:center;
+    font:700 .70rem/1.15 system-ui,-apple-system,Segoe UI,sans-serif;
+    min-height:30px;padding:5px 7px;margin:0 2px;
+    border-radius:10px;white-space:nowrap;vertical-align:middle;
+    flex:0 0 auto;
+  }
+  .container :is(#buchungen .dashboard-desktop-ledger,.web-bookings-desktop) td.dashboard-row-actions form{
+    display:inline-flex;vertical-align:middle;margin:0;flex:0 0 auto;
+  }
+}

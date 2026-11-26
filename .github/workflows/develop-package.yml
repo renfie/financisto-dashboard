@@ -1,0 +1,85 @@
+name: Package development ZIP
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'package/VERSION'
+      - 'package/src/app.py'
+      - 'package/src/mobile_recurring_api.py'
+      - 'package/tests/test_mobile_recurring_rules.py'
+      - 'package/src/monthly_reports.py'
+      - 'package/tests/test_monthly_mobile_reports.py'
+      - 'package/tests/test_mobile_reconciliation.py'
+      - 'package/docs/MOBILE_RECONCILIATION.de.md'
+      - 'package/docs/MOBILE_RECONCILIATION.en.md'
+      - 'package/docs/MOBILE_MONTHLY_REPORTS.de.md'
+      - 'package/docs/MOBILE_MONTHLY_REPORTS.en.md'
+      - 'package/templates/bookings.html'
+      - 'package/static/mobile.css'
+      - 'package/static/style.css'
+      - 'package/tests/test_mobile_booking_layout.py'
+      - 'package/CHANGELOG.md'
+      - 'package/CHANGELOG.en.md'
+      - '.github/workflows/develop-package.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check developer source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n update.sh
+          node --check package/static/app.js
+          node --check package/static/mobile.js
+          python3 -m compileall -q package/src
+          python3 -m unittest discover -s package/tests -p 'test_*.py' -v
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('package/templates/bookings.html').read_text()
+          s=Path('package/src/app.py').read_text()
+          assert "('category','Kategorie')" in t
+          assert 'data-label="Kategorie"' in t
+          assert 'colspan="8"' in t
+          assert "if sort_key == 'category':" in s
+          import re
+          assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+-dev\.[0-9]+',Path('package/VERSION').read_text().strip())
+          assert "'recurring_rules':True" in s
+          assert "'monthly_reports':True" in s
+          assert "'history_highlights':True" in s
+          assert "'account_reconciliation':True" in s
+          assert 'def reconcile_account_balance(' in s
+          assert 'def mobile_api_reconcile_account(' in s
+          assert Path('package/docs/MOBILE_RECURRING_API.de.md').is_file()
+          assert Path('package/docs/MOBILE_RECURRING_API.en.md').is_file()
+          assert 'def mobile_api_recurring_list():' in s
+          print('Category and recurring API checks passed')
+          PY
+      - name: Build full development update ZIP
+        id: version
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION="$(tr -d '[:space:]' < package/VERSION)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          ROOT="financisto-release-$VERSION"
+          mkdir -p "$RUNNER_TEMP/$ROOT"
+          cp -a package update.sh setup_financisto_sftp.sh README.txt README.md README.de.md LICENSE NOTICE.md CHANGELOG.md CHANGELOG.en.md docs "$RUNNER_TEMP/$ROOT/"
+          (cd "$RUNNER_TEMP" && zip -q -r "$GITHUB_WORKSPACE/financisto-dashboard-v$VERSION.zip" "$ROOT")
+          sha256sum "financisto-dashboard-v$VERSION.zip" > "financisto-dashboard-v$VERSION.zip.sha256"
+          unzip -tq "financisto-dashboard-v$VERSION.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: financisto-dashboard-v${{ steps.version.outputs.version }}
+          path: |
+            financisto-dashboard-v${{ steps.version.outputs.version }}.zip
+            financisto-dashboard-v${{ steps.version.outputs.version }}.zip.sha256
+          retention-days: 14
+          if-no-files-found: error

@@ -98,3 +98,29 @@ The independent dashboard is licensed under [GPL-2.0-only](../LICENSE). Refer to
 ## Copyright and redistribution
 
 Copyright © 2026 René Fieler (RenFie). First-party source files are licensed under **GNU GPL v2 only (GPL-2.0-only)**. Keep existing copyright, license and warranty notices when distributing copies. Clearly mark modified files and change dates, include the complete GPLv2 license, and provide corresponding source code or another GPLv2 §3-compliant option with distributed executables. See [LICENSE](../LICENSE) and [NOTICE.md](../NOTICE.md). Third-party rights remain with their owners.
+
+## Mobile API: recurring rules (development)
+
+The authenticated `/api/mobile/v1/recurring` interface exposes server-managed recurring rules to FieLanzen Android. Rules remain **on the dashboard server only**; there is no synchronization with the Android app's local recurring rules. `GET /api/mobile/v1/capabilities` advertises `features.recurring_rules: true` when available.
+
+Use the existing Bearer API key. Read-only keys can list rules; mutations require a write key, an administrator/editor account and `finance_mode=web`. New and edited rules are paused until activated explicitly; only administrators can enable automatic execution. Booking execution uses the existing dashboard recurring worker and transactional ledger logic.
+
+Endpoints: `GET/POST /api/mobile/v1/recurring`, `PUT/DELETE /api/mobile/v1/recurring/{id}`, `PUT /api/mobile/v1/recurring/{id}/mode`, and `POST /api/mobile/v1/recurring/{id}/post`. All mutations require a UUID `Idempotency-Key`; operations on existing rules also require the current 32-character `If-Match` revision. Manual posting requires `{"confirm":"BUCHEN"}`; archival requires the exact rule title. Never retry a timed-out posting with a new idempotency key.
+
+The original recurring dates, execution history, past postings, balances, exported backup formats and API key format are retained. Further details: [Mobile recurring API](docs/MOBILE_RECURRING_API.en.md).
+
+## Complete monthly Mobile API reports (development)
+
+`GET /api/mobile/v1/reports/monthly` calculates up to 36 months of complete server-side ledger history; the default is 12 months including the current month. Filter by currency, account and category hierarchy. Transfers are reported separately; pass-through/balance adjustments are excluded, and future-dated bookings never silently become realized income or expense. Dashboard comparison, historical timeline and API share one aggregation function. Existing read-only API credentials suffice. **Capability: `features.monthly_reports=true` (development).** Details: [Monthly reports API](docs/MOBILE_MONTHLY_REPORTS.en.md).
+
+**Historical highlights (development extension):** The monthly API also supplies `highlights.largest_expense` and `highlights.largest_income` with date, positive minor-unit amount, payee and full category path; `null` when no qualifying entry exists. The web historical panels reuse the exact same query helper. Optional `q` filters both monthly values and highlights. The optional capability `history_highlights: true` accompanies unchanged `monthly_reports`. Read-only.
+
+## Mobile API account reconciliation
+
+`POST /api/mobile/v1/accounts/{account_id}/reconcile` shares one transaction-safe helper with the Web form. Requires a Bearer write key, enabled admin/editor, `finance_mode=web` and UUID `Idempotency-Key`. The signed integer request fields are `actual_balance_minor`, `expected_balance_minor`, and `note` (up to 500 characters). Stale balances return `409 Conflict`, while zero changes create no booking. Adjustment categories stay out of normal monthly income/expense reports. Capability: `account_reconciliation: true`. [API reference](docs/MOBILE_RECONCILIATION.en.md).
+
+
+## Dashboard release 1.9.61 (2026-11-26)
+
+Includes Mobile API server recurring rules, complete monthly/history reports and secure account reconciliation. The development branch implementation is now released on `main`. Existing finance data and backup formats remain intact. [Changelog](CHANGELOG.en.md).
+

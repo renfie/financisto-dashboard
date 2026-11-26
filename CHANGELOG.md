@@ -1,3 +1,72 @@
+## 1.9.61 – Mobile-API und Finanzberichte (26.11.2026)
+
+- Freigabe des aktuellen Entwicklungsstands von `develop` als offizielles Dashboard-Release.
+- Mobile-API für wiederkehrende Serverregeln inklusive Verwaltung, Revisionskontrolle und Idempotenz.
+- Vollständige Monats- und Historienauswertungen, Spitzenbuchungen, Such- und Kategoriefilter.
+- Kontostandsabgleich mit gemeinsamer Web-/Mobile-Buchungslogik, Konflikt- und Doppelbuchungsschutz.
+- Einheitliche mobile Buchungskarten, Statusfarben, Kategorie-Spalte und Desktop-Aktionsbuttons.
+- Bestehende Kontostände, Buchungen und Backupformate bleiben erhalten; keine Synchronisation lokaler Android-Daten.
+
+## 1.9.62-dev.4 – Kontostandsabgleich über die Mobile-API (26.11.2026)
+
+- Neuer Endpunkt `POST /api/mobile/v1/accounts/{account_id}/reconcile` für tatsächlichen und erwarteten Ist-Kontostand in kleinsten Währungseinheiten sowie optionale Notiz.
+- Webformular und Mobile-API verwenden denselben transaktionalen Abgleichhelfer inklusive zukünftiger Buchungen, bestehender Sonderkategorien, Snapshot-Aktualisierung und Schlussprüfung.
+- Sicherheitsprüfung auf veralteten Kontostand innerhalb `BEGIN IMMEDIATE` (HTTP 409), UUID-Idempotenz mit atomarem Receipt und keine Buchung bei Null-Differenz.
+- Schreibberechtigung nur mit aktivem Admin-/Editorkonto, Write-Key und führendem Web-Finanzmodus; gesicherte Audit-Protokollierung.
+- Capability `account_reconciliation: true`, bisherige Features unverändert. Tests für Web-/Mobile-Gleichheit, Negativsalden, Währungen, Zukunftsbuchungen, Wiederholungen und Transaktions-Rollback.
+- API-Dokumentation DE/EN sowie Android-Integrationsauftrag. Keine Änderungen an Datenbankschema, Sicherungsformaten, Android-Repository oder `main`.
+
+## 1.9.62-dev.3 – Historische Spitzenbuchungen für die Mobile-API (26.11.2026)
+
+- Die bestehende Monats-API ergänzt optional `highlights.largest_expense` und `highlights.largest_income` (Datum, Einzelbetrag, Empfänger und vollständiger Kategorienpfad; `null` ohne Treffer).
+- Web-Historie und Mobile-API nutzen denselben schreibgeschützten Abfragehelfer; identische Zeitraum-, Konto-, Währungs-, Unterkategorie- und optionale Suchfilter `q`.
+- Umbuchungen, durchlaufende Posten, Saldoabgleiche, Vorlagen und zukünftige Buchungen werden ausgeschlossen. Historische Monatswerte und `monthly_reports: true` bleiben erhalten.
+- `history_highlights: true` als optionale Capability; Regressionstests und API-Dokumentation DE/EN erweitert. Keine Änderungen an Daten, Schema, Sicherungen oder Android-App.
+
+## 1.9.62-dev.2 – Vollständige Monatsauswertungen der Mobile-API (26.11.2026)
+
+- Neuer, schreibgeschützter GET-Endpunkt `/api/mobile/v1/reports/monthly` für vollständige serverseitige 12–36-Monatswerte einschließlich Nullmonaten und Kategorie-Unterstrukturen.
+- Gemeinsame, SQL-basierte Monatsaggregation für Startseiten-Monatsvergleich, historische Monats-Zeitreihe und Mobile-API; keine Abhängigkeit von paginierten Einzelbuchungen.
+- Umbuchungen separat; durchlaufende Posten und Saldoabgleiche gemäß Dashboard ausgeschlossen; Zukunftsbuchungen ausschließlich intern als separate Prognose, keine Vermischung mit Ist-Werten.
+- Berechtigungen, Währungs-/Kontofilter, Kategoriehierarchie, Datumsvalidierung, Read-only und No-Store gegen mehrere Zehntausend Buchungen getestet.
+- `features.monthly_reports=true` nach erfolgreichen Tests aktiviert. Keine Änderungen an Datenbank- oder Sicherungsformaten oder der Android-App.
+
+## 1.9.62-dev.1 – Mobile-API für wiederkehrende Serverregeln (26.11.2026)
+
+- Sechs Mobile-API-Endpunkte unter `/api/mobile/v1/recurring` für Lesen, pausierte Neuanlage, Bearbeitung, Moduswechsel, ausdrücklich bestätigte manuelle Ausführung und Archivierung.
+- `features.recurring_rules=true` erst nach erfolgreicher Implementierung und automatisierten Integrationstests aktiviert; bestehende Mobile-API-Schlüssel und Buchungsendpunkte unverändert.
+- Einheitliche 32-stellige Revisionsprüfungen über `If-Match`, UUID-Idempotenz und SQLite-Schreibtransaktionen. Read-Key nur lesend, Auto-Modus ausschließlich für Admins, Schreibschutz bei `finance_mode=import`.
+- Beträge als positive JSON-Absolutwerte; vorhandene signierte Datenbankbeträge und `recurring_runs`-Historie bleiben unverändert. Wiederholungen und Buchungen werden ausschließlich auf dem Dashboard-Server verwaltet.
+- Schutz gegen versehentliche Wiederholung manueller Buchungen, Soft-Delete ohne Einfluss auf frühere Buchungen/Kontostände und umfangreiche neue Testfälle. Neue API-Referenz und README DE/EN.
+- Nur `develop`: keine Änderungen am Android-Repository, an Backupformaten oder an `main`.
+
+## 1.9.61-dev.4 – Einheitliche Desktop-Aktionsbuttons (25.11.2026)
+
+- Die Schaltflächen Klonen, Bearbeiten und Löschen der Web-Buchungstabelle verwenden nun exakt die gemeinsamen Klassen und Maße der Desktop-Buchungstabelle auf der Startseite: Schriftgröße, Höhe, Innen- und Außenabstände, Ausrichtung und Zeilenumbruch.
+- Gemeinsame CSS-Regeln verhindern abweichende Button-Größen; die kompakte mobile Ansicht und Kategorie-Spalte bleiben unverändert.
+- Regressionstest zur Konsistenz beider Tabellen ergänzt. Entwicklung ausschließlich in `develop`.
+
+## 1.9.61-dev.3 – Mobile Buchungsliste identisch zur Startseite (25.11.2026)
+
+- Buchungskarten auf der Erfassungsseite verwenden jetzt dieselben HTML-Strukturen und die gemeinsamen CSS-Regeln wie auf der Startseite statt einer separaten Nachbildung.
+- Dieselbe farbliche Kennzeichnung: Umbuchungen blau, wiederkehrende Buchungen grün, Kombinationen violett und zukünftige Buchungen gelb; dieselben Abzeichen für Wiederholungen und Regelzuordnungen.
+- Standardmäßig geschlossene Karten mit Empfänger bzw. Buchungsart, Datum, Konto/Zielkonto, Betrag und aufklappbaren Details inklusive Kategorie und Aktionen.
+- Keine Änderungen an Finanzdaten oder Datenbankschema. Nur Entwicklungszweig `develop`.
+
+## 1.9.61-dev.2 – Mobile Buchungskarten wieder einklappbar (25.11.2026)
+
+- Fehlerhafte mobile Darstellung nach Ergänzung der Kategorie-Spalte korrigiert: feste Spaltenpositionen aus der Desktop-Tabelle werden für Handykarten nicht mehr verwendet.
+- Buchungen werden auf Smartphones wie auf der Hauptseite als kompakte, standardmäßig geschlossene Einträge angezeigt. Antippen öffnet Konto, vollständige Kategorie, Empfänger, Typ, Notiz und Aktionen.
+- Desktop-Tabelle mit Kategorie und Spaltensortierung bleibt erhalten; eigene Sortierauswahl für die kompakte Mobilansicht.
+- Regressionstest für Standardzustand, Kartenstruktur und Kategorie-Sortierung ergänzt. Nur `develop`, kein offizielles Release.
+
+## 1.9.61-dev.1 – Kategorie in der Web-Buchungsliste (25.11.2026)
+
+- Die Tabelle „Über die Webseite erfasste Buchungen“ zeigt die Kategorie direkt zwischen Konto und Empfänger, wie die Buchungsliste der Startseite.
+- Vollständige Kategorienamen einschließlich Unterkategorien; Einträge ohne Kategorie erhalten einen Gedankenstrich.
+- Kategorie ist auf- und absteigend sortierbar. Mobile Tabellenkennzeichnung und Leerzustand wurden angepasst.
+- Keine Änderung an Buchungen, Finanzdaten, Datenbankschema oder API. Entwicklungsstand ausschließlich auf `develop`, kein offizielles Release.
+
 ## 1.9.60 – Bereinigung öffentlicher Projektdokumentation (23.11.2026)
 
 - Interne Prozesshinweise aus den öffentlichen README-Dateien entfernt.

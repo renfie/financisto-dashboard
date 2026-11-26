@@ -1,3 +1,68 @@
+## 1.9.61 – Mobile API and financial reports (2026-11-26)
+
+- Official release of the tested development features: complete monthly/historical reports, recurring-rule API and account reconciliation.
+- Consistent transaction views and status colors. Existing balances and backup formats remain unchanged.
+
+## 1.9.62-dev.4 – Account reconciliation through the Mobile API (2026-11-26)
+
+- New `POST /api/mobile/v1/accounts/{account_id}/reconcile` accepts actual and previously displayed balances as signed integer minor units with an optional note.
+- Web form and Mobile API now reuse one transaction-safe helper for future-dated entries, existing correction categories, snapshot updates and final verification.
+- Detect stale balances under SQLite `BEGIN IMMEDIATE` (HTTP 409), persist UUID idempotency receipts atomically with corrections, and create no booking on zero difference.
+- Require an authenticated write key, admin/editor role and authoritative web finance mode; retain audit logging.
+- Advertise `account_reconciliation: true` without changing existing capabilities. Regression tests cover Web/Mobile parity, negative balances, currencies, future dates, replay and full rollback.
+- Bilingual API documentation and separate Android integration instructions. No schema, backup-format, Android or `main` changes.
+
+## 1.9.62-dev.3 – Historical highlights in Mobile API (2026-11-26)
+
+- Add optional `highlights.largest_expense` / `highlights.largest_income` with date, absolute minor-unit amount, payee and full category path (`null` when absent).
+- Web historical highlight panels and Mobile API reuse one read-only query; same date, account, currency, descendant category and optional `q` search filters.
+- Exclude internal transfers, pass-throughs, balance corrections, templates and future entries; preserve all monthly fields and `monthly_reports: true`.
+- Optional `history_highlights: true` capability, expanded tests and bilingual API docs; no changes to finance data, backups, Android or schema.
+
+## 1.9.62-dev.2 – Complete Mobile API monthly reports (2026-11-26)
+
+- New read-only `GET /api/mobile/v1/reports/monthly` for complete server-side 12–36-month reports, including zero months and nested category paths.
+- Shared SQL aggregation powers dashboard month comparisons, historical timeline and the Mobile API, independently of paged transaction downloads.
+- Transfers reported separately; pass-through and balance-adjustment categories excluded as in dashboard; future entries kept out of actuals and only projected internally.
+- Auth, validation, currency/account/category filtering, no-write/no-store behavior and performance tested on large ledgers.
+- `features.monthly_reports=true` enabled after successful tests. No changes to database/backup formats or Android.
+
+## 1.9.62-dev.1 – Mobile API for server-managed recurring rules (2026-11-26)
+
+- Six `/api/mobile/v1/recurring` endpoints: list, create paused, update/repause, change mode, explicitly confirm manual posting, and soft-delete.
+- Advertise `features.recurring_rules=true` after implementation and passing automated integration tests; preserve existing Mobile API credentials and booking endpoints.
+- 32-character `If-Match` revisions, UUID idempotency keys and atomic SQLite writes. Read keys cannot mutate, only admins can enable automatic posting, and import-authoritative servers are read-only.
+- Positive absolute JSON amounts mapped to existing signed rule storage. The recurring run history and accounting ledger remain server-only; no Android synchronization.
+- Additional duplicate-posting protection, archival preserving past transactions and balances, integration tests and bilingual API documentation/READMEs.
+- Development branch only; no Android repository, backup format or main-branch changes.
+
+## 1.9.61-dev.4 – Consistent desktop booking action buttons (2026-11-25)
+
+- Clone, Edit and Delete buttons in the web booking table now use the same classes and dimensions as the dashboard desktop ledger, including font size, height, padding, spacing, alignment and wrapping.
+- Shared CSS avoids inconsistent action sizing; compact mobile cards and category column remain unchanged.
+- Added regression test covering both tables. Development branch `develop` only.
+
+## 1.9.61-dev.3 – Mobile booking list matches dashboard cards (2026-11-25)
+
+- Booking-entry cards now reuse dashboard markup conventions and shared CSS rules instead of separately maintained copies.
+- Same colors: blue transfers, green recurring entries, purple combinations and yellow future bookings; identical recurring and rule-matched badges.
+- Collapsed by default; show payee/type, date, source/target account and amount, with expandable category, details and actions.
+- No change to financial data or schema. Development branch `develop` only.
+
+## 1.9.61-dev.2 – Restore collapsible mobile booking cards (2026-11-25)
+
+- Fix broken phone layout after adding a category column: mobile cards no longer rely on desktop table column positions.
+- Individual bookings are compact and collapsed by default, just like dashboard entries. Tap to reveal account, full category, payee, type, note and action buttons.
+- Preserve the desktop category table and sortable columns; add a sort menu for compact mobile view.
+- Add regression tests for collapsed cards, layout and category sorting. Development branch only; no official release.
+
+## 1.9.61-dev.1 – Category in web booking list (2026-11-25)
+
+- Show category between account and payee in the “Bookings entered through the website” table, consistent with the dashboard booking list.
+- Display full category paths, including subcategories, with a dash for uncategorized transactions.
+- Enable ascending and descending category sorting; adapt mobile table labels and empty-state colspan.
+- No changes to transactions, financial records, database schema or API. Development branch only; no official release.
+
 ## 1.9.60 – Public documentation cleanup (2026-11-23)
 
 - Removed internal process commentary from the public README files.

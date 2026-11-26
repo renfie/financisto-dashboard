@@ -10,8 +10,12 @@
 
 **Deutschsprachiges, selbst gehostetes Finanzdashboard für Docker** – mit Finanzberichten, Buchungsverwaltung, wiederkehrenden Buchungen, PWA und sicherem Import von [Financisto](https://github.com/dsolonenko/financisto)-Backups.
 
-**Aktuelles Release:** [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/latest) · [Versionshistorie](https://github.com/renfie/financisto-dashboard/releases).
+**Offizielles Release v1.9.61:** [ZIP und Prüfsumme herunterladen](https://github.com/renfie/financisto-dashboard/releases/latest) · [Versionshistorie](https://github.com/renfie/financisto-dashboard/releases).
 
+
+## Release 1.9.61
+
+Der aktuelle Dashboard-Entwicklungsstand ist auf `main` übernommen: wiederkehrende Serverregeln, vollständige Monats- und Historienauswertungen über die Mobile-API, sicherer Kontostandsabgleich und einheitliche Buchungsansichten. Finanzdaten und Sicherungen bleiben erhalten. Siehe [Änderungsverlauf](CHANGELOG.md).
 
 ## Funktionen
 
@@ -130,3 +134,23 @@ Alle fertigen Versionen stehen öffentlich unter [GitHub Releases](https://githu
 ## Urheberrecht und Weitergabe
 
 Copyright © 2026 René Fieler (RenFie). Eigene Programmteile stehen unter der **GNU GPL v2 (GPL-2.0-only)**. Bei Weitergabe müssen vorhandene Urheber-, Lizenz- und Gewährleistungshinweise erhalten bleiben; geänderte Dateien und Änderungsdaten sind zu kennzeichnen. Die vollständige GPL v2 ist beizulegen; bei Weitergabe ausführbarer Programme ist der zugehörige Quellcode oder eine nach §3 GPL v2 zulässige Alternative bereitzustellen. Einzelheiten: [LICENSE](LICENSE) und [NOTICE.md](NOTICE.md). Rechte Dritter bleiben unberührt.
+
+## Mobile-API: wiederkehrende Regeln (Entwicklungszweig)
+
+Die authentifizierte Schnittstelle `/api/mobile/v1/recurring` stellt die serverseitigen Wiederholungsregeln für FieLanzen Android bereit. Die Regeln verbleiben **ausschließlich auf dem Dashboard-Server**. Es gibt keinen Abgleich mit den lokalen Android-Regeln. `GET /api/mobile/v1/capabilities` meldet die Verfügbarkeit über `features.recurring_rules: true`.
+
+Verwendet werden die bisherigen Bearer-API-Schlüssel. Leseschlüssel dürfen Regeln anzeigen; Änderungen benötigen einen Schreibschlüssel, Administrator-/Editorrechte und `finance_mode=web`. Neue und bearbeitete Regeln bleiben zunächst pausiert. Automatische Ausführung dürfen ausschließlich Administratoren freigeben; die Ausführung übernimmt weiterhin der vorhandene Dashboard-Hintergrunddienst.
+
+Endpunkte: `GET/POST /api/mobile/v1/recurring`, `PUT/DELETE /api/mobile/v1/recurring/{id}`, `PUT /api/mobile/v1/recurring/{id}/mode` und `POST /api/mobile/v1/recurring/{id}/post`. Jede Änderung benötigt einen UUID-`Idempotency-Key`, bei bestehenden Regeln zusätzlich die aktuelle 32-stellige `If-Match`-Revision. Manuelles Buchen verlangt `{"confirm":"BUCHEN"}`; Archivieren den exakten Regelnamen. Nach einer Zeitüberschreitung niemals mit einem neuen Idempotenzschlüssel erneut buchen.
+
+Bestehende Wiederholungen, Ausführungshistorie, Kontostände, Sicherungsformate und API-Schlüssel bleiben erhalten. Weitere Details: [Mobile-API für Wiederholungen](package/docs/MOBILE_RECURRING_API.de.md).
+
+## Vollständige Monatsauswertungen über die Mobile-API (Entwicklung)
+
+`GET /api/mobile/v1/reports/monthly` berechnet bis zu 36 Monatswerte aus dem vollständigen Server-Buchungsbestand; 12 Monate einschließlich des aktuellen Monats sind Standard. Währung, Konto und Kategorien einschließlich Unterkategorien sind filterbar. Umbuchungen werden separat ausgewiesen, durchlaufende Posten und Saldoabgleiche ausgeschlossen, zukünftige Buchungen nicht als Ist-Werte gezählt. Die Web-Startseite, die historische Zeitreihe und die API verwenden dieselbe Aggregationsfunktion. Bestehende API-Schlüssel reichen aus, Schreibrechte werden nicht benötigt. **Capability: `features.monthly_reports=true` (Entwicklungszweig).** Details: [Mobile-Monatsberichte](package/docs/MOBILE_MONTHLY_REPORTS.de.md).
+
+**Historische Spitzenwerte (Erweiterung auf develop):** Die Monats-API liefert zusätzlich `highlights.largest_expense` und `highlights.largest_income` mit Datum, positivem Einzelbetrag in Cent, Empfänger und vollem Kategorienamen; ohne Treffer `null`. Die Web-Historie verwendet dieselbe SQL-Auswahlfunktion. `q` ist als Suchfilter für Monatswerte und Highlights ergänzt. Optionale Capability `history_highlights: true`; bestehende `monthly_reports`-Funktion bleibt unverändert. Kein Schreibzugriff.
+
+## Kontostandsabgleich über die Mobile-API
+
+`POST /api/mobile/v1/accounts/{account_id}/reconcile` verwendet denselben transaktionalen Abgleichhelfer wie das Web-Dashboard. Erforderlich sind Bearer-Write-Key, Admin-/Editorrechte, `finance_mode=web` und ein UUID-`Idempotency-Key`. Übertragen werden der tatsächliche Kontostand, der vorher angezeigte Ist-Kontostand (jeweils Integer in kleinsten Währungseinheiten) und eine Notiz bis 500 Zeichen. Geänderte Kontostände ergeben `409 Conflict` ohne Korrekturbuchung; Null-Differenzen erzeugen keine Buchung. Die Korrekturkategorien bleiben von der regulären Monatsstatistik ausgeschlossen. Capability: `account_reconciliation: true`. Bei unklarer Antwort denselben Idempotency-Key wiederverwenden. [API-Dokumentation](package/docs/MOBILE_RECONCILIATION.de.md).
