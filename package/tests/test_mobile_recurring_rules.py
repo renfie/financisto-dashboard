@@ -120,7 +120,7 @@ class MobileRecurringContract(unittest.TestCase):
     def draft(self,**overrides):
         item=dict(title='Miete',kind='expense',account_id=1,to_account_id=0,
                   category_id=2,payee_title='Vermieter',amount_minor=95000,note='',
-                  frequency='monthly',interval_count=1,day_of_month=25,
+                  frequency='monthly',interval_count=1,day_of_month=26,
                   start_on='2026-11-01',run_at='09:30',end_on=None,max_occurrences=12)
         item.update(overrides)
         return item
