@@ -1,3 +1,12 @@
+## 1.9.62-dev.1 – Mobile-API für wiederkehrende Serverregeln (26.11.2026)
+
+- Sechs Mobile-API-Endpunkte unter `/api/mobile/v1/recurring` für Lesen, pausierte Neuanlage, Bearbeitung, Moduswechsel, ausdrücklich bestätigte manuelle Ausführung und Archivierung.
+- `features.recurring_rules=true` erst nach erfolgreicher Implementierung und automatisierten Integrationstests aktiviert; bestehende Mobile-API-Schlüssel und Buchungsendpunkte unverändert.
+- Einheitliche 32-stellige Revisionsprüfungen über `If-Match`, UUID-Idempotenz und SQLite-Schreibtransaktionen. Read-Key nur lesend, Auto-Modus ausschließlich für Admins, Schreibschutz bei `finance_mode=import`.
+- Beträge als positive JSON-Absolutwerte; vorhandene signierte Datenbankbeträge und `recurring_runs`-Historie bleiben unverändert. Wiederholungen und Buchungen werden ausschließlich auf dem Dashboard-Server verwaltet.
+- Schutz gegen versehentliche Wiederholung manueller Buchungen, Soft-Delete ohne Einfluss auf frühere Buchungen/Kontostände und umfangreiche neue Testfälle. Neue API-Referenz und README DE/EN.
+- Nur `develop`: keine Änderungen am Android-Repository, an Backupformaten oder an `main`.
+
 ## 1.9.61-dev.4 – Einheitliche Desktop-Aktionsbuttons (25.11.2026)
 
 - Die Schaltflächen Klonen, Bearbeiten und Löschen der Web-Buchungstabelle verwenden nun exakt die gemeinsamen Klassen und Maße der Desktop-Buchungstabelle auf der Startseite: Schriftgröße, Höhe, Innen- und Außenabstände, Ausrichtung und Zeilenumbruch.
