@@ -3902,3 +3902,177 @@ def mobile_api_update_booking(booking_id):
 @app.delete('/api/mobile/v1/bookings/<int:booking_id>')
 def mobile_api_delete_booking(booking_id):
     return _mobile_edit_booking(booking_id,delete=True)
+
+# Mobile API for recurring server rules. No Android-local state is read or written.
+from mobile_recurring_api import (
+    read_rule as _mobile_rule_read,
+    serialize as _mobile_rule_json,
+    revision as _mobile_rule_revision,
+    parse_payload as _mobile_rule_payload,
+)
+
+
+def _mobile_recurring_writer():
+    user,error=_mobile_require()
+    if error:return None,error
+    if user['access']!='write' or user['role'] not in ('admin','editor'):
+        return None,_mobile_denied(403,'API-Schlüssel hat keine Schreibberechtigung.')
+    with get_db() as db:
+        if finance_setting(db,'finance_mode','import')!='web':
+            return None,_mobile_denied(409,'Web-Verwaltung ist nicht führend.')
+    return user,None
+
+
+@app.get('/api/mobile/v1/recurring')
+def mobile_api_recurring_list():
+    user,error=_mobile_require()
+    if error:return error
+    with get_db() as db:
+        rows=db.execute("""SELECT r.*,p.title payee_title,
+            (SELECT COUNT(*) FROM recurring_runs x WHERE x.rule_id=r.id) completed_count
+            FROM recurring_rules r LEFT JOIN payees p ON p.id=r.payee_id
+            WHERE r.deleted_on IS NULL ORDER BY r.id""").fetchall()
+    return _mobile_json_response({'items':[_mobile_rule_json(row) for row in rows]})
+
+
+def _mobile_recurring_mutate(operation, rule_id=None):
+    user,error=_mobile_recurring_writer()
+    if error:return error
+    try:
+        data,rid=_mobile_body_and_request_id()
+    except ValueError as exc:
+        return _mobile_denied(400,str(exc))
+    expected=None
+    if rule_id is not None:
+        expected=request.headers.get('If-Match','')
+        if not re.fullmatch(r'[0-9a-f]{32}',expected):
+            return _mobile_denied(428,'If-Match mit 32-stelliger Regelrevision erforderlich.')
+    payload={'rule_id':rule_id,'revision':expected,'data':data}
+    try:
+        with get_db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            # Recheck server ownership while holding the write lock.
+            if finance_setting(db,'finance_mode','import')!='web':
+                return _mobile_denied(409,'Web-Verwaltung ist nicht führend.')
+            cached,fingerprint=_mobile_receipt(db,user,rid,'recurring:'+operation,payload)
+            if cached is not None:
+                return _mobile_json_response(cached,201 if operation=='create' else 200)
+            old=_mobile_rule_read(db,rule_id) if rule_id is not None else None
+            if rule_id is not None:
+                if old is None:
+                    return _mobile_denied(404,'Wiederholungsregel nicht vorhanden.')
+                if _mobile_rule_revision(old,int(old['completed_count']))!=expected:
+                    return _mobile_denied(409,'Regel wurde inzwischen geändert. Bitte neu laden.')
+
+            if operation in ('create','update'):
+                values=_mobile_rule_payload(db,data,entry_payee)
+                if operation=='create':
+                    cur=db.execute("""INSERT INTO recurring_rules
+                      (title,kind,account_id,to_account_id,category_id,payee_id,
+                       amount_minor,note,frequency,interval_count,day_of_month,
+                       start_on,run_at,end_on,max_occurrences,active,auto_post)
+                      VALUES(:title,:kind,:account_id,:to_account_id,:category_id,:payee_id,
+                       :amount_minor,:note,:frequency,:interval_count,:day_of_month,
+                       :start_on,:run_at,:end_on,:max_occurrences,0,0)""",values)
+                    rule_id=cur.lastrowid
+                else:
+                    db.execute("""UPDATE recurring_rules SET title=:title,kind=:kind,
+                      account_id=:account_id,to_account_id=:to_account_id,
+                      category_id=:category_id,payee_id=:payee_id,amount_minor=:amount_minor,
+                      note=:note,frequency=:frequency,interval_count=:interval_count,
+                      day_of_month=:day_of_month,start_on=:start_on,run_at=:run_at,
+                      end_on=:end_on,max_occurrences=:max_occurrences,
+                      active=0,auto_post=0,next_on=NULL,completed_on=NULL,
+                      needs_review='',updated_on=CURRENT_TIMESTAMP WHERE id=:id""",
+                      {**values,'id':rule_id})
+                audit(db,'mobile_recurring_saved',str(rule_id),actor_id=user['user_id'])
+
+            elif operation=='mode':
+                if set(data)!={'mode'} or data['mode'] not in ('paused','manual','auto'):
+                    return _mobile_denied(400,'Modus muss paused, manual oder auto sein.')
+                mode=data['mode']
+                if mode=='auto' and user['role']!='admin':
+                    return _mobile_denied(403,'Automatische Ausführung nur für Administratoren.')
+                if mode=='paused':
+                    db.execute("""UPDATE recurring_rules SET active=0,auto_post=0,
+                       updated_on=CURRENT_TIMESTAMP WHERE id=?""",(rule_id,))
+                else:
+                    from recurring import is_finished, completed_runs
+                    validate_rule(db,old)
+                    next_on=on_or_after(date.fromisoformat(old['start_on']),
+                        old['frequency'],int(old['interval_count']),
+                        int(old['day_of_month']),recurring_today()).isoformat()
+                    if is_finished(old,next_on,completed_runs(db,rule_id)):
+                        return _mobile_denied(409,'Enddatum oder maximale Ausführungszahl erreicht.')
+                    db.execute("""UPDATE recurring_rules SET active=1,auto_post=?,next_on=?,
+                        needs_review='',completed_on=NULL,updated_on=CURRENT_TIMESTAMP
+                        WHERE id=?""",(int(mode=='auto'),next_on,rule_id))
+                audit(db,'mobile_recurring_mode',f'{rule_id}:{mode}',actor_id=user['user_id'])
+
+            elif operation=='post':
+                if set(data)!={'confirm'} or data['confirm']!='BUCHEN':
+                    return _mobile_denied(400,'Zur Bestätigung BUCHEN erforderlich.')
+                if not old['active'] or old['auto_post']:
+                    return _mobile_denied(409,'Nur aktive manuelle Regeln können gebucht werden.')
+                if not old['next_on'] or old['next_on']>recurring_today().isoformat():
+                    return _mobile_denied(409,'Regel ist nicht fällig.')
+                # Never let a fresh idempotency key post multiple backlog dates
+                # for the same rule on the same calendar day after an uncertain reply.
+                recent=db.execute("""SELECT created_on FROM recurring_runs
+                                   WHERE rule_id=? ORDER BY id DESC LIMIT 1""",
+                                  (rule_id,)).fetchone()
+                if recent:
+                    from datetime import datetime as _RecDateTime, timezone as _RecTimezone
+                    from zoneinfo import ZoneInfo as _RecZoneInfo
+                    stamp=_RecDateTime.fromisoformat(recent['created_on']).replace(tzinfo=_RecTimezone.utc)
+                    if stamp.astimezone(_RecZoneInfo('Europe/Berlin')).date()>=recurring_today():
+                        return _mobile_denied(409,'Für diese Regel wurde heute bereits ein Termin verarbeitet.')
+                booking_id=post_one(db,rule_id,automatic=False)
+                audit(db,'mobile_recurring_post',f'{rule_id}:{booking_id}',actor_id=user['user_id'])
+
+            elif operation=='delete':
+                if set(data)!={'confirm_title'} or data['confirm_title']!=old['title']:
+                    return _mobile_denied(400,'Exakten Regelnamen zur Archivierung bestätigen.')
+                db.execute("""UPDATE recurring_rules SET deleted_on=CURRENT_TIMESTAMP,
+                    active=0,auto_post=0,next_on=NULL,updated_on=CURRENT_TIMESTAMP
+                    WHERE id=? AND deleted_on IS NULL""",(rule_id,))
+                audit(db,'mobile_recurring_deleted',f'{rule_id}:{old["title"]}',actor_id=user['user_id'])
+            else:
+                return _mobile_denied(400,'Unbekannte Regeloperation.')
+
+            current=_mobile_rule_read(db,rule_id)
+            result=({'id':rule_id,'archived':True} if operation=='delete'
+                    else {'id':rule_id,'booking_id':booking_id,'saved':True,
+                          'rule':_mobile_rule_json(current)} if operation=='post'
+                    else {'id':rule_id,'saved':True,'rule':_mobile_rule_json(current)})
+            _mobile_save_receipt(db,user,rid,'recurring:'+operation,fingerprint,result)
+        return _mobile_json_response(result,201 if operation=='create' else 200)
+    except ValueError as exc:
+        return _mobile_denied(400 if operation in ('create','update') else 409,str(exc))
+    except sqlite3.Error:
+        return _mobile_denied(409,'Regeländerung konnte nicht sicher abgeschlossen werden.')
+
+
+@app.post('/api/mobile/v1/recurring')
+def mobile_api_recurring_create():
+    return _mobile_recurring_mutate('create')
+
+
+@app.put('/api/mobile/v1/recurring/<int:rule_id>')
+def mobile_api_recurring_update(rule_id):
+    return _mobile_recurring_mutate('update',rule_id)
+
+
+@app.put('/api/mobile/v1/recurring/<int:rule_id>/mode')
+def mobile_api_recurring_mode(rule_id):
+    return _mobile_recurring_mutate('mode',rule_id)
+
+
+@app.post('/api/mobile/v1/recurring/<int:rule_id>/post')
+def mobile_api_recurring_post(rule_id):
+    return _mobile_recurring_mutate('post',rule_id)
+
+
+@app.delete('/api/mobile/v1/recurring/<int:rule_id>')
+def mobile_api_recurring_delete(rule_id):
+    return _mobile_recurring_mutate('delete',rule_id)
