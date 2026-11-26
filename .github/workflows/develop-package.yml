@@ -42,15 +42,21 @@ jobs:
           assert 'data-label="Kategorie"' in t
           assert 'colspan="8"' in t
           assert "if sort_key == 'category':" in s
-          assert Path('package/VERSION').read_text().strip() == '1.9.62-dev.1'
+          import re
+          assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+-dev\.[0-9]+',Path('package/VERSION').read_text().strip())
+          assert "'recurring_rules':True" in s
+          assert Path('package/docs/MOBILE_RECURRING_API.de.md').is_file()
+          assert Path('package/docs/MOBILE_RECURRING_API.en.md').is_file()
           assert 'def mobile_api_recurring_list():' in s
           print('Category and recurring API checks passed')
           PY
       - name: Build full development update ZIP
+        id: version
         shell: bash
         run: |
           set -Eeuo pipefail
           VERSION="$(tr -d '[:space:]' < package/VERSION)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           ROOT="financisto-release-$VERSION"
           mkdir -p "$RUNNER_TEMP/$ROOT"
           cp -a package update.sh setup_financisto_sftp.sh README.txt README.md README.de.md LICENSE NOTICE.md CHANGELOG.md CHANGELOG.en.md docs "$RUNNER_TEMP/$ROOT/"
@@ -59,9 +65,9 @@ jobs:
           unzip -tq "financisto-dashboard-v$VERSION.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: financisto-dashboard-v1.9.62-dev.1
+          name: financisto-dashboard-v${{ steps.version.outputs.version }}
           path: |
-            financisto-dashboard-v1.9.62-dev.1.zip
-            financisto-dashboard-v1.9.62-dev.1.zip.sha256
+            financisto-dashboard-v${{ steps.version.outputs.version }}.zip
+            financisto-dashboard-v${{ steps.version.outputs.version }}.zip.sha256
           retention-days: 14
           if-no-files-found: error
