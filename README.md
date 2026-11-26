@@ -138,3 +138,7 @@ Use the existing Bearer API key. Read-only keys can list rules; mutations requir
 Endpoints: `GET/POST /api/mobile/v1/recurring`, `PUT/DELETE /api/mobile/v1/recurring/{id}`, `PUT /api/mobile/v1/recurring/{id}/mode`, and `POST /api/mobile/v1/recurring/{id}/post`. All mutations require a UUID `Idempotency-Key`; operations on existing rules also require the current 32-character `If-Match` revision. Manual posting requires `{"confirm":"BUCHEN"}`; archival requires the exact rule title. Never retry a timed-out posting with a new idempotency key.
 
 The original recurring dates, execution history, past postings, balances, exported backup formats and API key format are retained. Further details: [Mobile recurring API](package/docs/MOBILE_RECURRING_API.en.md).
+
+## Complete monthly Mobile API reports (development)
+
+`GET /api/mobile/v1/reports/monthly` calculates up to 36 months of complete server-side ledger history; the default is 12 months including the current month. Filter by currency, account and category hierarchy. Transfers are reported separately; pass-through/balance adjustments are excluded, and future-dated bookings never silently become realized income or expense. Dashboard comparison, historical timeline and API share one aggregation function. Existing read-only API credentials suffice. **Capability: `features.monthly_reports=true` (development).** Details: [Monthly reports API](package/docs/MOBILE_MONTHLY_REPORTS.en.md).

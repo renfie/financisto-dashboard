@@ -1,3 +1,11 @@
+## 1.9.62-dev.2 – Complete Mobile API monthly reports (2026-11-26)
+
+- New read-only `GET /api/mobile/v1/reports/monthly` for complete server-side 12–36-month reports, including zero months and nested category paths.
+- Shared SQL aggregation powers dashboard month comparisons, historical timeline and the Mobile API, independently of paged transaction downloads.
+- Transfers reported separately; pass-through and balance-adjustment categories excluded as in dashboard; future entries kept out of actuals and only projected internally.
+- Auth, validation, currency/account/category filtering, no-write/no-store behavior and performance tested on large ledgers.
+- `features.monthly_reports=true` enabled after successful tests. No changes to database/backup formats or Android.
+
 ## 1.9.62-dev.1 – Mobile API for server-managed recurring rules (2026-11-26)
 
 - Six `/api/mobile/v1/recurring` endpoints: list, create paused, update/repause, change mode, explicitly confirm manual posting, and soft-delete.

@@ -37,6 +37,7 @@ from backup_manager import (create_backup as create_verified_backup, status as s
                             current_financisto_backups, financisto_status, export_dir as financisto_export_dir,
                             export_current_financisto)
 from job_monitor import ensure_schema as ensure_monitor_schema, dashboard_status
+from monthly_reports import summarize_months, attach_categories, months_between
 from recurring import (ensure_schema as ensure_recurring_schema, preview_from_backup,
                        save_import_preview, confirm_import, validate_rule,
                        on_or_after, post_one, today as recurring_today)
@@ -2979,52 +2980,27 @@ def dashboard():
         category=filters.get('category','')
         if category not in {str(c['id']) for c in categories}: category=''
         search=filters.get('q','').strip()[:100]
-        where=['substr(t.day,1,7) BETWEEN ? AND ?','a.currency_id=?','t.is_template=0','t.to_account_id=0']
-        params=[range_start,range_end,currency]
-        if account:
-            where.append('t.account_id=?');params.append(account)
+        # The dashboard and Mobile API share one SQL aggregation (actual vs.
+        # separately projected). Account/category/search selection is identical.
+        descendants=[]
         if category:
             selected=next(c for c in categories if str(c['id'])==category)
             descendants=[c['id'] for c in categories if c['lft']>=selected['lft'] and c['rgt']<=selected['rgt']]
-            where.append('t.category_id IN ('+','.join('?' for _ in descendants)+')')
-            params.extend(descendants)
-        if search:
-            match=like_match(search)
-            where.append("(p.title LIKE ? ESCAPE '\\' OR t.note LIKE ? ESCAPE '\\' OR c.title LIKE ? ESCAPE '\\')")
-            params.extend([match,match,match])
-        sql='''SELECT t.id,t.day,t.origin,t.category_id,t.amount,t.note,a.title account_title,
-                         c.title category_title,p.title payee_title
-                 FROM transactions t JOIN accounts a ON a.id=t.account_id
-                 LEFT JOIN categories c ON c.id=t.category_id
-                 LEFT JOIN payees p ON p.id=t.payee_id
-                 WHERE '''+' AND '.join(where)
-        transactions=[dict(r)|{'source':'Financisto','group_key':r['category_id'],
-                               'pass_through': r['category_id'] in neutral_ids,
-                               'adjustment': r['category_id'] in adjustment_ids}
-                      for r in db.execute(sql,params)]
+        match=like_match(search) if search else ''
+        month_data,projection,category_groups=summarize_months(
+            db,first=range_start,last=range_end,currency_id=int(currency),
+            today=today_period.isoformat(),neutral_ids=neutral_ids,categories=categories,
+            account_id=int(account) if account else None,
+            category_id=int(category) if category else None,search=search or None)
         months={month_a,month_b}
-        totals={m:{'expenses':0,'income':0,'balance':0} for m in months}
-        projected_totals={m:{'expenses':0,'income':0,'balance':0} for m in months}
+        totals={m:dict(income=month_data[m]['income_minor'],
+                       expenses=month_data[m]['expense_minor'],
+                       balance=month_data[m]['balance_minor']) for m in months}
+        projected_totals={m:projection[m] for m in months}
         grouped=defaultdict(lambda:{m:0 for m in months})
-        for t in transactions:
-            month=t['day'][:7]
-            if t['category_id'] in neutral_ids or month not in totals:
-                continue  # Transfers/pass-through excluded in both calculations.
-            forecast = projected_totals[month]
-            actual = totals[month] if t['day'] <= today_period.isoformat() else None
-            if t['amount'] < 0:
-                amount = -t['amount']
-                forecast['expenses'] += amount
-                if actual is not None:
-                    actual['expenses'] += amount
-                    grouped[t['group_key']][month] += amount
-            else:
-                forecast['income'] += t['amount']
-                if actual is not None:
-                    actual['income'] += t['amount']
-        for m in months:
-            totals[m]['balance'] = totals[m]['income'] - totals[m]['expenses']
-            projected_totals[m]['balance'] = (projected_totals[m]['income'] - projected_totals[m]['expenses'])
+        for (m,kind,cat),(amount,count) in category_groups.items():
+            if m in months and kind=='expense':
+                grouped[cat][m]+=amount
         rows=[]
         for key,values in grouped.items():
             name=cat_names.get(key,'Ohne Kategorie')
@@ -3296,8 +3272,8 @@ def historical_analysis():
         for t in tx:
             m=t['day'][:7]
             month_row=monthly[m]
-            if t['category_id'] in neutral_ids:
-                continue  # Exclude third-party funds from averages and diagrams.
+            if t['category_id'] in neutral_ids or t['day']>datetime.now(MONTH_TZ).date().isoformat():
+                continue  # Only realized, non-neutral data in historical statistics.
             month_row['count']+=1
             category_title=names.get(t['category_id'],'Ohne Kategorie')
             if t['amount'] < 0:
@@ -3318,6 +3294,20 @@ def historical_analysis():
                 income_count += 1
                 if biggest_income is None or amt > biggest_income['amount']:
                     biggest_income = dict(t)
+        # Full history timeline uses the same booked-only aggregate as the
+        # dashboard comparison and the Mobile API, not a paged transaction set.
+        month_data,_,_=summarize_months(
+            db,first=start,last=end,currency_id=int(currency),
+            today=datetime.now(MONTH_TZ).date().isoformat(),
+            neutral_ids=neutral_ids,categories=categories,
+            account_id=int(account) if account else None,
+            category_id=int(category) if category else None,search=search or None)
+        for m,row in monthly.items():
+            row['income']=month_data[m]['income_minor']
+            row['expenses']=month_data[m]['expense_minor']
+            row['count']=month_data[m]['booking_count']
+        total_income=sum(row['income_minor'] for row in month_data.values())
+        total_expenses=sum(row['expense_minor'] for row in month_data.values())
         timeline = list(monthly.values())
         for month_row in timeline:
             month_row['balance'] = month_row['income'] - month_row['expenses']
@@ -3407,8 +3397,8 @@ def monthly_report_context():
         if group_by not in ('category', 'payee'):
             group_by = 'category'
 
-        where = ['substr(t.day,1,7)=?', 'a.currency_id=?', 't.is_template=0', 't.to_account_id=0']
-        args = [month, currency]
+        where = ['substr(t.day,1,7)=?', 'a.currency_id=?', 't.is_template=0', 't.to_account_id=0', 't.day<=?']
+        args = [month, currency, datetime.now(MONTH_TZ).date().isoformat()]
         if account:
             where.append('t.account_id=?')
             args.append(account)
@@ -3475,6 +3465,15 @@ def monthly_report_context():
                 income_total += minor_abs
                 incomes.append(item)
 
+        common,_,_=summarize_months(db,first=month,last=month,
+            currency_id=int(currency),today=datetime.now(MONTH_TZ).date().isoformat(),
+            neutral_ids=neutral_ids,categories=db.execute('SELECT * FROM categories ORDER BY lft').fetchall(),
+            account_id=int(account) if account else None)
+        expense_total_all=common[month]['expense_minor']
+        income_total_all=common[month]['income_minor']
+        if not hidden:
+            expense_total=expense_total_all
+            income_total=income_total_all
         ordered_groups = sorted(groups.values(), key=lambda x: (x['name'].casefold()))
         for group in ordered_groups:
             group['amount'] = group['amount_minor']/divisor
@@ -3621,7 +3620,7 @@ def mobile_api_capabilities():
        'features':{'accounts':True,'categories':True,'payees':True,'bookings':True,
                    'create_booking':True,'update_booking':True,'delete_booking':True,
                    'server_authoritative':True,'offline_conflict_merge':False,
-                   'recurring_rules':True},
+                   'recurring_rules':True,'monthly_reports':True},
        'server_base_path':'/api/mobile/v1',
        'message':'Online-Servermodus verfügbar. Kein automatischer Import lokaler Android-Daten.'})
 
@@ -4080,3 +4079,59 @@ def mobile_api_recurring_post(rule_id):
 @app.delete('/api/mobile/v1/recurring/<int:rule_id>')
 def mobile_api_recurring_delete(rule_id):
     return _mobile_recurring_mutate('delete',rule_id)
+
+
+@app.get('/api/mobile/v1/reports/monthly')
+def mobile_api_monthly_reports():
+    """Authenticated, complete monthly aggregates, independent of paging."""
+    user,error=_mobile_require()
+    if error:return error
+    query=request.args
+    if any(key not in ('from','to','currency','account_id','category_id') for key in query):
+        return _mobile_denied(400,'Unbekannter Berichtsparameter.')
+    first=query.get('from')
+    last=query.get('to')
+    current=datetime.now(MONTH_TZ).strftime('%Y-%m')
+    if first is None and last is None:
+        last=current
+        index=int(current[:4])*12+int(current[5:7])-1-11
+        first=f'{index//12:04d}-{index%12+1:02d}'
+    if not first or not last or not re.fullmatch(r'(?:19|20|21)[0-9]{2}-(?:0[1-9]|1[0-2])',first) or not re.fullmatch(r'(?:19|20|21)[0-9]{2}-(?:0[1-9]|1[0-2])',last):
+        return _mobile_denied(400,'from und to müssen gültige Monate YYYY-MM sein.')
+    span=(int(last[:4])-int(first[:4]))*12+int(last[5:])-int(first[5:])+1
+    if not 1<=span<=36:
+        return _mobile_denied(400,'Monatsbereich muss 1 bis 36 Monate umfassen.')
+    code=query.get('currency')
+    if code is not None and (not re.fullmatch(r'[A-Z]{3}',code)):
+        return _mobile_denied(400,'Währung muss als ISO-Code angegeben werden.')
+    identifiers={}
+    for name in ('account_id','category_id'):
+        raw=query.get(name)
+        if raw is not None:
+            if not re.fullmatch(r'[1-9][0-9]{0,18}',raw) or int(raw)>9223372036854775807:
+                return _mobile_denied(400,name+' ist ungültig.')
+            identifiers[name]=int(raw)
+    try:
+        with get_db() as db:
+            if code is None:
+                code=finance_setting(db,'default_currency_code','EUR')
+            currency=db.execute('SELECT id,code,decimals FROM currencies WHERE code=?',(code,)).fetchone()
+            if currency is None:
+                return _mobile_denied(400,'Währung ist nicht vorhanden.')
+            if 'account_id' in identifiers and not db.execute(
+                    'SELECT 1 FROM accounts WHERE id=? AND currency_id=?',
+                    (identifiers['account_id'],currency['id'])).fetchone():
+                return _mobile_denied(400,'Konto gehört nicht zur ausgewählten Währung.')
+            categories,names,_=category_tree(db)
+            if 'category_id' in identifiers and identifiers['category_id'] not in {c['id'] for c in categories}:
+                return _mobile_denied(400,'Kategorie ist unbekannt.')
+            results,_,groups=summarize_months(db,first=first,last=last,
+                currency_id=currency['id'],today=datetime.now(MONTH_TZ).date().isoformat(),
+                neutral_ids=pass_through_category_ids(db),categories=categories,
+                account_id=identifiers.get('account_id'),
+                category_id=identifiers.get('category_id'))
+            attach_categories(results,groups,names)
+        return _mobile_json_response(dict(currency=code,decimals=max(0,min(int(currency['decimals'] if currency['decimals'] is not None else 2),6)),
+            **{'from':first,'to':last},complete=True,months=list(results.values())))
+    except sqlite3.Error:
+        return _mobile_denied(500,'Monatsbericht konnte nicht gelesen werden.')

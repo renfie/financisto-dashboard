@@ -1,3 +1,11 @@
+## 1.9.62-dev.2 – Vollständige Monatsauswertungen der Mobile-API (26.11.2026)
+
+- Neuer, schreibgeschützter GET-Endpunkt `/api/mobile/v1/reports/monthly` für vollständige serverseitige 12–36-Monatswerte einschließlich Nullmonaten und Kategorie-Unterstrukturen.
+- Gemeinsame, SQL-basierte Monatsaggregation für Startseiten-Monatsvergleich, historische Monats-Zeitreihe und Mobile-API; keine Abhängigkeit von paginierten Einzelbuchungen.
+- Umbuchungen separat; durchlaufende Posten und Saldoabgleiche gemäß Dashboard ausgeschlossen; Zukunftsbuchungen ausschließlich intern als separate Prognose, keine Vermischung mit Ist-Werten.
+- Berechtigungen, Währungs-/Kontofilter, Kategoriehierarchie, Datumsvalidierung, Read-only und No-Store gegen mehrere Zehntausend Buchungen getestet.
+- `features.monthly_reports=true` nach erfolgreichen Tests aktiviert. Keine Änderungen an Datenbank- oder Sicherungsformaten oder der Android-App.
+
 ## 1.9.62-dev.1 – Mobile-API für wiederkehrende Serverregeln (26.11.2026)
 
 - Sechs Mobile-API-Endpunkte unter `/api/mobile/v1/recurring` für Lesen, pausierte Neuanlage, Bearbeitung, Moduswechsel, ausdrücklich bestätigte manuelle Ausführung und Archivierung.

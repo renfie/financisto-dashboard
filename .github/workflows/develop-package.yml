@@ -8,6 +8,8 @@ on:
       - 'package/src/app.py'
       - 'package/src/mobile_recurring_api.py'
       - 'package/tests/test_mobile_recurring_rules.py'
+      - 'package/src/monthly_reports.py'
+      - 'package/tests/test_monthly_mobile_reports.py'
       - 'package/templates/bookings.html'
       - 'package/static/mobile.css'
       - 'package/static/style.css'

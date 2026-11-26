@@ -340,3 +340,7 @@ Verwendet werden die bisherigen Bearer-API-Schlüssel. Leseschlüssel dürfen Re
 Endpunkte: `GET/POST /api/mobile/v1/recurring`, `PUT/DELETE /api/mobile/v1/recurring/{id}`, `PUT /api/mobile/v1/recurring/{id}/mode` und `POST /api/mobile/v1/recurring/{id}/post`. Jede Änderung benötigt einen UUID-`Idempotency-Key`, bei bestehenden Regeln zusätzlich die aktuelle 32-stellige `If-Match`-Revision. Manuelles Buchen verlangt `{"confirm":"BUCHEN"}`; Archivieren den exakten Regelnamen. Nach einer Zeitüberschreitung niemals mit einem neuen Idempotenzschlüssel erneut buchen.
 
 Bestehende Wiederholungen, Ausführungshistorie, Kontostände, Sicherungsformate und API-Schlüssel bleiben erhalten. Weitere Details: [Mobile-API für Wiederholungen](docs/MOBILE_RECURRING_API.de.md).
+
+## Vollständige Monatsauswertungen über die Mobile-API (Entwicklung)
+
+`GET /api/mobile/v1/reports/monthly` berechnet bis zu 36 Monatswerte aus dem vollständigen Server-Buchungsbestand; 12 Monate einschließlich des aktuellen Monats sind Standard. Währung, Konto und Kategorien einschließlich Unterkategorien sind filterbar. Umbuchungen werden separat ausgewiesen, durchlaufende Posten und Saldoabgleiche ausgeschlossen, zukünftige Buchungen nicht als Ist-Werte gezählt. Die Web-Startseite, die historische Zeitreihe und die API verwenden dieselbe Aggregationsfunktion. Bestehende API-Schlüssel reichen aus, Schreibrechte werden nicht benötigt. **Capability: `features.monthly_reports=true` (Entwicklungszweig).** Details: [Mobile-Monatsberichte](docs/MOBILE_MONTHLY_REPORTS.de.md).
