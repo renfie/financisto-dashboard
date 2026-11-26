@@ -1,3 +1,12 @@
+## 1.9.62-dev.4 – Kontostandsabgleich über die Mobile-API (26.11.2026)
+
+- Neuer Endpunkt `POST /api/mobile/v1/accounts/{account_id}/reconcile` für tatsächlichen und erwarteten Ist-Kontostand in kleinsten Währungseinheiten sowie optionale Notiz.
+- Webformular und Mobile-API verwenden denselben transaktionalen Abgleichhelfer inklusive zukünftiger Buchungen, bestehender Sonderkategorien, Snapshot-Aktualisierung und Schlussprüfung.
+- Sicherheitsprüfung auf veralteten Kontostand innerhalb `BEGIN IMMEDIATE` (HTTP 409), UUID-Idempotenz mit atomarem Receipt und keine Buchung bei Null-Differenz.
+- Schreibberechtigung nur mit aktivem Admin-/Editorkonto, Write-Key und führendem Web-Finanzmodus; gesicherte Audit-Protokollierung.
+- Capability `account_reconciliation: true`, bisherige Features unverändert. Tests für Web-/Mobile-Gleichheit, Negativsalden, Währungen, Zukunftsbuchungen, Wiederholungen und Transaktions-Rollback.
+- API-Dokumentation DE/EN sowie Android-Integrationsauftrag. Keine Änderungen an Datenbankschema, Sicherungsformaten, Android-Repository oder `main`.
+
 ## 1.9.62-dev.3 – Historische Spitzenbuchungen für die Mobile-API (26.11.2026)
 
 - Die bestehende Monats-API ergänzt optional `highlights.largest_expense` und `highlights.largest_income` (Datum, Einzelbetrag, Empfänger und vollständiger Kategorienpfad; `null` ohne Treffer).
