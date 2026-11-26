@@ -9,6 +9,7 @@ import re
 import sqlite3
 import sys
 import tempfile
+import time
 import types
 import unittest
 import uuid
@@ -26,7 +27,7 @@ import mobile_recurring_api as api
 def stub_app():
     source=(BASE/'src'/'app.py').read_text(encoding='utf-8')
     tree=ast.parse(source)
-    names={'_mobile_receipt','_mobile_save_receipt','_mobile_recurring_mutate',
+    names={'_mobile_receipt','_mobile_save_receipt','_mobile_body_and_request_id','_mobile_recurring_mutate',
            'mobile_api_recurring_list'}
     nodes=[]
     for node in tree.body:
@@ -34,10 +35,10 @@ def stub_app():
             node.decorator_list=[]
             nodes.append(node)
     assert len(nodes)==len(names)
-    scope=dict(sqlite3=sqlite3,re=re,hashlib=hashlib,_mobile_json=json,
+    scope=dict(sqlite3=sqlite3,re=re,hashlib=hashlib,time=time,_mobile_json=json,
                _mobile_rule_read=api.read_rule,_mobile_rule_json=api.serialize,
                _mobile_rule_revision=api.revision,_mobile_rule_payload=api.parse_payload,
-               entry_payee=lambda db,title: get_payee(db,title),
+               entry_payee=lambda db,title: get_payee(db,title),\n               _MobileUUID=uuid.UUID,
                recurring_today=lambda:date(2026,11,26),date=date,
                on_or_after=recurring.on_or_after,validate_rule=recurring.validate_rule,
                post_one=recurring.post_one,
