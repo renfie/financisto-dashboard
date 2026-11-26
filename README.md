@@ -128,3 +128,13 @@ The repository and downloadable releases are public. Only authorized collaborato
 ## Copyright and redistribution
 
 Copyright © 2026 René Fieler (RenFie). First-party source files are licensed under **GNU GPL v2 only (GPL-2.0-only)**. Keep existing copyright, license and warranty notices when distributing copies. Clearly mark modified files and change dates, include the complete GPLv2 license, and provide corresponding source code or another GPLv2 §3-compliant option with distributed executables. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Third-party rights remain with their owners.
+
+## Mobile API: recurring rules (development)
+
+The authenticated `/api/mobile/v1/recurring` interface exposes server-managed recurring rules to FieLanzen Android. Rules remain **on the dashboard server only**; there is no synchronization with the Android app's local recurring rules. `GET /api/mobile/v1/capabilities` advertises `features.recurring_rules: true` when available.
+
+Use the existing Bearer API key. Read-only keys can list rules; mutations require a write key, an administrator/editor account and `finance_mode=web`. New and edited rules are paused until activated explicitly; only administrators can enable automatic execution. Booking execution uses the existing dashboard recurring worker and transactional ledger logic.
+
+Endpoints: `GET/POST /api/mobile/v1/recurring`, `PUT/DELETE /api/mobile/v1/recurring/{id}`, `PUT /api/mobile/v1/recurring/{id}/mode`, and `POST /api/mobile/v1/recurring/{id}/post`. All mutations require a UUID `Idempotency-Key`; operations on existing rules also require the current 32-character `If-Match` revision. Manual posting requires `{"confirm":"BUCHEN"}`; archival requires the exact rule title. Never retry a timed-out posting with a new idempotency key.
+
+The original recurring dates, execution history, past postings, balances, exported backup formats and API key format are retained. Further details: [Mobile recurring API](package/docs/MOBILE_RECURRING_API.en.md).
