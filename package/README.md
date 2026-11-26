@@ -330,3 +330,13 @@ Ab 1.9.30: Unter Einstellungen → Standardkonto für neue Buchungen werden Web-
 ## Urheberrecht und Weitergabe
 
 Copyright © 2026 René Fieler (RenFie). Eigene Programmteile stehen unter der **GNU GPL v2 (GPL-2.0-only)**. Bei Weitergabe müssen vorhandene Urheber-, Lizenz- und Gewährleistungshinweise erhalten bleiben; geänderte Dateien und Änderungsdaten sind zu kennzeichnen. Die vollständige GPL v2 ist beizulegen; bei Weitergabe ausführbarer Programme ist der zugehörige Quellcode oder eine nach §3 GPL v2 zulässige Alternative bereitzustellen. Einzelheiten: [LICENSE](../LICENSE) und [NOTICE.md](../NOTICE.md). Rechte Dritter bleiben unberührt.
+
+## Mobile-API: wiederkehrende Regeln (Entwicklungszweig)
+
+Die authentifizierte Schnittstelle `/api/mobile/v1/recurring` stellt die serverseitigen Wiederholungsregeln für FieLanzen Android bereit. Die Regeln verbleiben **ausschließlich auf dem Dashboard-Server**. Es gibt keinen Abgleich mit den lokalen Android-Regeln. `GET /api/mobile/v1/capabilities` meldet die Verfügbarkeit über `features.recurring_rules: true`.
+
+Verwendet werden die bisherigen Bearer-API-Schlüssel. Leseschlüssel dürfen Regeln anzeigen; Änderungen benötigen einen Schreibschlüssel, Administrator-/Editorrechte und `finance_mode=web`. Neue und bearbeitete Regeln bleiben zunächst pausiert. Automatische Ausführung dürfen ausschließlich Administratoren freigeben; die Ausführung übernimmt weiterhin der vorhandene Dashboard-Hintergrunddienst.
+
+Endpunkte: `GET/POST /api/mobile/v1/recurring`, `PUT/DELETE /api/mobile/v1/recurring/{id}`, `PUT /api/mobile/v1/recurring/{id}/mode` und `POST /api/mobile/v1/recurring/{id}/post`. Jede Änderung benötigt einen UUID-`Idempotency-Key`, bei bestehenden Regeln zusätzlich die aktuelle 32-stellige `If-Match`-Revision. Manuelles Buchen verlangt `{"confirm":"BUCHEN"}`; Archivieren den exakten Regelnamen. Nach einer Zeitüberschreitung niemals mit einem neuen Idempotenzschlüssel erneut buchen.
+
+Bestehende Wiederholungen, Ausführungshistorie, Kontostände, Sicherungsformate und API-Schlüssel bleiben erhalten. Weitere Details: [Mobile-API für Wiederholungen](docs/MOBILE_RECURRING_API.de.md).
