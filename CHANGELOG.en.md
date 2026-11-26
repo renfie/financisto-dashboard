@@ -1,3 +1,12 @@
+## 1.9.62-dev.1 – Mobile API for server-managed recurring rules (2026-11-26)
+
+- Six `/api/mobile/v1/recurring` endpoints: list, create paused, update/repause, change mode, explicitly confirm manual posting, and soft-delete.
+- Advertise `features.recurring_rules=true` after implementation and passing automated integration tests; preserve existing Mobile API credentials and booking endpoints.
+- 32-character `If-Match` revisions, UUID idempotency keys and atomic SQLite writes. Read keys cannot mutate, only admins can enable automatic posting, and import-authoritative servers are read-only.
+- Positive absolute JSON amounts mapped to existing signed rule storage. The recurring run history and accounting ledger remain server-only; no Android synchronization.
+- Additional duplicate-posting protection, archival preserving past transactions and balances, integration tests and bilingual API documentation/READMEs.
+- Development branch only; no Android repository, backup format or main-branch changes.
+
 ## 1.9.61-dev.4 – Consistent desktop booking action buttons (2026-11-25)
 
 - Clone, Edit and Delete buttons in the web booking table now use the same classes and dimensions as the dashboard desktop ledger, including font size, height, padding, spacing, alignment and wrapping.
