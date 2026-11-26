@@ -1,7 +1,11 @@
 ## 1.9.61 – Mobile-API und Finanzberichte (26.11.2026)
 
-- Offizielles Release des geprüften Entwicklungsstands mit vollständigen Monats-/Historienberichten und Mobile-API für wiederkehrende Regeln sowie Kontostandsabgleich.
-- Buchungsansichten und Kennzeichnungsfarben vereinheitlicht. Bestehende Kontostände und Sicherungsformate unverändert.
+- Freigabe des aktuellen Entwicklungsstands von `develop` als offizielles Dashboard-Release.
+- Mobile-API für wiederkehrende Serverregeln inklusive Verwaltung, Revisionskontrolle und Idempotenz.
+- Vollständige Monats- und Historienauswertungen, Spitzenbuchungen, Such- und Kategoriefilter.
+- Kontostandsabgleich mit gemeinsamer Web-/Mobile-Buchungslogik, Konflikt- und Doppelbuchungsschutz.
+- Einheitliche mobile Buchungskarten, Statusfarben, Kategorie-Spalte und Desktop-Aktionsbuttons.
+- Bestehende Kontostände, Buchungen und Backupformate bleiben erhalten; keine Synchronisation lokaler Android-Daten.
 
 ## 1.9.62-dev.4 – Kontostandsabgleich über die Mobile-API (26.11.2026)
 

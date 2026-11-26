@@ -1,7 +1,11 @@
 ## 1.9.61 – Mobile API and financial reports (2026-11-26)
 
-- Official release of the tested development features: complete monthly/historical reports, recurring-rule API and account reconciliation.
-- Consistent transaction views and status colors. Existing balances and backup formats remain unchanged.
+- Official release of the complete current `develop` dashboard implementation.
+- Mobile API for managing server recurring rules with revisions and idempotent writes.
+- Complete monthly and historical reports, largest transactions, search and category filters.
+- Shared web/mobile balance reconciliation with conflict and duplicate-posting protection.
+- Consistent mobile transaction cards, colors, category column and desktop action controls.
+- Existing accounting data and backup formats remain intact; no Android local-data synchronization.
 
 ## 1.9.62-dev.4 – Account reconciliation through the Mobile API (2026-11-26)
 

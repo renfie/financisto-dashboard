@@ -69,6 +69,9 @@ jobs:
             echo 'A private host/IP remains in release source. Aborting.'
             exit 1
           fi
+          # Dashboard legal changelogs must match their canonical sources exactly.
+          cmp package/CHANGELOG.md package/static/legal/CHANGELOG.de.md
+          cmp package/CHANGELOG.en.md package/static/legal/CHANGELOG.en.md
           # Exercise the read-only Mobile API recurrence semantics before publishing.
           PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s package/tests -p 'test_*.py' -v
           [[ -x update.sh ]] || { echo 'update.sh must be executable in the release ZIP'; exit 1; }
