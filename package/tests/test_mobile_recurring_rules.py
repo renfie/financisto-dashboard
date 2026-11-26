@@ -89,6 +89,9 @@ class MobileRecurringContract(unittest.TestCase):
                 INSERT INTO meta VALUES('finance_mode','web'),('ledger_web_writes','0');
             """)
             recurring.ensure_schema(db)
+        original_today=recurring.today
+        recurring.today=lambda:date(2026,11,26)
+        self.addCleanup(lambda:setattr(recurring,'today',original_today))
         self.scope=stub_app()
         self.request=SimpleNamespace(headers={},args={},get_json=lambda silent=False:self.payload)
         self.scope['request']=self.request
@@ -212,6 +215,59 @@ class MobileRecurringContract(unittest.TestCase):
         with self.connection() as db:
             self.assertEqual(db.execute('SELECT COUNT(*) FROM recurring_runs').fetchone()[0],1)
             self.assertEqual(db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=1').fetchone()[0],before)
+
+    def test_get_all_modes_read_only_and_archived_excluded(self):
+        item=self.create()
+        self.headers('mode',item['revision'])
+        manual=self.mutation('mode',item['id'],{'mode':'manual'})['rule']
+        self.headers('mode',manual['revision'])
+        auto=self.mutation('mode',item['id'],{'mode':'auto'})['rule']
+        self.access='read'
+        self.assertEqual(self.scope['mobile_api_recurring_list']()['items'][0]['mode'],'auto')
+        self.headers('delete',auto['revision'])
+        self.assertEqual(self.mutation('delete',item['id'],{'confirm_title':'Miete'})['status'],403)
+        self.access='write'
+        self.headers('delete',auto['revision'])
+        self.mutation('delete',item['id'],{'confirm_title':'Miete'})
+        self.assertEqual(self.scope['mobile_api_recurring_list']()['items'],[])
+
+    def test_not_due_and_replay_same_idempotency_key(self):
+        item=self.create(day_of_month=27)
+        self.headers('mode',item['revision'])
+        active=self.mutation('mode',item['id'],{'mode':'manual'})['rule']
+        self.headers('post',active['revision'])
+        self.assertEqual(self.mutation('post',item['id'],{'confirm':'BUCHEN'})['status'],409)
+        with self.connection() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM recurring_runs').fetchone()[0],0)
+        # A due run returns the same receipt on a network replay.
+        due=self.create(title='Heute',day_of_month=26)
+        self.headers('mode',due['revision'])
+        ready=self.mutation('mode',due['id'],{'mode':'manual'})['rule']
+        key=str(uuid.uuid4())
+        self.headers('post',ready['revision'],rid=key)
+        first=self.mutation('post',due['id'],{'confirm':'BUCHEN'})
+        self.headers('post',ready['revision'],rid=key)
+        second=self.mutation('post',due['id'],{'confirm':'BUCHEN'})
+        self.assertEqual(first,second)
+        with self.connection() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM recurring_runs').fetchone()[0],1)
+
+    def test_archive_preserves_posted_booking_and_balance(self):
+        item=self.create()
+        self.headers('mode',item['revision'])
+        active=self.mutation('mode',item['id'],{'mode':'manual'})['rule']
+        self.headers('post',active['revision'])
+        posted=self.mutation('post',item['id'],{'confirm':'BUCHEN'})
+        self.assertEqual(posted['status'],200)
+        with self.connection() as db:
+            n=db.execute('SELECT COUNT(*) FROM transactions').fetchone()[0]
+            balance=db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=1').fetchone()[0]
+        self.headers('delete',posted['rule']['revision'])
+        self.assertEqual(self.mutation('delete',item['id'],{'confirm_title':'Miete'})['status'],200)
+        with self.connection() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM transactions').fetchone()[0],n)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM recurring_runs').fetchone()[0],1)
+            self.assertEqual(db.execute('SELECT balance_minor FROM account_snapshots WHERE account_id=1').fetchone()[0],balance)
 
     def test_invalid_drafts_and_limits(self):
         for changes in (dict(interval_count=121),dict(day_of_month=32),
